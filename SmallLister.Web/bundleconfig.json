@@ -1,0 +1,18 @@
+﻿[{
+        "outputFileName": "wwwroot/css/smalllister.min.css",
+        "inputFiles": [
+            "wwwroot/css/smalllister.css"
+        ]
+    },
+    {
+        "outputFileName": "wwwroot/js/smalllister.min.js",
+        "inputFiles": [
+            "wwwroot/js/smalllister.js"
+        ],
+        "minify": {
+            "enabled": true,
+            "renameLocals": true
+        },
+        "sourceMap": false
+    }
+]
