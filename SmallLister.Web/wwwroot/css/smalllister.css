@@ -25,6 +25,13 @@ h1 {
     font-weight: bold;
 }
 
+h2 {
+    font-size: 13pt;
+    padding: 0;
+    margin: 0 0 10px 0;
+    font-weight: bold;
+}
+
 a,
 a:link,
 a:visited {
@@ -38,8 +45,8 @@ a:hover {
 header {
     display: -webkit-flex;
     display: flex;
-    background-color: #ffd700;
-    border-bottom: solid #20b2aa 2px;
+    background-color: #60c4dc;
+    border-bottom: solid #60dc87 2px;
 }
 
 nav.navbar-header {
@@ -90,7 +97,7 @@ aside {
     -ms-flex: 0;
     flex: 0;
     padding: 10px;
-    background-color: #ffd700;
+    background-color: #60c4dc;
 }
 
 aside ul {
@@ -99,150 +106,67 @@ aside ul {
 }
 
 aside ul li {
-    cursor: pointer;
     margin: 0;
-    padding: 0 0 30px 40px;
+    padding: 0 0 20px 10px;
     list-style: none;
-    background-repeat: no-repeat;
-    background-position: left top;
-    background-size: 30px;
-    border-top: 2px solid #ffd700;
+    border-top: 2px solid #60c4dc;
 }
 
 aside ul li:hover,
 aside ul li.sml-selected {
-    color: #20b2aa;
-    border-top: 2px solid #20b2aa;
+    color: #60dc87;
+    border-top: 2px solid #60dc87;
 }
 
-li.sml-planner {
-    background-image: url('/images/planner.png');
+span.sml-toolbar {
+    float: right;
 }
 
-li.sml-meals {
-    background-image: url('/images/saved-meals.png');
+span.sml-toolbar a {
+    color: white;
 }
 
-li.sml-shoppinglist {
-    background-image: url('/images/shopping-list.png');
-}
-
-li.sml-notes {
-    background-image: url('/images/notes.png');
-}
-
-ul.sml-planner-list,
-ul.sml-planner-list-meal {
+ul.sml-list,
+ul.sml-list-item {
     margin: 0;
     padding: 0;
     list-style: none;
 }
 
-li.sml-planner-list {
-    border-top: 2px solid #ffd700;
+li.sml-list {
+    border-top: 2px solid #60c4dc;
     display: flex;
     padding: 3px;
 }
 
-ul.sml-planner-list {
-    border-bottom: 2px solid #ffd700;
+ul.sml-list {
+    border-bottom: 2px solid #60c4dc;
 }
 
-div.sml-planner-list-day {
-    min-width: 115px;
-}
-
-div.sml-planner-list-day-selected {
-    font-weight: bold;
-}
-
-ul.sml-planner-list-meal {
+ul.sml-list-item {
     width: 100%;
 }
 
-ul.sml-planner-list-meal>li {
+ul.sml-list-item>li {
     display: flex;
-    background-color: #fffae1;
+    background-color: #b6b9dc;
     margin: 2px;
 }
 
-ul.sml-planner-list-meal>li>div:nth-child(2) {
-    min-width: 18px;
-}
-
-ul.sml-planner-list-meal>li>div:nth-child(4)>form {
+ul.sml-list-item>li>div:nth-child(2)>form {
     display: inline;
 }
 
-ul.sml-planner-list-meal>li>div:nth-child(3) {
+ul.sml-list-item>li>div:nth-child(2) {
     flex-grow: 1;
 }
 
-ul.sml-planner-list-meal>li>div {
+ul.sml-list-item>li>div:last-child {
+    width: 130px;
+}
+
+ul.sml-list-item>li>div {
     padding: 0 10px 0 0;
-}
-
-div.sml-planner-list-meal-details {
-    display: none;
-    margin-top: 3px;
-}
-
-div.sml-planner-list-meal-details ul {
-    margin: 0;
-    padding: 0;
-    list-style: none;
-}
-
-div.sml-planner-list-meal-details ul>li {
-    padding-bottom: 2px;
-}
-
-div.sml-planner-list-meal-details>:first-child,
-div.sml-planner-list-meal-details>:nth-child(3),
-div.sml-planner-add-new>div {
-    font-style: oblique;
-    font-size: 11pt;
-}
-
-img.sml-planner-list-meal-oc {
-    padding-top: 3px;
-}
-
-div.sml-meal-notes {
-    white-space: pre-line;
-}
-
-input.sml-planner-add-new-description {
-    width: 280px;
-}
-
-textarea.sml-planner-add-new-ingredients,
-textarea.sml-planner-add-new-notes {
-    width: 280px;
-    height: 75px;
-}
-
-div.note-unsaved {
-    color: red;
-    font-weight: bold;
-}
-
-.pagination {
-    display: inline-block;
-}
-
-.pagination * {
-    float: left;
-    padding: 5px 10px;
-    text-decoration: none;
-}
-
-.pagination a.pagination-active {
-    background-color: #ffd700;
-}
-
-.pagination a:hover:not(.pagination-active) {
-    background-color: #fffae1;
 }
 
 article {
@@ -254,16 +178,10 @@ article {
 }
 
 footer {
-    border-top: solid #20b2aa 1px;
+    border-top: solid #60dc87 1px;
     padding: 10px;
     text-align: center;
     font-size: 10pt;
-}
-
-textarea.notes {
-    width: 100%;
-    height: 400px;
-    overflow: auto;
 }
 
 body.dragging,
@@ -277,67 +195,19 @@ body.dragging * {
     z-index: 2000;
 }
 
-ul.sml-planner-list li.placeholder {
+ul.sml-list li.placeholder {
     position: relative;
-    background: #ffd700;
+    background: #60c4dc;
     padding: 1px 1px;
     clear: both;
 }
 
-ul.sml-planner-list li.placeholder:before {
+ul.sml-list li.placeholder:before {
     position: absolute;
 }
 
-.sml-planner-list-meal-drag-handle {
+.sml-list-item-drag-handle {
     cursor: move;
-}
-
-div.sml-planner-add-header,
-div.sml-planner-add-header>span {
-    padding: 3px 3px 3px 3px;
-}
-
-div.sml-planner-add-header>span {
-    cursor: pointer;
-}
-
-div.sml-planner-add-header>span.selected {
-    background-color: #ffd700;
-}
-
-div.sml-planner-add-recent,
-div.sml-planner-add-new,
-div.sml-shoplist-current,
-div.sml-shoplist-add-from-planner,
-div.sml-shoplist-bought,
-div.sml-shoplist-rtm,
-div.sml-planner-add-header>span {
-    border: 1px solid #ffd700;
-}
-
-div.sml-planner-add-recent {
-    padding: 5px;
-}
-
-div.sml-planner-add-recent>ul {
-    list-style: none;
-    padding: 0;
-}
-
-div.sml-planner-add-recent>ul>li {
-    padding: 5px;
-}
-
-div.sml-planner-add-recent form {
-    display: inline;
-}
-
-div.sml-planner-add-new,
-div.sml-shoplist-add-from-planner,
-div.sml-shoplist-bought,
-div.sml-shoplist-rtm {
-    display: none;
-    padding: 5px;
 }
 
 @media (max-width: 600px) {
@@ -351,18 +221,8 @@ div.sml-shoplist-rtm {
     .nav-show {
         display: inline;
     }
-    ul.sml-planner-list-meal>li {
+    ul.sml-list-item>li {
         flex-direction: column;
-    }
-}
-
-@media (max-width: 800px) {
-    aside {
-        min-width: 32px;
-    }
-    aside ul li span {
-        visibility: hidden;
-        white-space: nowrap;
     }
 }
 
@@ -377,12 +237,7 @@ div.sml-shoplist-rtm {
     footer {
         color: white;
     }
-    .sml-planner-add-recent>a,
-    .pagination>a {
-        color: white;
-    }
-    ul.sml-planner-list-meal>li,
-    a.pagination-active,
+    ul.sml-list-item>li,
     span.selected {
         color: black;
     }

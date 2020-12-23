@@ -9,7 +9,7 @@ namespace SmallLister.Data
         public SqliteDataContext CreateDbContext(string[] args)
         {
             var optionsBuilder = new DbContextOptionsBuilder<SqliteDataContext>();
-            optionsBuilder.UseSqlite("Data Source=SmallMealPlan.Web/smallmealplan.db");
+            optionsBuilder.UseSqlite("Data Source=SmallLister.Web/smalllister.db");
             return new SqliteDataContext(optionsBuilder.Options);
         }
     }
