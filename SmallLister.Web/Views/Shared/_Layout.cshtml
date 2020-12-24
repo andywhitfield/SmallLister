@@ -9,9 +9,11 @@
     <title>Small:Lister</title>
 
     <environment names="Development">
+        <link rel="stylesheet" href="/lib/pickmeup/css/pickmeup.css" />
         <link rel="stylesheet" href="/css/smalllister.css" />
     </environment>
     <environment names="Staging,Production">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/PickMeUp/3.2.1/css/pickmeup.css" integrity="sha512-5R2Om2Kryt5hqiLT76LS9Jkpji26njKU/9xZKfguGDZY575Zg3yqi1spdj6r1RVZYZZdw0/zfW8wZlfSKPAiHw==" crossorigin="anonymous" />
         <link rel="stylesheet" href="/css/smalllister.min.css" asp-append-version="true" />
     </environment>
     @RenderSection("HeaderScripts", required: false)
@@ -51,6 +53,7 @@
     <environment names="Development">
         <script src="/lib/jquery/jquery.min.js"></script>
         <script src="/lib/jquery-sortable/jquery-sortable-min.js"></script>
+        <script src="/lib/pickmeup/pickmeup.min.js"></script>
         <script src="/js/smalllister.js" asp-append-version="true"></script>
     </environment>
     <environment names="Staging,Production">
@@ -64,6 +67,9 @@
                 asp-fallback-test="window.jQuery"
                 crossorigin="anonymous">
         </script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/PickMeUp/3.2.1/pickmeup.min.js"
+                integrity="sha512-zW9jU25wki/XuPm541IGdt3DY0YICfwpNjtXO9bzi5V/bYRxfvUoqQRSOBWL2BXZiFqu4nhp+0iz+7u64Xpm2Q=="
+                crossorigin="anonymous"></script>
         <script src="/js/smalllister.min.js" asp-append-version="true"></script>
     </environment>
 

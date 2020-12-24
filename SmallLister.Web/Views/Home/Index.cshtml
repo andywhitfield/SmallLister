@@ -71,4 +71,25 @@
             </ul>
         </li>
     </ul>
+
+    <div>
+    <form name="sml-list-add" method="post" action="/todo">
+    @Html.AntiForgeryToken()
+    <input type="text" name="description" class="sml-list-add-title" /> <button type="submit" data-depends="input.sml-list-add-title">Add new task</button>
+    <br/>
+    <input type="text" name="due" class="sml-list-add-due" />
+    </form>
+    </div>
 </article>
+
+@section Scripts {
+<script type="text/javascript">
+    $(function() { 
+        pickmeup('form[name="sml-list-add"] input.sml-list-add-due', {
+            default_date: false,
+            hide_on_select: true,
+            format: 'Y-m-d'
+        });
+    });
+</script>
+}

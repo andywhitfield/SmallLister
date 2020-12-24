@@ -45,8 +45,8 @@ a:hover {
 header {
     display: -webkit-flex;
     display: flex;
-    background-color: #60c4dc;
-    border-bottom: solid #60dc87 2px;
+    background-color: #23dbdd;
+    border-bottom: solid #92dd23 2px;
 }
 
 nav.navbar-header {
@@ -97,7 +97,7 @@ aside {
     -ms-flex: 0;
     flex: 0;
     padding: 10px;
-    background-color: #60c4dc;
+    background-color: #23dbdd;
 }
 
 aside ul {
@@ -109,13 +109,13 @@ aside ul li {
     margin: 0;
     padding: 0 0 20px 10px;
     list-style: none;
-    border-top: 2px solid #60c4dc;
+    border-top: 2px solid #23dbdd;
 }
 
 aside ul li:hover,
 aside ul li.sml-selected {
-    color: #60dc87;
-    border-top: 2px solid #60dc87;
+    color: #92dd23;
+    border-top: 2px solid #92dd23;
 }
 
 span.sml-toolbar {
@@ -134,13 +134,13 @@ ul.sml-list-item {
 }
 
 li.sml-list {
-    border-top: 2px solid #60c4dc;
+    border-top: 2px solid #23dbdd;
     display: flex;
     padding: 3px;
 }
 
 ul.sml-list {
-    border-bottom: 2px solid #60c4dc;
+    border-bottom: 2px solid #23dbdd;
 }
 
 ul.sml-list-item {
@@ -149,7 +149,7 @@ ul.sml-list-item {
 
 ul.sml-list-item>li {
     display: flex;
-    background-color: #b6b9dc;
+    background-color: #92d3d4;
     margin: 2px;
 }
 
@@ -169,6 +169,10 @@ ul.sml-list-item>li>div {
     padding: 0 10px 0 0;
 }
 
+input.sml-list-add-title {
+    width: 200px;
+}
+
 article {
     -webkit-flex: 1;
     -ms-flex: 1;
@@ -178,7 +182,7 @@ article {
 }
 
 footer {
-    border-top: solid #60dc87 1px;
+    border-top: solid #92dd23 1px;
     padding: 10px;
     text-align: center;
     font-size: 10pt;
@@ -197,7 +201,7 @@ body.dragging * {
 
 ul.sml-list li.placeholder {
     position: relative;
-    background: #60c4dc;
+    background: #23dbdd;
     padding: 1px 1px;
     clear: both;
 }

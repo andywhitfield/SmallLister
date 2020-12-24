@@ -15,6 +15,14 @@
       "files": [
         "jquery-sortable-min.js"
       ]
+    },
+    {
+      "library": "PickMeUp@3.2.1",
+      "destination": "wwwroot/lib/pickmeup",
+      "files": [
+        "pickmeup.min.js",
+        "css/pickmeup.css"
+      ]
     }
   ]
 }
