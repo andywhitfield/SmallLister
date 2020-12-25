@@ -169,8 +169,17 @@ ul.sml-list-item>li>div {
     padding: 0 10px 0 0;
 }
 
-input.sml-list-add-title {
-    width: 200px;
+form[name="sml-list-add"] label {
+    width: 105px;
+    display: inline-block;
+}
+
+input.sml-list-add-description {
+    width: 350px;
+}
+
+input.sml-list-add-due {
+    width: 110px;
 }
 
 article {

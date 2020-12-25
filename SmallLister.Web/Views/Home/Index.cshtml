@@ -75,9 +75,20 @@
     <div>
     <form name="sml-list-add" method="post" action="/todo">
     @Html.AntiForgeryToken()
-    <input type="text" name="description" class="sml-list-add-title" /> <button type="submit" data-depends="input.sml-list-add-title">Add new task</button>
-    <br/>
-    <input type="text" name="due" class="sml-list-add-due" />
+    <fieldset>
+    <legend>Add to list</legend>
+    <div>
+        <label for="sml-list-add-description">Description:</label>
+        <input type="text" id="sml-list-add-description" name="sml-list-add-description" class="sml-list-add-description" />
+    </div>
+    <div>
+        <label for="sml-list-add-due">Due:</label>
+        <input type="text" id="sml-list-add-due" name="sml-list-add-due" class="sml-list-add-due" />
+    </div>
+    <div>
+        <button type="submit" data-depends="input.sml-list-add-description">Add new task</button>
+    </div>
+    </fieldset>
     </form>
     </div>
 </article>

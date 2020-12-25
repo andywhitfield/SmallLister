@@ -103,7 +103,11 @@ namespace SmallLister.Web
             services.AddScoped<IUserAccountRepository, UserAccountRepository>();
 
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_3_0).AddSessionStateTempDataProvider();
-            services.AddRazorPages();
+            var builder = services.AddRazorPages();
+#if DEBUG
+            if (Environment.IsDevelopment())
+                builder.AddRazorRuntimeCompilation();
+#endif
             services.AddCors();
             services.AddDistributedMemoryCache();
             services.AddSession(options => options.IdleTimeout = TimeSpan.FromMinutes(5));
