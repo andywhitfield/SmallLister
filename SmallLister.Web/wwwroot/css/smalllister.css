@@ -143,6 +143,14 @@ ul.sml-list {
     border-bottom: 2px solid #23dbdd;
 }
 
+.sml-list-due {
+    font-weight: bold;
+}
+
+.sml-list-all {
+    font-style: italic;
+}
+
 ul.sml-list-item {
     width: 100%;
 }
@@ -169,17 +177,46 @@ ul.sml-list-item>li>div {
     padding: 0 10px 0 0;
 }
 
+.sml-list-item-notes {
+    margin-top: 2px;
+    font-size: 11pt;
+}
+
 form[name="sml-list-add"] label {
     width: 105px;
     display: inline-block;
+    vertical-align: top;
 }
 
 input.sml-list-add-description {
-    width: 350px;
+    width: 300px;
+}
+
+textarea.sml-list-add-notes {
+    width: 300px;
+    height: 60px;
 }
 
 input.sml-list-add-due {
     width: 110px;
+}
+
+.pagination {
+    display: inline-block;
+}
+
+.pagination * {
+    float: left;
+    padding: 5px 10px;
+    text-decoration: none;
+}
+
+.pagination a.pagination-active {
+    background-color: #23dbdd;
+}
+
+.pagination a:hover:not(.pagination-active) {
+    background-color: #92d3d4;
 }
 
 article {
@@ -248,6 +285,9 @@ ul.sml-list li.placeholder:before {
         color: white;
     }
     footer {
+        color: white;
+    }
+    .pagination>a {
         color: white;
     }
     ul.sml-list-item>li,

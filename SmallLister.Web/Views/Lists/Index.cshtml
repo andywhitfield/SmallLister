@@ -1,0 +1,70 @@
+﻿@model SmallLister.Web.Model.Lists.IndexViewModel
+
+<aside>
+    <nav>
+        <ul>
+            <li class="sml-list-due"><a href="/todo">1 overdue; 2 due today</a></li>
+            <li class="sml-list-all"><a href="/todo">All</a></li>
+            <li><a href="/todo">List 1</a></li>
+            <li><a href="/todo">List 2</a></li>
+        </ul>
+    </nav>
+</aside>
+
+<article>
+    <ul class="sml-list">
+        <li class="sml-list">
+            <ul class="sml-list-item">
+                <li class="sml-list-item" data-listitem="1">
+                    <div><img class="sml-list-item-drag-handle" src="/images/drag.png" height="26" width="22" title="Move" /></div>
+                    <div>                        
+                        <form method="post" action="/todo" name="list1">
+                        @Html.AntiForgeryToken()
+                        <input type="text" name="sml-list-item-name" value="List 1" />
+                        <button title="Save" type="submit" data-depends="form[name='list1'] input[name='sml-list-item-name']"><img src="/images/tick.png" height="15" width="15" /> Save</button>
+                        </form>
+                    </div>
+                    <div>
+                        <form method="post" action="/todo">
+                        @Html.AntiForgeryToken()
+                        <button title="Delete"><img src="/images/notes.png" height="15" width="15" /> Delete</button>
+                        </form>
+                    </div>
+                </li>
+                <li class="sml-list-item" data-listitem="1">
+                    <div><img class="sml-list-item-drag-handle" src="/images/drag.png" height="26" width="22" title="Move" /></div>
+                    <div>                        
+                        <form method="post" action="/todo" name="list2">
+                        @Html.AntiForgeryToken()
+                        <input type="text" name="sml-list-item-name" value="List 2" />
+                        <button title="Save" type="submit" data-depends="form[name='list2'] input[name='sml-list-item-name']"><img src="/images/tick.png" height="15" width="15" /> Save</button>
+                        </form>
+                    </div>
+                    <div>
+                        <form method="post" action="/todo">
+                        @Html.AntiForgeryToken()
+                        <button title="Delete"><img src="/images/notes.png" height="15" width="15" /> Delete</button>
+                        </form>
+                    </div>
+                </li>
+            </ul>
+        </li>
+    </ul>
+
+    <div>
+    <form name="sml-list-add" method="post" action="/todo">
+    @Html.AntiForgeryToken()
+    <fieldset>
+    <legend>Create a new list</legend>
+    <div>
+        <label for="sml-list-add-name">Name:</label>
+        <input type="text" id="sml-list-add-name" name="sml-list-add-name" class="sml-list-add-name" />
+    </div>
+    <div>
+        <label></label>
+        <button type="submit" data-depends="input.sml-list-add-name">Add</button>
+    </div>
+    </fieldset>
+    </form>
+    </div>
+</article>

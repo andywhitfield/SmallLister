@@ -26,16 +26,18 @@ function smlInitialise() {
         }
     });
 
-    $('button[data-depends]').each(function() {
+    $('[data-depends]').each(function() {
         let btnWithDependency = $(this);
         let dependentFormObject = $(btnWithDependency.attr('data-depends'));
-        dependentFormObject.on('keypress', function(e) {
-            if (btnWithDependency.attr('disabled') && (e.keyCode || e.which) === 13) {
-                e.preventDefault();
-                return false;
-            }
-        });
-        dependentFormObject.on('change input paste keyup', function() {
+        if (dependentFormObject.is('input')) {
+            dependentFormObject.on('keypress', function(e) {
+                if (btnWithDependency.attr('disabled') && (e.keyCode || e.which) === 13) {
+                    e.preventDefault();
+                    return false;
+                }
+            });
+        }
+        dependentFormObject.on('change input paste keyup pickmeup-change', function() {
             let dependentValue = $(this).val();
             btnWithDependency.prop('disabled', dependentValue === null || dependentValue.match(/^\s*$/) !== null);
         });

@@ -31,7 +31,9 @@
         <nav class="navbar-main">
             <div class="navbar-nav">
                 @if (Model.IsLoggedIn) {
-                    <a href="/signout">Logout</a>
+                    <text>
+                    <a href="/lists">Edit lists</a> | <a href="/signout">Logout</a>
+                    </text>
                 }
             </div>
             <div>
@@ -48,7 +50,6 @@
     <footer class="footer ">
         &#169; @DateTime.Today.Year Small:Lister
     </footer>
-
 
     <environment names="Development">
         <script src="/lib/jquery/jquery.min.js"></script>
@@ -76,7 +77,6 @@
     <script type="text/javascript">
         $(function() { smlInitialise() })
     </script>
-
     @RenderSection("Scripts", required: false)
 </body>
 </html>

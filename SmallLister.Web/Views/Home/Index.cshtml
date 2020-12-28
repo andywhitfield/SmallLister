@@ -3,7 +3,8 @@
 <aside>
     <nav>
         <ul>
-            <li><a href="/todo"><b>2 due today</b></a></li>
+            <li class="sml-list-due"><a href="/todo">1 overdue; 2 due today</a></li>
+            <li class="sml-list-all"><a href="/todo">All</a></li>
             <li class="sml-selected"><a href="/todo">List 1</a></li>
             <li><a href="/todo">List 2</a></li>
         </ul>
@@ -11,7 +12,7 @@
 </aside>
 
 <article>
-    <span class="sml-toolbar"><a href="/todo">Undo</a> | Sort by: <a href="/todo">due date</a> or <a href="/todo">title</a></span>
+    <span class="sml-toolbar">Sort by: <a href="/todo">due date</a> or <a href="/todo">description</a></span>
     <h2>List 1</h2>
 
     <ul class="sml-list">
@@ -20,16 +21,15 @@
                 <li class="sml-list-item" data-listitem="1">
                     <div><img class="sml-list-item-drag-handle" src="/images/drag.png" height="26" width="22" title="Move" /></div>
                     <div>
-                        Something to do 1
+                        <div>Something to do 1</div>
                         
-                        <br/>
                         <form method="post" action="/todo">
                         @Html.AntiForgeryToken()
-                        <button title="Bought"><img src="/images/tick.png" height="15" width="15" /> Done</button>
+                        <button title="Done"><img src="/images/tick.png" height="15" width="15" /> Done</button>
                         </form>
                         <form method="post" action="/todo">
                         @Html.AntiForgeryToken()
-                        <button title="Delete"><img src="/images/notes.png" height="15" width="15" /> Edit</button>
+                        <button title="Edit"><img src="/images/notes.png" height="15" width="15" /> Edit</button>
                         </form>
                     </div>
                     <div>Due Tuesday<br/><span style="font-size:10pt">Repeats every week</style></div>
@@ -37,16 +37,21 @@
                 <li class="sml-list-item" data-listitem="1">
                     <div><img class="sml-list-item-drag-handle" src="/images/drag.png" height="26" width="22" title="Move" /></div>
                     <div>
-                        Something else without a due date
+                        <div>Something else without a due date</div>
 
+                        <div class="sml-list-item-notes">
+                        And with some notes which has
                         <br/>
+                        many lines
+                        </div>
+
                         <form method="post" action="/todo">
                         @Html.AntiForgeryToken()
-                        <button title="Bought"><img src="/images/tick.png" height="15" width="15" /> Done</button>
+                        <button title="Done"><img src="/images/tick.png" height="15" width="15" /> Done</button>
                         </form>
                         <form method="post" action="/todo">
                         @Html.AntiForgeryToken()
-                        <button title="Delete"><img src="/images/notes.png" height="15" width="15" /> Edit</button>
+                        <button title="Edit"><img src="/images/notes.png" height="15" width="15" /> Edit</button>
                         </form>
                     </div>
                     <div></div>
@@ -54,16 +59,15 @@
                 <li class="sml-list-item" data-listitem="1">
                     <div><img class="sml-list-item-drag-handle" src="/images/drag.png" height="26" width="22" title="Move" /></div>
                     <div>
-                        One off task
+                        <div>One off task</div>
 
-                        <br/>
                         <form method="post" action="/todo">
                         @Html.AntiForgeryToken()
-                        <button title="Bought"><img src="/images/tick.png" height="15" width="15" /> Done</button>
+                        <button title="Done"><img src="/images/tick.png" height="15" width="15" /> Done</button>
                         </form>
                         <form method="post" action="/todo">
                         @Html.AntiForgeryToken()
-                        <button title="Delete"><img src="/images/notes.png" height="15" width="15" /> Edit</button>
+                        <button title="Edit"><img src="/images/notes.png" height="15" width="15" /> Edit</button>
                         </form>
                     </div>
                     <div>Due tomorrow</div>
@@ -71,6 +75,15 @@
             </ul>
         </li>
     </ul>
+    <div class="pagination">
+        <a href="/todo">&laquo;</a>
+        <a class="pagination-active">1</a>
+        <a href="/todo">2</a>
+        <a href="/todo">3</a>
+        <span>&bull;&bull;</span>
+        <a href="/todo">12</a>
+        <a href="/todo">&raquo;</a>
+    </div>
 
     <div>
     <form name="sml-list-add" method="post" action="/todo">
@@ -85,8 +98,23 @@
         <label for="sml-list-add-due">Due:</label>
         <input type="text" id="sml-list-add-due" name="sml-list-add-due" class="sml-list-add-due" />
     </div>
+    <div>        
+        <label for="sml-list-add-repeat">Repeat:</label>
+        <select id="sml-list-add-repeat" name="sml-list-add-repeat" class="sml-list-add-repeat" data-depends="input.sml-list-add-due">
+            <option value="none">None</option>
+            <option value="day">Every day</option>
+            <option value="week">Every week</option>
+            <option value="month">Every month</option>
+            <option value="year">Every year</option>
+        </select>
+    </div>
     <div>
-        <button type="submit" data-depends="input.sml-list-add-description">Add new task</button>
+        <label for="sml-list-add-notes">Notes:</label>
+        <textarea id="sml-list-add-notes" name="sml-list-add-notes" class="sml-list-add-notes" wrap="off"></textarea>
+    </div>
+    <div>
+        <label></label>
+        <button type="submit" data-depends="input.sml-list-add-description">Add</button>
     </div>
     </fieldset>
     </form>
@@ -96,10 +124,19 @@
 @section Scripts {
 <script type="text/javascript">
     $(function() { 
-        pickmeup('form[name="sml-list-add"] input.sml-list-add-due', {
+        let dueDateSelector = 'form[name="sml-list-add"] input.sml-list-add-due';
+        pickmeup(dueDateSelector, {
             default_date: false,
             hide_on_select: true,
             format: 'Y-m-d'
+        });
+        $(dueDateSelector).on('change input paste keyup', function() {
+            let dueDate = $(this).val();
+            if (dueDate !== null && dueDate.match(/^\s*$/) === null)
+                return;
+            pickmeup(dueDateSelector).hide();
+            pickmeup(dueDateSelector).set_date(new Date);
+            $('form[name="sml-list-add"] select.sml-list-add-repeat').val('none');
         });
     });
 </script>
