@@ -30,3 +30,5 @@ publish/
 .DS_Store
 
 smalllister.db
+smalllister.db-shm
+smalllister.db-wal

@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using Microsoft.AspNetCore.Http;
 
 namespace SmallLister.Web.Model.Lists
@@ -7,5 +8,7 @@ namespace SmallLister.Web.Model.Lists
         public IndexViewModel(HttpContext context) : base(context)
         {
         }
+
+        public IEnumerable<UserListModel> Lists { get; set; }
     }
 }

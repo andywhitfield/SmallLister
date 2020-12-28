@@ -12,53 +12,41 @@
 </aside>
 
 <article>
+    @if (Model.Lists.Any()) {
     <ul class="sml-list">
         <li class="sml-list">
             <ul class="sml-list-item">
-                <li class="sml-list-item" data-listitem="1">
+                @foreach (var list in Model.Lists) {
+                <li class="sml-list-item" data-listitem="@list.UserListId">
                     <div><img class="sml-list-item-drag-handle" src="/images/drag.png" height="26" width="22" title="Move" /></div>
                     <div>                        
-                        <form method="post" action="/todo" name="list1">
+                        <form method="post" action="/lists/@list.UserListId" name="list@(list.UserListId)">
                         @Html.AntiForgeryToken()
-                        <input type="text" name="sml-list-item-name" value="List 1" />
-                        <button title="Save" type="submit" data-depends="form[name='list1'] input[name='sml-list-item-name']"><img src="/images/tick.png" height="15" width="15" /> Save</button>
+                        <input type="text" name="name" value="@list.Name" />
+                        <button title="Save" type="submit" data-depends="form[name='list@(list.UserListId)'] input[name='name']"><img src="/images/tick.png" height="15" width="15" /> Save</button>
                         </form>
                     </div>
                     <div>
-                        <form method="post" action="/todo">
+                        <form method="post" action="/lists/delete/@list.UserListId" data-confirm="Deleting a list will move any items that are on this list to the 'All' list instead. Are you sure you want to delete this list?">
                         @Html.AntiForgeryToken()
                         <button title="Delete"><img src="/images/notes.png" height="15" width="15" /> Delete</button>
                         </form>
                     </div>
                 </li>
-                <li class="sml-list-item" data-listitem="1">
-                    <div><img class="sml-list-item-drag-handle" src="/images/drag.png" height="26" width="22" title="Move" /></div>
-                    <div>                        
-                        <form method="post" action="/todo" name="list2">
-                        @Html.AntiForgeryToken()
-                        <input type="text" name="sml-list-item-name" value="List 2" />
-                        <button title="Save" type="submit" data-depends="form[name='list2'] input[name='sml-list-item-name']"><img src="/images/tick.png" height="15" width="15" /> Save</button>
-                        </form>
-                    </div>
-                    <div>
-                        <form method="post" action="/todo">
-                        @Html.AntiForgeryToken()
-                        <button title="Delete"><img src="/images/notes.png" height="15" width="15" /> Delete</button>
-                        </form>
-                    </div>
-                </li>
+                }
             </ul>
         </li>
     </ul>
+    }
 
     <div>
-    <form name="sml-list-add" method="post" action="/todo">
+    <form name="sml-list-add" method="post" action="/lists">
     @Html.AntiForgeryToken()
     <fieldset>
     <legend>Create a new list</legend>
     <div>
         <label for="sml-list-add-name">Name:</label>
-        <input type="text" id="sml-list-add-name" name="sml-list-add-name" class="sml-list-add-name" />
+        <input type="text" id="sml-list-add-name" name="name" class="sml-list-add-name" />
     </div>
     <div>
         <label></label>

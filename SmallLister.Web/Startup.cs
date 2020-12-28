@@ -100,7 +100,9 @@ namespace SmallLister.Web
                 serviceProvider.GetRequiredService<ILogger<Startup>>().LogInformation($"Using connection string: {sqliteConnectionString}");
                 options.UseSqlite(sqliteConnectionString);                
             });
-            services.AddScoped<IUserAccountRepository, UserAccountRepository>();
+            services
+                .AddScoped<IUserAccountRepository, UserAccountRepository>()
+                .AddScoped<IUserListRepository, UserListRepository>();
 
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_3_0).AddSessionStateTempDataProvider();
             var builder = services.AddRazorPages();
