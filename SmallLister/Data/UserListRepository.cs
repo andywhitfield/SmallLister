@@ -46,6 +46,34 @@ namespace SmallLister.Data
             return _context.SaveChangesAsync();
         }
 
+        public async Task UpdateOrderAsync(UserList list, UserList precedingList)
+        {
+            var lists = _context.UserLists
+                .Where(l => l.UserListId != list.UserListId && l.UserAccountId == list.UserAccountId && l.DeletedDateTime == null)
+                .OrderBy(l => l.SortOrder);
+            var sortOrder = 0;
+            var now = DateTime.UtcNow;
+
+            if (precedingList == null)
+                UpdateListSortOrder(list, sortOrder++, now);
+
+            await foreach (var l in lists.AsAsyncEnumerable())
+            {
+                UpdateListSortOrder(l, sortOrder++, now);
+                if (precedingList?.UserListId == l.UserListId)
+                    UpdateListSortOrder(list, sortOrder++, now);
+            }
+            await _context.SaveChangesAsync();
+
+            void UpdateListSortOrder(UserList listToUpdate, int newSortOrder, DateTime lastUpdateDateTime)
+            {
+                if (listToUpdate.SortOrder == newSortOrder)
+                    return;
+                listToUpdate.SortOrder = newSortOrder;
+                listToUpdate.LastUpdateDateTime = lastUpdateDateTime;
+            }
+        }
+
         private async Task<int> GetMaxSortOrderAsync(UserAccount user) =>
             (await _context.UserLists.Where(l => l.UserAccount == user && l.DeletedDateTime == null).MaxAsync(l => (int?)l.SortOrder)) ?? -1;
     }

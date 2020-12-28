@@ -10,5 +10,6 @@ namespace SmallLister.Data
         Task<List<UserList>> GetListsAsync(UserAccount user);
         Task AddListAsync(UserAccount user, string name);
         Task SaveAsync(UserList list);
+        Task UpdateOrderAsync(UserList list, UserList precedingList);
     }
 }

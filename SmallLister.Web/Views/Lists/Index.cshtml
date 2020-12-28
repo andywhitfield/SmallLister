@@ -13,7 +13,7 @@
 
 <article>
     @if (Model.Lists.Any()) {
-    <ul class="sml-list">
+    <ul class="sml-list" data-baseuri="/api/lists">
         <li class="sml-list">
             <ul class="sml-list-item">
                 @foreach (var list in Model.Lists) {

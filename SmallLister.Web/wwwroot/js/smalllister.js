@@ -1,7 +1,8 @@
 function smlInitialise() {
     smlInitialiseNav();
 
-    $('ul.sml-list').sortable({
+    let smlList = $('ul.sml-list');
+    smlList.sortable({
         handle: '.sml-list-item-drag-handle',
         isValidTarget: function(item, container) {
             return container.el[0].className.includes('sml-list-item');
@@ -14,7 +15,7 @@ function smlInitialise() {
                 let prevListItem = parseInt(item.prev('li').attr('data-listitem'));
 
                 $.ajax({
-                    url: '/api/lists/' + listItemMoved + '/move',
+                    url: smlList.attr('data-baseuri') + '/' + listItemMoved + '/move',
                     type: 'PUT',
                     data: JSON.stringify({ sortOrderPreviousListItemId: prevListItem == NaN ? null : prevListItem }),
                     contentType: 'application/json; charset=utf-8',
