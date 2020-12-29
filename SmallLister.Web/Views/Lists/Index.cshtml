@@ -1,16 +1,5 @@
 ﻿@model SmallLister.Web.Model.Lists.IndexViewModel
 
-<aside>
-    <nav>
-        <ul>
-            <li class="sml-list-due"><a href="/todo">1 overdue; 2 due today</a></li>
-            <li class="sml-list-all"><a href="/todo">All</a></li>
-            <li><a href="/todo">List 1</a></li>
-            <li><a href="/todo">List 2</a></li>
-        </ul>
-    </nav>
-</aside>
-
 <article>
     @if (Model.Lists.Any()) {
     <ul class="sml-list" data-baseuri="/api/lists">

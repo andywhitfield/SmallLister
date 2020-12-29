@@ -5,8 +5,11 @@
         <ul>
             <li class="sml-list-due"><a href="/todo">1 overdue; 2 due today</a></li>
             <li class="sml-list-all"><a href="/todo">All</a></li>
-            <li class="sml-selected"><a href="/todo">List 1</a></li>
-            <li><a href="/todo">List 2</a></li>
+            @foreach (var list in Model.Lists) {
+                <li class="@(list.UserListId == Model.SelectedList?.UserListId ? "sml-selected" : "")">
+                    <a href="/todo">@list.Name</a>
+                </li>
+            }
         </ul>
     </nav>
 </aside>

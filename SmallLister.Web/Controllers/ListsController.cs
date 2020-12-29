@@ -5,11 +5,13 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using SmallLister.Data;
+using SmallLister.Web.Model;
 using SmallLister.Web.Model.Lists;
 using SmallLister.Web.Model.Request;
 
 namespace SmallLister.Web.Controllers
 {
+    [Authorize]
     public class ListsController : Controller
     {
         private readonly ILogger<ListsController> _logger;
@@ -24,7 +26,6 @@ namespace SmallLister.Web.Controllers
             _userListRepository = userListRepository;
         }
 
-        [Authorize]
         [HttpGet("~/lists")]
         public async Task<IActionResult> Index()
         {

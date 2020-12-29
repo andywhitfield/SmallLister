@@ -1,4 +1,4 @@
-namespace SmallLister.Web.Model.Lists
+namespace SmallLister.Web.Model
 {
     public class UserListModel
     {
