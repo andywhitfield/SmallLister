@@ -48,6 +48,7 @@ namespace SmallLister.Web.Controllers
             if (!ModelState.IsValid)
                 return BadRequest();
             var user = await _userAccountRepository.GetUserAccountAsync(User);
+            _logger.LogInformation($"Adding new list: {addModel.Name}");
             await _userListRepository.AddListAsync(user, addModel.Name?.Trim());
             return Redirect("~/lists");
         }
@@ -62,6 +63,7 @@ namespace SmallLister.Web.Controllers
             var list = await _userListRepository.GetListAsync(user, userListId);
             if (list == null)
                 return NotFound();
+            _logger.LogInformation($"Updating name of list {list.UserListId} [{list.Name}] to [{updateModel.Name}]");
             list.Name = updateModel.Name;
             await _userListRepository.SaveAsync(list);
             return Redirect("~/lists");
@@ -77,6 +79,7 @@ namespace SmallLister.Web.Controllers
             var list = await _userListRepository.GetListAsync(user, userListId);
             if (list == null)
                 return NotFound();
+            _logger.LogInformation($"Deleting list {list.UserListId} [{list.Name}]");
             list.DeletedDateTime = DateTime.UtcNow;
             await _userListRepository.SaveAsync(list);
             return Redirect("~/lists");

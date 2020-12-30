@@ -41,6 +41,7 @@ namespace SmallLister.Web.Controllers
                     return NotFound();
             }
             
+            _logger.LogInformation($"Updating order of list {list.UserListId} [{list.Name}] to come after list {precedingList?.UserListId} [{precedingList?.Name}]");
             await _userListRepository.UpdateOrderAsync(list, precedingList);
             return NoContent();
         }

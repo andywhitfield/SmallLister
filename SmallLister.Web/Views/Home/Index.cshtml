@@ -89,31 +89,44 @@
     </div>
 
     <div>
-    <form name="sml-list-add" method="post" action="/todo">
+    <form name="sml-list-add" method="post" action="/items/add">
     @Html.AntiForgeryToken()
     <fieldset>
     <legend>Add to list</legend>
+        <div>
+        <label for="sml-list-add-list">List:</label>
+        <select id="sml-list-add-list" name="list" class="sml-list-add-list">
+            <option value="">All</option>
+            @foreach (var list in Model.Lists) {
+                @if (list.UserListId == Model.SelectedList?.UserListId) {
+            <option value="@list.UserListId" selected="selected">@list.Name</option>
+                } else {
+            <option value="@list.UserListId">@list.Name</option>
+                }
+            }
+        </select>
+    </div>
     <div>
         <label for="sml-list-add-description">Description:</label>
-        <input type="text" id="sml-list-add-description" name="sml-list-add-description" class="sml-list-add-description" />
+        <input type="text" id="sml-list-add-description" name="description" class="sml-list-add-description" />
     </div>
     <div>
         <label for="sml-list-add-due">Due:</label>
-        <input type="text" id="sml-list-add-due" name="sml-list-add-due" class="sml-list-add-due" />
+        <input type="text" id="sml-list-add-due" name="due" class="sml-list-add-due" />
     </div>
     <div>        
         <label for="sml-list-add-repeat">Repeat:</label>
-        <select id="sml-list-add-repeat" name="sml-list-add-repeat" class="sml-list-add-repeat" data-depends="input.sml-list-add-due">
-            <option value="none">None</option>
-            <option value="day">Every day</option>
-            <option value="week">Every week</option>
-            <option value="month">Every month</option>
-            <option value="year">Every year</option>
+        <select id="sml-list-add-repeat" name="repeat" class="sml-list-add-repeat" data-depends="input.sml-list-add-due">
+            <option value="" selected="selected">None</option>
+            <option value="daily">Every day</option>
+            <option value="weekly">Every week</option>
+            <option value="monthly">Every month</option>
+            <option value="yearly">Every year</option>
         </select>
     </div>
     <div>
         <label for="sml-list-add-notes">Notes:</label>
-        <textarea id="sml-list-add-notes" name="sml-list-add-notes" class="sml-list-add-notes" wrap="off"></textarea>
+        <textarea id="sml-list-add-notes" name="notes" class="sml-list-add-notes" wrap="off"></textarea>
     </div>
     <div>
         <label></label>

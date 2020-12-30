@@ -102,7 +102,8 @@ namespace SmallLister.Web
             });
             services
                 .AddScoped<IUserAccountRepository, UserAccountRepository>()
-                .AddScoped<IUserListRepository, UserListRepository>();
+                .AddScoped<IUserListRepository, UserListRepository>()
+                .AddScoped<IUserItemRepository, UserItemRepository>();
 
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_3_0).AddSessionStateTempDataProvider();
             var builder = services.AddRazorPages();
