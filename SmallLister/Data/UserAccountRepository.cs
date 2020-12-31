@@ -39,5 +39,12 @@ namespace SmallLister.Data
 
             return _context.UserAccounts.FirstOrDefaultAsync(ua => ua.AuthenticationUri == authenticationUri && ua.DeletedDateTime == null);
         }
+
+        public Task SetLastSelectedUserListIdAsync(UserAccount user, int? lastSelectedUserListId)
+        {
+            user.LastSelectedUserListId = lastSelectedUserListId;
+            user.LastUpdateDateTime = DateTime.UtcNow;
+            return _context.SaveChangesAsync();
+        }
     }
 }

@@ -31,13 +31,35 @@ namespace SmallLister.Web.Controllers
 
         [Authorize]
         [HttpGet("~/")]
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index([FromQuery] string list)
         {
             var user = await _userAccountRepository.GetUserAccountAsync(User);
             var userLists = await _userListRepository.GetListsAsync(user);
             var lists = userLists.Select(l => new UserListModel { UserListId = l.UserListId, Name = l.Name });
-            var list = lists.FirstOrDefault(l => l.UserListId == user.LastSelectedUserListId);
-            var items = (await _userItemRepository.GetItemsAsync(user, userLists.FirstOrDefault(l => l.UserListId == user.LastSelectedUserListId)))
+            UserListModel selectedList = null;
+            if (list == "due")
+            {
+            }
+            else if (list == "all")
+            {
+                await _userAccountRepository.SetLastSelectedUserListIdAsync(user, null);
+            }
+            else if (!string.IsNullOrEmpty(list))
+            {
+                if (!int.TryParse(list, out var listId))
+                    return BadRequest();
+
+                if (!userLists.Any(l => l.UserListId == listId))
+                    return BadRequest();
+
+                selectedList = lists.Single(l => l.UserListId == listId);
+                await _userAccountRepository.SetLastSelectedUserListIdAsync(user, listId);
+            }
+            else
+            {
+                selectedList = lists.FirstOrDefault(l => l.UserListId == user.LastSelectedUserListId);
+            }
+            var items = (await _userItemRepository.GetItemsAsync(user, userLists.FirstOrDefault(l => l.UserListId == selectedList?.UserListId)))
                 .Select(i => new UserItemModel
                 {
                     UserItemId = i.UserItemId,
@@ -47,7 +69,7 @@ namespace SmallLister.Web.Controllers
 
             return View(new IndexViewModel(HttpContext)
             {
-                SelectedList = list,
+                SelectedList = selectedList,
                 Items = items,
                 Lists = lists
             });

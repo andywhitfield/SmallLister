@@ -3,11 +3,11 @@
 <aside>
     <nav>
         <ul>
-            <li class="sml-list-due"><a href="/todo">1 overdue; 2 due today</a></li>
-            <li class="sml-list-all"><a href="/todo">All</a></li>
+            <li class="sml-list-due"><a href="/?list=due">1 overdue; 2 due today</a></li>
+            <li class="sml-list-all"><a href="/?list=all">All</a></li>
             @foreach (var list in Model.Lists) {
                 <li class="@(list.UserListId == Model.SelectedList?.UserListId ? "sml-selected" : "")">
-                    <a href="/todo">@list.Name</a>
+                    <a href="/?list=@list.UserListId">@list.Name</a>
                 </li>
             }
         </ul>

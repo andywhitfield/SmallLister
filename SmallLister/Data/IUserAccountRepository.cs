@@ -9,5 +9,6 @@ namespace SmallLister.Data
         Task CreateNewUserAsync(ClaimsPrincipal user);
         Task<UserAccount> GetUserAccountAsync(ClaimsPrincipal user);
         Task<UserAccount> GetUserAccountOrNullAsync(ClaimsPrincipal user);
+        Task SetLastSelectedUserListIdAsync(UserAccount user, int? lastSelectedUserListId);
     }
 }
