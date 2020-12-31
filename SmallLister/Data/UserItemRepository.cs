@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
@@ -16,6 +17,19 @@ namespace SmallLister.Data
         {
             _context = context;
             _logger = logger;
+        }
+
+        public Task<List<UserItem>> GetItemsAsync(UserAccount user, UserList list)
+        {
+            return list == null
+                ? _context.UserItems
+                    .Where(i => i.UserAccount == user && i.DeletedDateTime == null)
+                    .OrderBy(i => i.UserList.SortOrder).ThenBy(i => i.SortOrder)
+                    .ToListAsync()
+                : _context.UserItems
+                    .Where(i => i.UserAccount == user && i.DeletedDateTime == null && i.UserListId == list.UserListId)
+                    .OrderBy(i => i.SortOrder)
+                    .ToListAsync();
         }
 
         public async Task AddItemAsync(UserAccount user, UserList list, string description, string notes, DateTime? dueDate, ItemRepeat? repeat)

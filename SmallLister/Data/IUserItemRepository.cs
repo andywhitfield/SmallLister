@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using SmallLister.Model;
 
@@ -6,6 +7,7 @@ namespace SmallLister.Data
 {
     public interface IUserItemRepository
     {
-         Task AddItemAsync(UserAccount user, UserList list, string description, string notes, DateTime? dueDate, ItemRepeat? repeat);
+        Task<List<UserItem>> GetItemsAsync(UserAccount user, UserList list);
+        Task AddItemAsync(UserAccount user, UserList list, string description, string notes, DateTime? dueDate, ItemRepeat? repeat);
     }
 }

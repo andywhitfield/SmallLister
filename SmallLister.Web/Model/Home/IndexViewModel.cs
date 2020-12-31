@@ -11,5 +11,6 @@ namespace SmallLister.Web.Model.Home
 
         public UserListModel SelectedList { get; set; }
         public IEnumerable<UserListModel> Lists { get; set; }
+        public IEnumerable<UserItemModel> Items { get; set; }
     }
 }

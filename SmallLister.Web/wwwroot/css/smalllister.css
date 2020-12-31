@@ -173,6 +173,10 @@ ul.sml-list-item>li>div:last-child {
     width: 130px;
 }
 
+ul.sml-list-item>li>div:last-child span {
+    font-size: 10pt;
+}
+
 ul.sml-list-item>li>div {
     padding: 0 10px 0 0;
 }
@@ -180,6 +184,7 @@ ul.sml-list-item>li>div {
 .sml-list-item-notes {
     margin-top: 2px;
     font-size: 11pt;
+    white-space: pre-line;
 }
 
 form[name="sml-list-add"] label {

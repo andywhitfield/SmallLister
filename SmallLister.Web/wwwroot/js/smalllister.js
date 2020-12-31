@@ -2,30 +2,35 @@ function smlInitialise() {
     smlInitialiseNav();
 
     let smlList = $('ul.sml-list');
-    smlList.sortable({
-        handle: '.sml-list-item-drag-handle',
-        isValidTarget: function(item, container) {
-            return container.el[0].className.includes('sml-list-item');
-        },
-        onDrop: function(item, container, _super, event) {
-            _super(item, container, event);
+    let baseUri = smlList.attr('data-baseuri');
+    if (typeof baseUri !== 'undefined') {
+        smlList.sortable({
+            handle: '.sml-list-item-drag-handle',
+            isValidTarget: function(item, container) {
+                return container.el[0].className.includes('sml-list-item');
+            },
+            onDrop: function(item, container, _super, event) {
+                _super(item, container, event);
 
-            let listItemMoved = item.attr('data-listitem');
-            if (typeof listItemMoved !== 'undefined') {
-                let prevListItem = parseInt(item.prev('li').attr('data-listitem'));
+                let listItemMoved = item.attr('data-listitem');
+                if (typeof listItemMoved !== 'undefined') {
+                    let prevListItem = parseInt(item.prev('li').attr('data-listitem'));
 
-                $.ajax({
-                    url: smlList.attr('data-baseuri') + '/' + listItemMoved + '/move',
-                    type: 'PUT',
-                    data: JSON.stringify({ sortOrderPreviousListItemId: prevListItem == NaN ? null : prevListItem }),
-                    contentType: 'application/json; charset=utf-8',
-                    dataType: 'json'
-                });
+                    console.log('moving item ' + listItemMoved + ' to be after ' + prevListItem);
 
-                return;
+                    $.ajax({
+                        url: baseUri + '/' + listItemMoved + '/move',
+                        type: 'PUT',
+                        data: JSON.stringify({ sortOrderPreviousListItemId: prevListItem == NaN ? null : prevListItem }),
+                        contentType: 'application/json; charset=utf-8',
+                        dataType: 'json'
+                    });
+
+                    return;
+                }
             }
-        }
-    });
+        });
+    }
 
     $('[data-depends]').each(function() {
         let btnWithDependency = $(this);
