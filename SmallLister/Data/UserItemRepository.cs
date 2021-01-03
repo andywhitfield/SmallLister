@@ -19,17 +19,26 @@ namespace SmallLister.Data
             _logger = logger;
         }
 
-        public Task<List<UserItem>> GetItemsAsync(UserAccount user, UserList list)
+        public Task<List<UserItem>> GetItemsAsync(UserAccount user, UserList list, UserItemFilter filter = null)
         {
-            return list == null
-                ? _context.UserItems
-                    .Where(i => i.UserAccount == user && i.DeletedDateTime == null)
-                    .OrderBy(i => i.UserList.SortOrder).ThenBy(i => i.SortOrder)
-                    .ToListAsync()
-                : _context.UserItems
-                    .Where(i => i.UserAccount == user && i.DeletedDateTime == null && i.UserListId == list.UserListId)
-                    .OrderBy(i => i.SortOrder)
-                    .ToListAsync();
+            var query = _context.UserItems.Where(i => i.UserAccount == user && i.DeletedDateTime == null);
+            if (filter != null)
+            {
+                var today = DateTime.Today;
+                if (filter.Overdue && filter.DueToday)
+                    query = query.Where(i => i.NextDueDate <= today);
+                else if (filter.Overdue)
+                    query = query.Where(i => i.NextDueDate < today);
+                else if (filter.DueToday)
+                    query = query.Where(i => i.NextDueDate == today);
+            }
+
+            if (list == null)
+                query = query.OrderBy(i => i.UserList.SortOrder).ThenBy(i => i.SortOrder);
+            else
+                query = query.Where(i => i.UserListId == list.UserListId).OrderBy(i => i.SortOrder);
+
+            return query.ToListAsync();
         }
 
         public async Task AddItemAsync(UserAccount user, UserList list, string description, string notes, DateTime? dueDate, ItemRepeat? repeat)

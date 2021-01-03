@@ -67,7 +67,13 @@ namespace SmallLister.Web.Controllers
                 else if (list == "due")
                 {
                     selectedList = lists.Single(l => l.UserListId == "due");
-                    items = new List<UserItemModel>();
+                    items = (await _userItemRepository.GetItemsAsync(user, null, new UserItemFilter { Overdue = true, DueToday = true }))
+                        .Select(i => new UserItemModel
+                        {
+                            UserItemId = i.UserItemId,
+                            Description = i.Description,
+                            Notes = i.Notes
+                        }.WithDueDate(i.NextDueDate).WithRepeat(i.Repeat));
                     await _userAccountRepository.SetLastSelectedUserListIdAsync(user, -1);
                 }
                 else if (!int.TryParse(list, out var listId))
@@ -95,9 +101,14 @@ namespace SmallLister.Web.Controllers
                 {
                     if (user.LastSelectedUserListId == -1)
                     {
-                        // due
                         selectedList = lists.Single(l => l.UserListId == "due");
-                        items = new List<UserItemModel>();
+                        items = (await _userItemRepository.GetItemsAsync(user, null, new UserItemFilter { Overdue = true, DueToday = true }))
+                            .Select(i => new UserItemModel
+                            {
+                                UserItemId = i.UserItemId,
+                                Description = i.Description,
+                                Notes = i.Notes
+                            }.WithDueDate(i.NextDueDate).WithRepeat(i.Repeat));
                     }
                     else
                     {
