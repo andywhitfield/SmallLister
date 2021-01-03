@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
 using System.IO;
+using MediatR;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.AspNetCore.Builder;
@@ -105,6 +106,7 @@ namespace SmallLister.Web
                 .AddScoped<IUserListRepository, UserListRepository>()
                 .AddScoped<IUserItemRepository, UserItemRepository>();
 
+            services.AddMediatR(typeof(Startup));
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_3_0).AddSessionStateTempDataProvider();
             var builder = services.AddRazorPages();
 #if DEBUG
