@@ -3,12 +3,8 @@
 <aside>
     <nav>
         <ul>
-            <li class="sml-list-due"><a href="/?list=due">1 overdue; 2 due today</a></li>
-            <li class="sml-list-all"><a href="/?list=all">All</a></li>
             @foreach (var list in Model.Lists) {
-                <li class="@(list.UserListId == Model.SelectedList?.UserListId ? "sml-selected" : "")">
-                    <a href="/?list=@list.UserListId">@list.Name</a>
-                </li>
+            <li class="@list.CssClass"><a href="/?list=@list.UserListId">@list.Name (@list.ItemCount)</a></li>
             }
         </ul>
     </nav>
@@ -68,8 +64,7 @@
         <div>
         <label for="sml-list-add-list">List:</label>
         <select id="sml-list-add-list" name="list" class="sml-list-add-list">
-            <option value="">All</option>
-            @foreach (var list in Model.Lists) {
+            @foreach (var list in Model.Lists.Where(l => l.CanAddItems)) {
                 @if (list.UserListId == Model.SelectedList?.UserListId) {
             <option value="@list.UserListId" selected="selected">@list.Name</option>
                 } else {

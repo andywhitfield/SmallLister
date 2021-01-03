@@ -8,12 +8,14 @@ namespace SmallLister.Web.Model
         public int UserItemId { get; set; }
         public string Description { get; set; }
         public string Notes { get; set; }
+        public DateTime? DueDate { get; set; }
         public string Due { get; set; }
         public string DueSummary { get; set; }
         public string Repeats { get; set; }
 
         public UserItemModel WithDueDate(DateTime? dueDate)
         {
+            DueDate = dueDate;
             if (dueDate == null)
             {
                 Due = DueSummary = "";

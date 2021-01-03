@@ -22,11 +22,22 @@ namespace SmallLister.Data
         public Task<UserList> GetListAsync(UserAccount user, int userListId) =>
             _context.UserLists.SingleOrDefaultAsync(l => l.UserListId == userListId && l.UserAccount == user && l.DeletedDateTime == null);
 
-        public Task<List<UserList>> GetListsAsync(UserAccount user) =>
-            _context.UserLists
-                .Where(l => l.UserAccount == user && l.DeletedDateTime == null)
-                .OrderBy(l => l.SortOrder)
-                .ToListAsync();
+        public async Task<List<UserList>> GetListsAsync(UserAccount user) =>
+            await _context.UserLists.Where(l => l.UserAccount == user && l.DeletedDateTime == null).OrderBy(l => l.SortOrder).ToListAsync();
+
+        public async Task<(int OverdueCount, int DueCount, int TotalCount, IDictionary<int, int> ListCounts)> GetListCountsAsync(UserAccount user)
+        {
+            var today = DateTime.Today;
+            var overdue = await _context.UserItems.CountAsync(i => i.UserAccount == user && i.DeletedDateTime == null && i.NextDueDate != null && i.NextDueDate.Value < today);
+            var due = await _context.UserItems.CountAsync(i => i.UserAccount == user && i.DeletedDateTime == null && i.NextDueDate != null && i.NextDueDate.Value.Date == today);
+            var total = await _context.UserItems.CountAsync(i => i.UserAccount == user && i.DeletedDateTime == null);
+            var countByListId = await _context.UserItems
+                .Where(i => i.UserAccount == user && i.DeletedDateTime == null && i.UserListId != null)
+                .GroupBy(i => i.UserListId)
+                .Select(g => new { UserListId = g.Key.Value, Count = g.Count() })
+                .ToDictionaryAsync(s => s.UserListId, s => s.Count);
+            return (overdue, due, total, countByListId);
+        }
 
         public async Task AddListAsync(UserAccount user, string name)
         {

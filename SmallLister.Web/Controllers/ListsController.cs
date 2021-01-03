@@ -35,7 +35,7 @@ namespace SmallLister.Web.Controllers
             {
                 Lists = lists.Select(l => new UserListModel
                 {
-                    UserListId = l.UserListId,
+                    UserListId = l.UserListId.ToString(),
                     Name = l.Name
                 })
             });
