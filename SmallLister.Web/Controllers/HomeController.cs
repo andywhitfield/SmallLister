@@ -6,7 +6,6 @@ using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
-using SmallLister.Data;
 using SmallLister.Web.Handlers;
 using SmallLister.Web.Model.Home;
 
@@ -16,31 +15,22 @@ namespace SmallLister.Web.Controllers
     {
         private readonly ILogger<HomeController> _logger;
         private readonly IMediator _mediator;
-        private readonly IUserAccountRepository _userAccountRepository;
 
-        public HomeController(ILogger<HomeController> logger, IMediator mediator,
-            IUserAccountRepository userAccountRepository)
+        public HomeController(ILogger<HomeController> logger, IMediator mediator)
         {
             _logger = logger;
             _mediator = mediator;
-            _userAccountRepository = userAccountRepository;
         }
 
         [Authorize]
         [HttpGet("~/")]
         public async Task<IActionResult> Index([FromQuery] string list)
         {
-            var request = new GetListItemsRequest(User, list);
-            var response = await _mediator.Send(request);
+            var response = await _mediator.Send(new GetListItemsRequest(User, list));
             if (!response.IsValid)
                 return BadRequest();
 
-            return View(new IndexViewModel(HttpContext)
-            {
-                SelectedList = response.SelectedList,
-                Items = response.Items,
-                Lists = response.Lists
-            }.SetCssClasses());
+            return View(new IndexViewModel(HttpContext, response.Lists, response.SelectedList, response.Items));
         }
 
         public IActionResult Error() => View(new ErrorViewModel(HttpContext));
@@ -56,8 +46,7 @@ namespace SmallLister.Web.Controllers
         [HttpGet("~/signedin")]
         public async Task<IActionResult> SignedIn()
         {
-            if (await _userAccountRepository.GetUserAccountOrNullAsync(User) == null)
-                await _userAccountRepository.CreateNewUserAsync(User);
+            await _mediator.Send(new SignedInRequest(User));
             return Redirect("~/");
         }
 

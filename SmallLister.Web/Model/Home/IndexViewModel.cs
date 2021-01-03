@@ -5,16 +5,13 @@ namespace SmallLister.Web.Model.Home
 {
     public class IndexViewModel : BaseViewModel
     {
-        public IndexViewModel(HttpContext context) : base(context)
+        public IndexViewModel(HttpContext context, IEnumerable<UserListModel> lists, UserListModel selectedList, IEnumerable<UserItemModel> items)
+            : base(context)
         {
-        }
+            Lists = lists;
+            SelectedList = selectedList;
+            Items = items;
 
-        public UserListModel SelectedList { get; set; }
-        public IEnumerable<UserListModel> Lists { get; set; }
-        public IEnumerable<UserItemModel> Items { get; set; }
-
-        public IndexViewModel SetCssClasses()
-        {
             foreach (var list in Lists)
             {
                 if (list.UserListId == "all")
@@ -26,8 +23,10 @@ namespace SmallLister.Web.Model.Home
 
                 list.CssClass += list.UserListId == SelectedList?.UserListId ? "sml-selected" : "";
             }
-
-            return this;
         }
+
+        public UserListModel SelectedList { get; }
+        public IEnumerable<UserListModel> Lists { get; }
+        public IEnumerable<UserItemModel> Items { get; }
     }
 }
