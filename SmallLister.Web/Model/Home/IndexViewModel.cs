@@ -24,12 +24,14 @@ namespace SmallLister.Web.Model.Home
                 else
                     list.CssClass = "";
 
-                list.CssClass += list.UserListId == SelectedList?.UserListId ? "sml-selected" : "";
+                list.CssClass += list.UserListId == SelectedList.UserListId ? "sml-selected" : "";
             }
         }
 
         public UserListModel SelectedList { get; }
         public IEnumerable<UserListModel> Lists { get; }
         public IEnumerable<UserItemModel> Items { get; }
+        public bool IsDueListSelected => SelectedList.UserListId == DueList;
+        public bool IsAllListSelected => SelectedList.UserListId == AllList;
     }
 }

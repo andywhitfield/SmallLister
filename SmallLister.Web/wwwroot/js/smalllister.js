@@ -3,7 +3,7 @@ function smlInitialise() {
 
     let smlList = $('ul.sml-list');
     let baseUri = smlList.attr('data-baseuri');
-    if (typeof baseUri !== 'undefined') {
+    if (typeof baseUri !== 'undefined' && baseUri !== '') {
         smlList.sortable({
             handle: '.sml-list-item-drag-handle',
             isValidTarget: function(item, container) {

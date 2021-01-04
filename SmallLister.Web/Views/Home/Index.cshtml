@@ -11,16 +11,22 @@
 </aside>
 
 <article>
+    @if (!Model.IsAllListSelected && !Model.IsDueListSelected) {
     <span class="sml-toolbar">Sort by: <a href="/todo">due date</a> or <a href="/todo">description</a></span>
-    <h2>@(Model.SelectedList == null ? "All" : Model.SelectedList.Name)</h2>
+    }
+    <h2>@Model.SelectedList.Name</h2>
 
-    <ul class="sml-list">
+    <ul class="sml-list" data-baseuri="/api/items">
         <li class="sml-list">
             @if (Model.Items.Any()) {
             <ul class="sml-list-item">
             @foreach (var item in Model.Items) {
                 <li class="sml-list-item" data-listitem="@item.UserItemId">
-                    <div><img class="sml-list-item-drag-handle" src="/images/drag.png" height="26" width="22" title="Move" /></div>
+                    <div>
+                        @if (!Model.IsAllListSelected && !Model.IsDueListSelected) {
+                        <img class="sml-list-item-drag-handle" src="/images/drag.png" height="26" width="22" title="Move" />
+                        }
+                    </div>
                     <div>
                         <div>@item.Description</div>
                         <div class="sml-list-item-notes">@item.Notes</div>
@@ -65,7 +71,7 @@
         <label for="sml-list-add-list">List:</label>
         <select id="sml-list-add-list" name="list" class="sml-list-add-list">
             @foreach (var list in Model.Lists.Where(l => l.CanAddItems)) {
-                @if (list.UserListId == Model.SelectedList?.UserListId) {
+                @if (list.UserListId == Model.SelectedList.UserListId) {
             <option value="@list.UserListId" selected="selected">@list.Name</option>
                 } else {
             <option value="@list.UserListId">@list.Name</option>
