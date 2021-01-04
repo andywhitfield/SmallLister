@@ -9,14 +9,14 @@ using SmallLister.Web.Handlers.RequestResponse;
 
 namespace SmallLister.Web.Handlers
 {
-    public class AddOrUpdateItemHandler : IRequestHandler<AddOrUpdateUserItemRequest, bool>
+    public class AddItemHandler : IRequestHandler<AddItemRequest, bool>
     {
-        private readonly ILogger<AddOrUpdateItemHandler> _logger;
+        private readonly ILogger<AddItemHandler> _logger;
         private readonly IUserAccountRepository _userAccountRepository;
         private readonly IUserListRepository _userListRepository;
         private readonly IUserItemRepository _userItemRepository;
 
-        public AddOrUpdateItemHandler(ILogger<AddOrUpdateItemHandler> logger,
+        public AddItemHandler(ILogger<AddItemHandler> logger,
             IUserAccountRepository userAccountRepository, IUserListRepository userListRepository,
             IUserItemRepository userItemRepository)
         {
@@ -26,7 +26,7 @@ namespace SmallLister.Web.Handlers
             _userItemRepository = userItemRepository;
         }
 
-        public async Task<bool> Handle(AddOrUpdateUserItemRequest request, CancellationToken cancellationToken)
+        public async Task<bool> Handle(AddItemRequest request, CancellationToken cancellationToken)
         {
             var user = await _userAccountRepository.GetUserAccountAsync(request.User);
             UserList list = null;

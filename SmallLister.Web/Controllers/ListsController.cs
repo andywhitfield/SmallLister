@@ -1,11 +1,9 @@
-using System;
-using System.Linq;
 using System.Threading.Tasks;
+using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
-using SmallLister.Data;
-using SmallLister.Web.Model;
+using SmallLister.Web.Handlers.RequestResponse;
 using SmallLister.Web.Model.Lists;
 using SmallLister.Web.Model.Request;
 
@@ -15,31 +13,19 @@ namespace SmallLister.Web.Controllers
     public class ListsController : Controller
     {
         private readonly ILogger<ListsController> _logger;
-        private readonly IUserAccountRepository _userAccountRepository;
-        private readonly IUserListRepository _userListRepository;
+        private readonly IMediator _mediator;
 
-        public ListsController(ILogger<ListsController> logger,
-            IUserAccountRepository userAccountRepository, IUserListRepository userListRepository)
+        public ListsController(ILogger<ListsController> logger, IMediator mediator)
         {
             _logger = logger;
-            _userAccountRepository = userAccountRepository;
-            _userListRepository = userListRepository;
+            _mediator = mediator;
         }
 
         [HttpGet("~/lists")]
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index() => View(new IndexViewModel(HttpContext)
         {
-            var user = await _userAccountRepository.GetUserAccountAsync(User);
-            var lists = await _userListRepository.GetListsAsync(user);
-            return View(new IndexViewModel(HttpContext)
-            {
-                Lists = lists.Select(l => new UserListModel
-                {
-                    UserListId = l.UserListId.ToString(),
-                    Name = l.Name
-                })
-            });
-        }
+            Lists = await _mediator.Send(new GetListsRequest(User))
+        });
 
         [HttpPost("~/lists")]
         [ValidateAntiForgeryToken]
@@ -47,9 +33,7 @@ namespace SmallLister.Web.Controllers
         {
             if (!ModelState.IsValid)
                 return BadRequest();
-            var user = await _userAccountRepository.GetUserAccountAsync(User);
-            _logger.LogInformation($"Adding new list: {addModel.Name}");
-            await _userListRepository.AddListAsync(user, addModel.Name?.Trim());
+            await _mediator.Send(new AddListRequest(User, addModel));
             return Redirect("~/lists");
         }
 
@@ -59,13 +43,10 @@ namespace SmallLister.Web.Controllers
         {
             if (!ModelState.IsValid)
                 return BadRequest();
-            var user = await _userAccountRepository.GetUserAccountAsync(User);
-            var list = await _userListRepository.GetListAsync(user, userListId);
-            if (list == null)
+
+            if (!await _mediator.Send(new UpdateListRequest(User, userListId, updateModel)))
                 return NotFound();
-            _logger.LogInformation($"Updating name of list {list.UserListId} [{list.Name}] to [{updateModel.Name}]");
-            list.Name = updateModel.Name;
-            await _userListRepository.SaveAsync(list);
+
             return Redirect("~/lists");
         }
 
@@ -75,13 +56,10 @@ namespace SmallLister.Web.Controllers
         {
             if (!ModelState.IsValid)
                 return BadRequest();
-            var user = await _userAccountRepository.GetUserAccountAsync(User);
-            var list = await _userListRepository.GetListAsync(user, userListId);
-            if (list == null)
+
+            if (!await _mediator.Send(new DeleteListRequest(User, userListId)))
                 return NotFound();
-            _logger.LogInformation($"Deleting list {list.UserListId} [{list.Name}]");
-            list.DeletedDateTime = DateTime.UtcNow;
-            await _userListRepository.SaveAsync(list);
+
             return Redirect("~/lists");
         }
     }
