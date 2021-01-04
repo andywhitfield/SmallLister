@@ -27,14 +27,20 @@ namespace SmallLister.Web.Handlers
             var user = await _userAccountRepository.GetUserAccountAsync(request.User);
             var list = await _userListRepository.GetListAsync(user, request.UserListId);
             if (list == null)
+            {
+                _logger.LogInformation($"Could not find list {request.UserListId}");
                 return false;
+            }
 
             UserList precedingList = null;
-            if (request.Model.sortOrderPreviousListItemId != null)
+            if (request.Model.SortOrderPreviousListItemId != null)
             {
-                precedingList = await _userListRepository.GetListAsync(user, request.Model.sortOrderPreviousListItemId.Value);
+                precedingList = await _userListRepository.GetListAsync(user, request.Model.SortOrderPreviousListItemId.Value);
                 if (precedingList == null)
+                {
+                    _logger.LogInformation($"Could not find preceding list {request.Model.SortOrderPreviousListItemId}");
                     return false;
+                }
             }
 
             _logger.LogInformation($"Updating order of list {list.UserListId} [{list.Name}] to come after list {precedingList?.UserListId} [{precedingList?.Name}]");

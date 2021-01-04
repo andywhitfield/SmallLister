@@ -1,4 +1,5 @@
 using System;
+using System.Globalization;
 using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
@@ -34,14 +35,21 @@ namespace SmallLister.Web.Handlers
             {
                 list = await _userListRepository.GetListAsync(user, request.Model.List.Value);
                 if (list == null)
+                {
+                    _logger.LogInformation($"Could not find list {request.Model.List}");
                     return false;
+                }
             }
 
             DateTime? dueDate = null;
             if (!string.IsNullOrWhiteSpace(request.Model.Due))
             {
-                if (!DateTime.TryParseExact(request.Model.Due, "yyyy-MM-dd", null, System.Globalization.DateTimeStyles.AssumeUniversal, out var due))
+                if (!DateTime.TryParseExact(request.Model.Due, "yyyy-MM-dd", null, DateTimeStyles.AssumeUniversal, out var due))
+                {
+                    _logger.LogInformation($"Could not parse due date {request.Model.Due}");
                     return false;
+                }
+
                 dueDate = due.Date;
             }
 

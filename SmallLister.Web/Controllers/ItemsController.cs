@@ -25,10 +25,16 @@ namespace SmallLister.Web.Controllers
         public async Task<IActionResult> Add([FromForm] AddOrUpdateItemRequest addModel)
         {
             if (!ModelState.IsValid)
+            {
+                _logger.LogInformation("Model state is invalid, returning bad request");
                 return BadRequest();
+            }
             
             if (!await _mediator.Send(new AddItemRequest(User, addModel)))
+            {
+                _logger.LogInformation($"Could not add item {addModel.Description} to list {addModel.List}, returning bad request");
                 return BadRequest();
+            }
 
             return Redirect("~/");
         }

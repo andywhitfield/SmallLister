@@ -27,10 +27,16 @@ namespace SmallLister.Web.Controllers
         public async Task<IActionResult> Move(int userListId, MoveRequest moveRequest)
         {
             if (!ModelState.IsValid)
+            {
+                _logger.LogInformation("Model state is invalid, returning bad request");
                 return BadRequest();
+            }
             
             if (!await _mediator.Send(new ReorderListRequest(User, userListId, moveRequest)))
+            {
+                _logger.LogInformation($"Could not move list {userListId} to {moveRequest.SortOrderPreviousListItemId}, returning not found");
                 return NotFound();
+            }
 
             return NoContent();
         }

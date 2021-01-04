@@ -5,7 +5,6 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
 using SmallLister.Web.Handlers.RequestResponse;
 using SmallLister.Web.Model.Home;
 
@@ -13,14 +12,9 @@ namespace SmallLister.Web.Controllers
 {
     public class HomeController : Controller
     {
-        private readonly ILogger<HomeController> _logger;
         private readonly IMediator _mediator;
 
-        public HomeController(ILogger<HomeController> logger, IMediator mediator)
-        {
-            _logger = logger;
-            _mediator = mediator;
-        }
+        public HomeController(IMediator mediator) => _mediator = mediator;
 
         [Authorize]
         [HttpGet("~/")]

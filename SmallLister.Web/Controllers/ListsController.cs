@@ -32,7 +32,11 @@ namespace SmallLister.Web.Controllers
         public async Task<IActionResult> Add([FromForm] AddOrUpdateListRequest addModel)
         {
             if (!ModelState.IsValid)
+            {
+                _logger.LogInformation("Model state is invalid, returning bad request");
                 return BadRequest();
+            }
+
             await _mediator.Send(new AddListRequest(User, addModel));
             return Redirect("~/lists");
         }
@@ -42,10 +46,16 @@ namespace SmallLister.Web.Controllers
         public async Task<IActionResult> Update([FromRoute] int userListId, [FromForm] AddOrUpdateListRequest updateModel)
         {
             if (!ModelState.IsValid)
+            {
+                _logger.LogInformation("Model state is invalid, returning bad request");
                 return BadRequest();
+            }
 
             if (!await _mediator.Send(new UpdateListRequest(User, userListId, updateModel)))
+            {
+                _logger.LogInformation($"Could not update list {userListId}, returning not found");
                 return NotFound();
+            }
 
             return Redirect("~/lists");
         }
@@ -55,10 +65,16 @@ namespace SmallLister.Web.Controllers
         public async Task<IActionResult> Delete([FromRoute] int userListId)
         {
             if (!ModelState.IsValid)
+            {
+                _logger.LogInformation("Model state is invalid, returning bad request");
                 return BadRequest();
+            }
 
             if (!await _mediator.Send(new DeleteListRequest(User, userListId)))
+            {
+                _logger.LogInformation($"Could not delete list {userListId}, returning not found");
                 return NotFound();
+            }
 
             return Redirect("~/lists");
         }

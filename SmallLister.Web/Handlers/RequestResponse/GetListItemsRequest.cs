@@ -7,7 +7,6 @@ namespace SmallLister.Web.Handlers.RequestResponse
     {
         public ClaimsPrincipal User { get; }
         public string List { get; }
-
         public GetListItemsRequest(ClaimsPrincipal user, string list)
         {
             User = user;

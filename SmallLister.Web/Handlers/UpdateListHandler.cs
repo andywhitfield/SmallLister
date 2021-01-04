@@ -24,7 +24,10 @@ namespace SmallLister.Web.Handlers
             var user = await _userAccountRepository.GetUserAccountAsync(request.User);
             var list = await _userListRepository.GetListAsync(user, request.UserListId);
             if (list == null)
+            {
+                _logger.LogInformation($"Could not find list {request.UserListId}");
                 return false;
+            }
 
             _logger.LogInformation($"Updating name of list {list.UserListId} [{list.Name}] to [{request.Model.Name}]");
             list.Name = request.Model.Name;
