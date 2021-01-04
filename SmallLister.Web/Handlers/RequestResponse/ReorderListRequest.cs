@@ -4,14 +4,15 @@ using SmallLister.Web.Model.Request;
 
 namespace SmallLister.Web.Handlers.RequestResponse
 {
-    public class AddOrUpdateUserItemRequest : IRequest<bool>
+    public class ReorderListRequest : IRequest<bool>
     {
         public ClaimsPrincipal User { get; }
-        public AddOrUpdateItemRequest Model { get; }
-
-        public AddOrUpdateUserItemRequest(ClaimsPrincipal user, AddOrUpdateItemRequest model)
+        public int UserListId { get; }
+        public MoveRequest Model { get; }
+        public ReorderListRequest(ClaimsPrincipal user, int userListId, MoveRequest model)
         {
             User = user;
+            UserListId = userListId;
             Model = model;
         }
     }

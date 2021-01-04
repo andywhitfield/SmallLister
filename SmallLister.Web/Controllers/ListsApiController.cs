@@ -1,10 +1,10 @@
 using System.Threading.Tasks;
+using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
-using SmallLister.Data;
-using SmallLister.Model;
+using SmallLister.Web.Handlers.RequestResponse;
 using SmallLister.Web.Model.Request;
 
 namespace SmallLister.Web.Controllers
@@ -14,35 +14,24 @@ namespace SmallLister.Web.Controllers
     public class ListsApiController : ControllerBase
     {
         private readonly ILogger<ListsApiController> _logger;
-        private readonly IUserAccountRepository _userAccountRepository;
-        private readonly IUserListRepository _userListRepository;
+        private readonly IMediator _mediator;
 
-        public ListsApiController(ILogger<ListsApiController> logger,
-            IUserAccountRepository userAccountRepository, IUserListRepository userListRepository)
+        public ListsApiController(ILogger<ListsApiController> logger, IMediator mediator)
         {
             _logger = logger;
-            _userAccountRepository = userAccountRepository;
-            _userListRepository = userListRepository;
+            _mediator = mediator;
         }
 
         [HttpPut("~/api/lists/{userListId}/move")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         public async Task<IActionResult> Move(int userListId, MoveRequest moveRequest)
         {
-            var user = await _userAccountRepository.GetUserAccountAsync(User);
-            var list = await _userListRepository.GetListAsync(user, userListId);
-            if (list == null)
-                return NotFound();
-            UserList precedingList = null;
-            if (moveRequest.sortOrderPreviousListItemId != null)
-            {
-                precedingList = await _userListRepository.GetListAsync(user, moveRequest.sortOrderPreviousListItemId.Value);
-                if (precedingList == null)
-                    return NotFound();
-            }
+            if (!ModelState.IsValid)
+                return BadRequest();
             
-            _logger.LogInformation($"Updating order of list {list.UserListId} [{list.Name}] to come after list {precedingList?.UserListId} [{precedingList?.Name}]");
-            await _userListRepository.UpdateOrderAsync(list, precedingList);
+            if (!await _mediator.Send(new ReorderListRequest(User, userListId, moveRequest)))
+                return NotFound();
+
             return NoContent();
         }
     }

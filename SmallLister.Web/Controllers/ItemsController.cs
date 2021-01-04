@@ -27,9 +27,9 @@ namespace SmallLister.Web.Controllers
             if (!ModelState.IsValid)
                 return BadRequest();
             
-            var added = await _mediator.Send(new AddOrUpdateUserItemRequest(User, addModel));
-            if (!added)
+            if (!await _mediator.Send(new AddOrUpdateUserItemRequest(User, addModel)))
                 return BadRequest();
+
             return Redirect("~/");
         }
     }

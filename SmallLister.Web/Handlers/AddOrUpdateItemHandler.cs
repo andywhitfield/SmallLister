@@ -30,23 +30,23 @@ namespace SmallLister.Web.Handlers
         {
             var user = await _userAccountRepository.GetUserAccountAsync(request.User);
             UserList list = null;
-            if (request.Request.List.HasValue)
+            if (request.Model.List.HasValue)
             {
-                list = await _userListRepository.GetListAsync(user, request.Request.List.Value);
+                list = await _userListRepository.GetListAsync(user, request.Model.List.Value);
                 if (list == null)
                     return false;
             }
 
             DateTime? dueDate = null;
-            if (!string.IsNullOrWhiteSpace(request.Request.Due))
+            if (!string.IsNullOrWhiteSpace(request.Model.Due))
             {
-                if (!DateTime.TryParseExact(request.Request.Due, "yyyy-MM-dd", null, System.Globalization.DateTimeStyles.AssumeUniversal, out var due))
+                if (!DateTime.TryParseExact(request.Model.Due, "yyyy-MM-dd", null, System.Globalization.DateTimeStyles.AssumeUniversal, out var due))
                     return false;
                 dueDate = due.Date;
             }
 
-            _logger.LogInformation($"Adding item to list {list?.UserListId} [{list?.Name}]: {request.Request.Description}; due={dueDate}; repeat={request.Request.Repeat}; notes={request.Request.Notes}");
-            await _userItemRepository.AddItemAsync(user, list, request.Request.Description?.Trim(), request.Request.Notes?.Trim(), dueDate, request.Request.Repeat);
+            _logger.LogInformation($"Adding item to list {list?.UserListId} [{list?.Name}]: {request.Model.Description}; due={dueDate}; repeat={request.Model.Repeat}; notes={request.Model.Notes}");
+            await _userItemRepository.AddItemAsync(user, list, request.Model.Description?.Trim(), request.Model.Notes?.Trim(), dueDate, request.Model.Repeat);
 
             return true;
         }
