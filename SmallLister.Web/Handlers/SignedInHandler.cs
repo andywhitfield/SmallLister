@@ -2,6 +2,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
 using SmallLister.Data;
+using SmallLister.Web.Handlers.RequestResponse;
 
 namespace SmallLister.Web.Handlers
 {

@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
-using SmallLister.Web.Handlers;
+using SmallLister.Web.Handlers.RequestResponse;
 using SmallLister.Web.Model.Home;
 
 namespace SmallLister.Web.Controllers

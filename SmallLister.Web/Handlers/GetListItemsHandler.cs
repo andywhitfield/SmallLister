@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using MediatR;
 using Microsoft.Extensions.Logging;
 using SmallLister.Data;
+using SmallLister.Web.Handlers.RequestResponse;
 using SmallLister.Web.Model;
 
 namespace SmallLister.Web.Handlers

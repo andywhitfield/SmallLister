@@ -5,11 +5,11 @@ using MediatR;
 using Microsoft.Extensions.Logging;
 using SmallLister.Data;
 using SmallLister.Model;
-using SmallLister.Web.Model.Request;
+using SmallLister.Web.Handlers.RequestResponse;
 
 namespace SmallLister.Web.Handlers
 {
-    public class AddOrUpdateItemHandler : IRequestHandler<AddOrUpdateItemRequest, bool>
+    public class AddOrUpdateItemHandler : IRequestHandler<AddOrUpdateUserItemRequest, bool>
     {
         private readonly ILogger<AddOrUpdateItemHandler> _logger;
         private readonly IUserAccountRepository _userAccountRepository;
@@ -26,27 +26,27 @@ namespace SmallLister.Web.Handlers
             _userItemRepository = userItemRepository;
         }
 
-        public async Task<bool> Handle(AddOrUpdateItemRequest request, CancellationToken cancellationToken)
+        public async Task<bool> Handle(AddOrUpdateUserItemRequest request, CancellationToken cancellationToken)
         {
             var user = await _userAccountRepository.GetUserAccountAsync(request.User);
             UserList list = null;
-            if (request.List.HasValue)
+            if (request.Request.List.HasValue)
             {
-                list = await _userListRepository.GetListAsync(user, request.List.Value);
+                list = await _userListRepository.GetListAsync(user, request.Request.List.Value);
                 if (list == null)
                     return false;
             }
 
             DateTime? dueDate = null;
-            if (!string.IsNullOrWhiteSpace(request.Due))
+            if (!string.IsNullOrWhiteSpace(request.Request.Due))
             {
-                if (!DateTime.TryParseExact(request.Due, "yyyy-MM-dd", null, System.Globalization.DateTimeStyles.AssumeUniversal, out var due))
+                if (!DateTime.TryParseExact(request.Request.Due, "yyyy-MM-dd", null, System.Globalization.DateTimeStyles.AssumeUniversal, out var due))
                     return false;
                 dueDate = due.Date;
             }
 
-            _logger.LogInformation($"Adding item to list {list?.UserListId} [{list?.Name}]: {request.Description}; due={dueDate}; repeat={request.Repeat}; notes={request.Notes}");
-            await _userItemRepository.AddItemAsync(user, list, request.Description?.Trim(), request.Notes?.Trim(), dueDate, request.Repeat);
+            _logger.LogInformation($"Adding item to list {list?.UserListId} [{list?.Name}]: {request.Request.Description}; due={dueDate}; repeat={request.Request.Repeat}; notes={request.Request.Notes}");
+            await _userItemRepository.AddItemAsync(user, list, request.Request.Description?.Trim(), request.Request.Notes?.Trim(), dueDate, request.Request.Repeat);
 
             return true;
         }

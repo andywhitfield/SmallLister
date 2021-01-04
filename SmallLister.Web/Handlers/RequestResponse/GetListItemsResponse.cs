@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using SmallLister.Web.Model;
 
-namespace SmallLister.Web.Handlers
+namespace SmallLister.Web.Handlers.RequestResponse
 {
     public class GetListItemsResponse
     {

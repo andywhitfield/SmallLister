@@ -3,6 +3,7 @@ using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using SmallLister.Web.Handlers.RequestResponse;
 using SmallLister.Web.Model.Request;
 
 namespace SmallLister.Web.Controllers
@@ -26,8 +27,7 @@ namespace SmallLister.Web.Controllers
             if (!ModelState.IsValid)
                 return BadRequest();
             
-            addModel.User = User;
-            var added = await _mediator.Send(addModel);
+            var added = await _mediator.Send(new AddOrUpdateUserItemRequest(User, addModel));
             if (!added)
                 return BadRequest();
             return Redirect("~/");
