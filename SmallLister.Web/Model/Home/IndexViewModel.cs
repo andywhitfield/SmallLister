@@ -5,6 +5,9 @@ namespace SmallLister.Web.Model.Home
 {
     public class IndexViewModel : BaseViewModel
     {
+        public const string AllList = "all";
+        public const string DueList = "due";
+
         public IndexViewModel(HttpContext context, IEnumerable<UserListModel> lists, UserListModel selectedList, IEnumerable<UserItemModel> items)
             : base(context)
         {
@@ -14,9 +17,9 @@ namespace SmallLister.Web.Model.Home
 
             foreach (var list in Lists)
             {
-                if (list.UserListId == "all")
+                if (list.UserListId == AllList)
                     list.CssClass = "sml-list-all ";
-                else if (list.UserListId == "due")
+                else if (list.UserListId == DueList)
                     list.CssClass = "sml-list-due ";
                 else
                     list.CssClass = "";

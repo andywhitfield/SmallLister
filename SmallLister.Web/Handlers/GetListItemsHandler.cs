@@ -5,8 +5,10 @@ using System.Threading.Tasks;
 using MediatR;
 using Microsoft.Extensions.Logging;
 using SmallLister.Data;
+using SmallLister.Model;
 using SmallLister.Web.Handlers.RequestResponse;
 using SmallLister.Web.Model;
+using SmallLister.Web.Model.Home;
 
 namespace SmallLister.Web.Handlers
 {
@@ -34,58 +36,40 @@ namespace SmallLister.Web.Handlers
             var (overdueCount, dueCount, totalCount, userListCounts) = await _userListRepository.GetListCountsAsync(user);
             var lists = userLists
                 .Select(l => new UserListModel { UserListId = l.UserListId.ToString(), Name = l.Name, CanAddItems = true, ItemCount = userListCounts.TryGetValue(l.UserListId, out var listCount) ? listCount : 0 })
-                .Prepend(new UserListModel { Name = "All", UserListId = "all", CanAddItems = true, ItemCount = totalCount });
+                .Prepend(new UserListModel { Name = "All", UserListId = IndexViewModel.AllList, CanAddItems = true, ItemCount = totalCount });
             if (overdueCount > 0 || dueCount > 0)
             {
                 var name = overdueCount > 0 && dueCount > 0
                     ? $"{overdueCount} overdue and {dueCount} due today"
                     : overdueCount > 0 ? $"{overdueCount} overdue" : $"{dueCount} due today";
-                lists = lists.Prepend(new UserListModel { Name = name, UserListId = "due", CanAddItems = false, ItemCount = overdueCount + dueCount });
+                lists = lists.Prepend(new UserListModel { Name = name, UserListId = IndexViewModel.DueList, CanAddItems = false, ItemCount = overdueCount + dueCount });
             }
             lists = lists.ToList();
-            IEnumerable<UserItemModel> items;
+
+            IEnumerable<UserItem> items;
             UserListModel selectedList;
             if (request.List != null)
             {
-                if (request.List == "all")
+                if (request.List == IndexViewModel.AllList)
                 {
-                    selectedList = lists.Single(l => l.UserListId == "all");
-                    items = (await _userItemRepository.GetItemsAsync(user, null))
-                        .Select(i => new UserItemModel
-                        {
-                            UserItemId = i.UserItemId,
-                            Description = i.Description,
-                            Notes = i.Notes
-                        }.WithDueDate(i.NextDueDate).WithRepeat(i.Repeat));
+                    (selectedList, items) = await GetAllItemsAsync(user, lists);
                     await _userAccountRepository.SetLastSelectedUserListIdAsync(user, null);
                 }
-                else if (request.List == "due")
+                else if (request.List == IndexViewModel.DueList)
                 {
-                    selectedList = lists.Single(l => l.UserListId == "due");
-                    items = (await _userItemRepository.GetItemsAsync(user, null, new UserItemFilter { Overdue = true, DueToday = true }))
-                        .Select(i => new UserItemModel
-                        {
-                            UserItemId = i.UserItemId,
-                            Description = i.Description,
-                            Notes = i.Notes
-                        }.WithDueDate(i.NextDueDate).WithRepeat(i.Repeat));
+                    (selectedList, items) = await GetDueItemsAsync(user, lists);
                     await _userAccountRepository.SetLastSelectedUserListIdAsync(user, -1);
                 }
                 else if (!int.TryParse(request.List, out var listId))
+                {
                     return GetListItemsResponse.BadRequest;
+                }
                 else
                 {
                     if (!userLists.Any(l => l.UserListId == listId))
                         return GetListItemsResponse.BadRequest;
 
-                    selectedList = lists.Single(l => l.UserListId == request.List);
-                    items = (await _userItemRepository.GetItemsAsync(user, userLists.FirstOrDefault(l => l.UserListId == listId)))
-                        .Select(i => new UserItemModel
-                        {
-                            UserItemId = i.UserItemId,
-                            Description = i.Description,
-                            Notes = i.Notes
-                        }.WithDueDate(i.NextDueDate).WithRepeat(i.Repeat));
+                    (selectedList, items) = await GetListItemsAsync(user, userLists, lists, listId);
                     await _userAccountRepository.SetLastSelectedUserListIdAsync(user, listId);
                 }
             }
@@ -93,43 +77,29 @@ namespace SmallLister.Web.Handlers
             {
                 selectedList = lists.FirstOrDefault(l => l.UserListId == user.LastSelectedUserListId?.ToString());
                 if (selectedList == null)
-                {
                     if (user.LastSelectedUserListId == -1)
-                    {
-                        selectedList = lists.Single(l => l.UserListId == "due");
-                        items = (await _userItemRepository.GetItemsAsync(user, null, new UserItemFilter { Overdue = true, DueToday = true }))
-                            .Select(i => new UserItemModel
-                            {
-                                UserItemId = i.UserItemId,
-                                Description = i.Description,
-                                Notes = i.Notes
-                            }.WithDueDate(i.NextDueDate).WithRepeat(i.Repeat));
-                    }
+                        (selectedList, items) = await GetDueItemsAsync(user, lists);
                     else
-                    {
-                        selectedList = lists.Single(l => l.UserListId == "all");
-                        items = (await _userItemRepository.GetItemsAsync(user, null))
-                            .Select(i => new UserItemModel
-                            {
-                                UserItemId = i.UserItemId,
-                                Description = i.Description,
-                                Notes = i.Notes
-                            }.WithDueDate(i.NextDueDate).WithRepeat(i.Repeat));
-                    }
-                }
+                        (selectedList, items) = await GetAllItemsAsync(user, lists);
                 else
-                {
-                    items = (await _userItemRepository.GetItemsAsync(user, userLists.Single(l => l.UserListId.ToString() == selectedList.UserListId)))
-                        .Select(i => new UserItemModel
-                        {
-                            UserItemId = i.UserItemId,
-                            Description = i.Description,
-                            Notes = i.Notes
-                        }.WithDueDate(i.NextDueDate).WithRepeat(i.Repeat));
-                }
+                    (_, items) = await GetListItemsAsync(user, userLists, lists, user.LastSelectedUserListId.Value);
             }
 
-            return new GetListItemsResponse(lists, selectedList, items);
+            return new GetListItemsResponse(lists, selectedList, items.Select(i => new UserItemModel
+            {
+                UserItemId = i.UserItemId,
+                Description = i.Description,
+                Notes = i.Notes
+            }.WithDueDate(i.NextDueDate).WithRepeat(i.Repeat)));
         }
+
+        private async Task<(UserListModel, IEnumerable<UserItem>)> GetAllItemsAsync(UserAccount user, IEnumerable<UserListModel> lists) =>
+            (lists.Single(l => l.UserListId == IndexViewModel.AllList), await _userItemRepository.GetItemsAsync(user, null));
+
+        private async Task<(UserListModel, IEnumerable<UserItem>)> GetDueItemsAsync(UserAccount user, IEnumerable<UserListModel> lists) =>
+            (lists.Single(l => l.UserListId == IndexViewModel.DueList), await _userItemRepository.GetItemsAsync(user, null, new UserItemFilter { Overdue = true, DueToday = true }));
+
+        private async Task<(UserListModel, IEnumerable<UserItem>)> GetListItemsAsync(UserAccount user, IEnumerable<UserList> userLists, IEnumerable<UserListModel> lists, int listId) =>
+            (lists.Single(l => l.UserListId == listId.ToString()), await _userItemRepository.GetItemsAsync(user, userLists.FirstOrDefault(l => l.UserListId == listId)));
     }
 }
