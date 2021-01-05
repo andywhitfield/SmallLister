@@ -72,7 +72,6 @@ namespace SmallLister.Web.Controllers
             return Redirect("~/");
         }
 
-        /*
         [HttpPost("~/items/done/{userItemId}")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Done([FromRoute] int userItemId)
@@ -83,14 +82,13 @@ namespace SmallLister.Web.Controllers
                 return BadRequest();
             }
             
-            if (!await _mediator.Send(new ItemDoneRequest(User, userItemId)))
+            if (!await _mediator.Send(new MarkItemAsDoneRequest(User, userItemId)))
             {
-                _logger.LogInformation($"Could not delete item {userItemId}, returning not found");
+                _logger.LogInformation($"Could not mark item {userItemId} as done, returning not found");
                 return NotFound();
             }
 
             return Redirect("~/");
         }
-        */
     }
 }

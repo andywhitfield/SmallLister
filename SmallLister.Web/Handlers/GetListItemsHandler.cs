@@ -37,7 +37,8 @@ namespace SmallLister.Web.Handlers
             var lists = userLists
                 .Select(l => new UserListModel { UserListId = l.UserListId.ToString(), Name = l.Name, CanAddItems = true, ItemCount = userListCounts.TryGetValue(l.UserListId, out var listCount) ? listCount : 0 })
                 .Prepend(new UserListModel { Name = "All", UserListId = IndexViewModel.AllList, CanAddItems = true, ItemCount = totalCount });
-            if (overdueCount > 0 || dueCount > 0)
+            var hasDueItems = overdueCount > 0 || dueCount > 0;
+            if (hasDueItems)
             {
                 var name = overdueCount > 0 && dueCount > 0
                     ? $"{overdueCount} overdue and {dueCount} due today"
@@ -50,12 +51,12 @@ namespace SmallLister.Web.Handlers
             UserListModel selectedList;
             if (request.List != null)
             {
-                if (request.List == IndexViewModel.AllList)
+                if (request.List == IndexViewModel.AllList || (request.List == IndexViewModel.DueList && !hasDueItems))
                 {
                     (selectedList, items) = await GetAllItemsAsync(user, lists);
                     await _userAccountRepository.SetLastSelectedUserListIdAsync(user, null);
                 }
-                else if (request.List == IndexViewModel.DueList)
+                else if (request.List == IndexViewModel.DueList && hasDueItems)
                 {
                     (selectedList, items) = await GetDueItemsAsync(user, lists);
                     await _userAccountRepository.SetLastSelectedUserListIdAsync(user, -1);
@@ -77,7 +78,7 @@ namespace SmallLister.Web.Handlers
             {
                 selectedList = lists.FirstOrDefault(l => l.UserListId == user.LastSelectedUserListId?.ToString());
                 if (selectedList == null)
-                    if (user.LastSelectedUserListId == -1)
+                    if (user.LastSelectedUserListId == -1 && hasDueItems)
                         (selectedList, items) = await GetDueItemsAsync(user, lists);
                     else
                         (selectedList, items) = await GetAllItemsAsync(user, lists);

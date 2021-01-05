@@ -20,11 +20,11 @@ namespace SmallLister.Data
         }
 
         public Task<UserItem> GetItemAsync(UserAccount user, int userItemId) =>
-            _context.UserItems.SingleOrDefaultAsync(i => i.UserItemId == userItemId && i.UserAccount == user && i.DeletedDateTime == null);
+            _context.UserItems.SingleOrDefaultAsync(i => i.UserItemId == userItemId && i.UserAccount == user && i.CompletedDateTime == null && i.DeletedDateTime == null);
 
         public Task<List<UserItem>> GetItemsAsync(UserAccount user, UserList list, UserItemFilter filter = null)
         {
-            var query = _context.UserItems.Where(i => i.UserAccount == user && i.DeletedDateTime == null);
+            var query = _context.UserItems.Where(i => i.UserAccount == user && i.CompletedDateTime == null && i.DeletedDateTime == null);
             Func<IQueryable<UserItem>, IQueryable<UserItem>> orderByClause;
             if (list != null)
             {
@@ -79,7 +79,7 @@ namespace SmallLister.Data
         public async Task UpdateOrderAsync(UserItem item, UserItem precedingItem)
         {
             var items = _context.UserItems
-                .Where(i => i.UserItemId != item.UserItemId && i.UserAccountId == item.UserAccountId && i.UserListId == item.UserListId && i.DeletedDateTime == null)
+                .Where(i => i.UserItemId != item.UserItemId && i.UserAccountId == item.UserAccountId && i.UserListId == item.UserListId && i.CompletedDateTime == null && i.DeletedDateTime == null)
                 .OrderBy(i => i.SortOrder);
             var sortOrder = 0;
             var now = DateTime.UtcNow;
@@ -118,7 +118,7 @@ namespace SmallLister.Data
 
         private async Task<int> GetMaxSortOrderAsync(UserAccount user, int? listId) =>
             (await _context.UserItems
-                .Where(i => i.UserAccount == user && i.DeletedDateTime == null && i.UserListId == listId)
+                .Where(i => i.UserAccount == user && i.CompletedDateTime == null && i.DeletedDateTime == null && i.UserListId == listId)
                 .MaxAsync(i => (int?)i.SortOrder)) ?? -1;
     }
 }
