@@ -104,6 +104,18 @@ namespace SmallLister.Data
             }
         }
 
+        public async Task SaveAsync(UserItem item, UserList newList)
+        {
+            if (item.UserListId != newList?.UserListId)
+            {
+                item.UserListId = newList?.UserListId;
+                item.SortOrder = (await GetMaxSortOrderAsync(item.UserAccount, item.UserListId)) + 1;
+            }
+            
+            item.LastUpdateDateTime = DateTime.UtcNow;
+            await _context.SaveChangesAsync();
+        }
+
         private async Task<int> GetMaxSortOrderAsync(UserAccount user, int? listId) =>
             (await _context.UserItems
                 .Where(i => i.UserAccount == user && i.DeletedDateTime == null && i.UserListId == listId)

@@ -53,10 +53,9 @@ namespace SmallLister.Web.Controllers
             return View(new EditViewModel(HttpContext, response.UserItem, response.Lists, response.SelectedList));
         }
 
-        /*
         [HttpPost("~/items/{userItemId}")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit([FromRoute] int userItemId, [FromForm] AddOrUpdateItemRequest addModel)
+        public async Task<IActionResult> Edit([FromRoute] int userItemId, [FromForm] AddOrUpdateItemRequest updateModel)
         {
             if (!ModelState.IsValid)
             {
@@ -64,7 +63,7 @@ namespace SmallLister.Web.Controllers
                 return BadRequest();
             }
             
-            if (!await _mediator.Send(new EditItemRequest(User, userItemId, addModel)))
+            if (!await _mediator.Send(new EditItemRequest(User, userItemId, updateModel)))
             {
                 _logger.LogInformation($"Could not update item {userItemId}, returning not found");
                 return NotFound();
@@ -73,6 +72,7 @@ namespace SmallLister.Web.Controllers
             return Redirect("~/");
         }
 
+        /*
         [HttpPost("~/items/done/{userItemId}")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Done([FromRoute] int userItemId)

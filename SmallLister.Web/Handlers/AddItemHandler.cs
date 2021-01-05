@@ -41,20 +41,30 @@ namespace SmallLister.Web.Handlers
                 }
             }
 
-            DateTime? dueDate = null;
-            if (!string.IsNullOrWhiteSpace(request.Model.Due))
+            if (!TryGetDueDate(request.Model.Due, out var dueDate))
             {
-                if (!DateTime.TryParseExact(request.Model.Due, "yyyy-MM-dd", null, DateTimeStyles.AssumeUniversal, out var due))
-                {
-                    _logger.LogInformation($"Could not parse due date {request.Model.Due}");
-                    return false;
-                }
-
-                dueDate = due.Date;
+                _logger.LogInformation($"Could not parse due date {request.Model.Due}");
+                return false;
             }
 
             _logger.LogInformation($"Adding item to list {list?.UserListId} [{list?.Name}]: {request.Model.Description}; due={dueDate}; repeat={request.Model.Repeat}; notes={request.Model.Notes}");
             await _userItemRepository.AddItemAsync(user, list, request.Model.Description?.Trim(), request.Model.Notes?.Trim(), dueDate, request.Model.Repeat);
+
+            return true;
+        }
+
+        public static bool TryGetDueDate(string due, out DateTime? dueDate)
+        {
+            dueDate = null;
+            if (!string.IsNullOrWhiteSpace(due))
+            {
+                if (!DateTime.TryParseExact(due, "yyyy-MM-dd", null, DateTimeStyles.AssumeUniversal, out var parsed))
+                {
+                    return false;
+                }
+
+                dueDate = parsed.Date;
+            }
 
             return true;
         }

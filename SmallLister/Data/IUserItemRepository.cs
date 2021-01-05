@@ -11,5 +11,6 @@ namespace SmallLister.Data
         Task<List<UserItem>> GetItemsAsync(UserAccount user, UserList list, UserItemFilter filter = null);
         Task AddItemAsync(UserAccount user, UserList list, string description, string notes, DateTime? dueDate, ItemRepeat? repeat);
         Task UpdateOrderAsync(UserItem item, UserItem precedingItem);
+        Task SaveAsync(UserItem item, UserList newList);
     }
 }
