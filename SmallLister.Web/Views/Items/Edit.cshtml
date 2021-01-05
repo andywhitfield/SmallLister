@@ -1,0 +1,85 @@
+﻿@model SmallLister.Web.Model.Items.EditViewModel
+
+<article>
+    <form name="sml-list-add" method="post" action="/items/@Model.ItemToEdit.UserItemId">
+    @Html.AntiForgeryToken()
+    <fieldset>
+    <legend>Edit</legend>
+        <div>
+        <label for="sml-list-add-list">List:</label>
+        <select id="sml-list-add-list" name="list" class="sml-list-add-list">
+            @foreach (var list in Model.Lists.Where(l => l.CanAddItems)) {
+                @if (list.UserListId == Model.SelectedList.UserListId) {
+            <option value="@list.UserListId" selected="selected">@list.Name</option>
+                } else {
+            <option value="@list.UserListId">@list.Name</option>
+                }
+            }
+        </select>
+    </div>
+    <div>
+        <label for="sml-list-add-description">Description:</label>
+        <input type="text" id="sml-list-add-description" name="description" value="@Model.ItemToEdit.Description" class="sml-list-add-description" />
+    </div>
+    <div>
+        <label for="sml-list-add-due">Due:</label>
+        <input type="text" id="sml-list-add-due" name="due" value="@Model.ItemToEdit.DueDate?.ToString("yyyy-MM-dd")" class="sml-list-add-due" />
+    </div>
+    <div>        
+        <label for="sml-list-add-repeat">Repeat:</label>
+        <select id="sml-list-add-repeat" name="repeat" class="sml-list-add-repeat" data-depends="input.sml-list-add-due">
+            <option value="">None</option>
+            @if (Model.ItemToEdit.Repeat == SmallLister.Model.ItemRepeat.Daily) {
+            <option value="daily" selected>Every day</option>
+            } else {
+            <option value="daily">Every day</option>
+            }
+            @if (Model.ItemToEdit.Repeat == SmallLister.Model.ItemRepeat.Weekly) {
+            <option value="weekly" selected>Every week</option>
+            } else {
+            <option value="weekly">Every week</option>
+            }
+            @if (Model.ItemToEdit.Repeat == SmallLister.Model.ItemRepeat.Monthly) {
+            <option value="monthly" selected>Every month</option>
+            } else {
+            <option value="monthly">Every month</option>
+            }
+            @if (Model.ItemToEdit.Repeat == SmallLister.Model.ItemRepeat.Yearly) {
+            <option value="yearly" selected>Every year</option>
+            } else {
+            <option value="yearly">Every year</option>
+            }
+        </select>
+    </div>
+    <div>
+        <label for="sml-list-add-notes">Notes:</label>
+        <textarea id="sml-list-add-notes" name="notes" class="sml-list-add-notes" wrap="off">@Model.ItemToEdit.Notes</textarea>
+    </div>
+    <div>
+        <label></label>
+        <button type="submit" data-depends="input.sml-list-add-description">Update</button>
+    </div>
+    </fieldset>
+    </form>
+</article>
+
+@section Scripts {
+<script type="text/javascript">
+    $(function() { 
+        let dueDateSelector = 'form[name="sml-list-add"] input.sml-list-add-due';
+        pickmeup(dueDateSelector, {
+            default_date: false,
+            hide_on_select: true,
+            format: 'Y-m-d'
+        });
+        $(dueDateSelector).on('change input paste keyup', function() {
+            let dueDate = $(this).val();
+            if (dueDate !== null && dueDate.match(/^\s*$/) === null)
+                return;
+            pickmeup(dueDateSelector).hide();
+            pickmeup(dueDateSelector).set_date(new Date);
+            $('form[name="sml-list-add"] select.sml-list-add-repeat').val('none');
+        });
+    });
+</script>
+}

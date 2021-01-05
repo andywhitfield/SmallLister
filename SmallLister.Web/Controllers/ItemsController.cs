@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using SmallLister.Web.Handlers.RequestResponse;
+using SmallLister.Web.Model.Items;
 using SmallLister.Web.Model.Request;
 
 namespace SmallLister.Web.Controllers
@@ -38,5 +39,58 @@ namespace SmallLister.Web.Controllers
 
             return Redirect("~/");
         }
+
+        [HttpGet("~/items/{userItemId}")]
+        public async Task<IActionResult> Edit([FromRoute] int userItemId)
+        {
+            var response = await _mediator.Send(new GetItemForEditRequest(User, userItemId));
+            if (!response.IsValid)
+            {
+                _logger.LogInformation($"Could not find item {userItemId}, returning not found");
+                return NotFound();
+            }
+
+            return View(new EditViewModel(HttpContext, response.UserItem, response.Lists, response.SelectedList));
+        }
+
+        /*
+        [HttpPost("~/items/{userItemId}")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Edit([FromRoute] int userItemId, [FromForm] AddOrUpdateItemRequest addModel)
+        {
+            if (!ModelState.IsValid)
+            {
+                _logger.LogInformation("Model state is invalid, returning bad request");
+                return BadRequest();
+            }
+            
+            if (!await _mediator.Send(new EditItemRequest(User, userItemId, addModel)))
+            {
+                _logger.LogInformation($"Could not update item {userItemId}, returning not found");
+                return NotFound();
+            }
+
+            return Redirect("~/");
+        }
+
+        [HttpPost("~/items/done/{userItemId}")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Done([FromRoute] int userItemId)
+        {
+            if (!ModelState.IsValid)
+            {
+                _logger.LogInformation("Model state is invalid, returning bad request");
+                return BadRequest();
+            }
+            
+            if (!await _mediator.Send(new ItemDoneRequest(User, userItemId)))
+            {
+                _logger.LogInformation($"Could not delete item {userItemId}, returning not found");
+                return NotFound();
+            }
+
+            return Redirect("~/");
+        }
+        */
     }
 }

@@ -31,16 +31,13 @@
                         <div>@item.Description</div>
                         <div class="sml-list-item-notes">@item.Notes</div>
                         
-                        <form method="post" action="/todo">
+                        <form method="post" action="/items/done/@item.UserItemId">
                         @Html.AntiForgeryToken()
                         <button title="Done"><img src="/images/tick.png" height="15" width="15" /> Done</button>
                         </form>
-                        <form method="post" action="/todo">
-                        @Html.AntiForgeryToken()
-                        <button title="Edit"><img src="/images/notes.png" height="15" width="15" /> Edit</button>
-                        </form>
+                        <button title="Edit" data-href="/items/@item.UserItemId"><img src="/images/notes.png" height="15" width="15" /> Edit</button>
                     </div>
-                    <div title="@item.Due">@item.DueSummary<br/><span>@item.Repeats</span></div>
+                    <div title="@item.Due">@item.DueSummary<br/><span>@item.RepeatSummary</span></div>
                 </li>
             }
             </ul>

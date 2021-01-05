@@ -85,12 +85,7 @@ namespace SmallLister.Web.Handlers
                     (_, items) = await GetListItemsAsync(user, userLists, lists, user.LastSelectedUserListId.Value);
             }
 
-            return new GetListItemsResponse(lists, selectedList, items.Select(i => new UserItemModel
-            {
-                UserItemId = i.UserItemId,
-                Description = i.Description,
-                Notes = i.Notes
-            }.WithDueDate(i.NextDueDate).WithRepeat(i.Repeat)));
+            return new GetListItemsResponse(lists, selectedList, items.Select(i => new UserItemModel(i)));
         }
 
         private async Task<(UserListModel, IEnumerable<UserItem>)> GetAllItemsAsync(UserAccount user, IEnumerable<UserListModel> lists) =>

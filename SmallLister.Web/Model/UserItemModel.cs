@@ -5,15 +5,33 @@ namespace SmallLister.Web.Model
 {
     public class UserItemModel
     {
-        public int UserItemId { get; set; }
-        public string Description { get; set; }
-        public string Notes { get; set; }
-        public DateTime? DueDate { get; set; }
-        public string Due { get; set; }
-        public string DueSummary { get; set; }
-        public string Repeats { get; set; }
+        public UserItemModel(UserItem userItem)
+        {
+            UserItemId = userItem.UserItemId;
+            Description = userItem.Description;
+            Notes = userItem.Notes;
+            SetDueDate(userItem.NextDueDate);
+            Repeat = userItem.Repeat;
+            RepeatSummary = userItem.Repeat switch
+            {
+                ItemRepeat.Daily => "Repeats every day",
+                ItemRepeat.Weekly => "Repeats every week",
+                ItemRepeat.Monthly => "Repeats every month",
+                ItemRepeat.Yearly => "Repeats every year",
+                _ => ""
+            };
+        }
 
-        public UserItemModel WithDueDate(DateTime? dueDate)
+        public int UserItemId { get; }
+        public string Description { get; }
+        public string Notes { get; }
+        public DateTime? DueDate { get; private set; }
+        public string Due { get; private set; }
+        public string DueSummary { get; private set; }
+        public ItemRepeat? Repeat { get; }
+        public string RepeatSummary { get; }
+
+        private void SetDueDate(DateTime? dueDate)
         {
             DueDate = dueDate;
             if (dueDate == null)
@@ -56,19 +74,6 @@ namespace SmallLister.Web.Model
                 Due = $"Due {due:dd MMMM yyyy}";
                 DueSummary = $"Due {friendlyDueDate}";
             }
-            return this;
-        }
-        public UserItemModel WithRepeat(ItemRepeat? repeat)
-        {
-            Repeats = repeat switch
-            {
-                ItemRepeat.Daily => "Repeats every day",
-                ItemRepeat.Weekly => "Repeats every week",
-                ItemRepeat.Monthly => "Repeats every month",
-                ItemRepeat.Yearly => "Repeats every year",
-                _ => ""
-            };
-            return this;
         }
     }
 }
