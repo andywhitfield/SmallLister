@@ -31,6 +31,19 @@ namespace SmallLister.Web.Model
         public ItemRepeat? Repeat { get; }
         public string RepeatSummary { get; }
 
+        public string AppendDueCssClass(string cssClass)
+        {
+            if (DueDate == null)
+                return cssClass;
+            
+            var today = DateTime.Today;
+            if (DueDate == today)
+                return $"{cssClass} sml-list-item-due";
+            if (DueDate < today)
+                return $"{cssClass} sml-list-item-overdue";
+            return cssClass;
+        }
+
         private void SetDueDate(DateTime? dueDate)
         {
             DueDate = dueDate;

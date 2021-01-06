@@ -21,7 +21,7 @@
             @if (Model.Items.Any()) {
             <ul class="sml-list-item">
             @foreach (var item in Model.Items) {
-                <li class="sml-list-item" data-listitem="@item.UserItemId">
+                <li class="@item.AppendDueCssClass("sml-list-item")" data-listitem="@item.UserItemId">
                     <div>
                         @if (!Model.IsAllListSelected && !Model.IsDueListSelected) {
                         <img class="sml-list-item-drag-handle" src="/images/drag.png" height="26" width="22" title="Move" />

@@ -155,6 +155,15 @@ ul.sml-list-item {
     width: 100%;
 }
 
+.sml-list-item-due div {
+    font-weight: bold;
+}
+
+.sml-list-item-overdue div {
+    font-weight: bold;
+    color: red;
+}
+
 ul.sml-list-item>li {
     display: flex;
     background-color: #92d3d4;
