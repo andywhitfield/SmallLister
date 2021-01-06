@@ -56,7 +56,7 @@ namespace SmallLister.Web
                 })
                 .AddOpenIdConnect(options =>
                 {
-                    var openIdOptions = Configuration.GetSection("OpenId");
+                    var openIdOptions = Configuration.GetSection("SmallListerOpenId");
                     options.ClientId = openIdOptions.GetValue("ClientId", "");
                     options.ClientSecret = openIdOptions.GetValue("ClientSecret", "");
 
