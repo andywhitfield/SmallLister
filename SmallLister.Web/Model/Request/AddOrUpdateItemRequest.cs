@@ -11,5 +11,6 @@ namespace SmallLister.Web.Model.Request
         public string Due { get; set; }
         public ItemRepeat? Repeat { get; set; }
         public string Notes { get; set; }
+        public bool? Delete { get; set; }
     }
 }

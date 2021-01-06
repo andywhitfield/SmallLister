@@ -50,7 +50,7 @@ function smlInitialise() {
         dependentFormObject.trigger('change');
     });
 
-    $('form[data-confirm]').submit(function(event) {
+    $('[data-confirm]').click(function(event) {
         if (!confirm($(this).attr('data-confirm'))) {
             event.preventDefault();
             return false;

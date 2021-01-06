@@ -106,7 +106,7 @@ namespace SmallLister.Data
 
         public async Task SaveAsync(UserItem item, UserList newList)
         {
-            if (item.UserListId != newList?.UserListId)
+            if (item.DeletedDateTime == null && item.UserListId != newList?.UserListId)
             {
                 item.UserListId = newList?.UserListId;
                 item.SortOrder = (await GetMaxSortOrderAsync(item.UserAccount, item.UserListId)) + 1;

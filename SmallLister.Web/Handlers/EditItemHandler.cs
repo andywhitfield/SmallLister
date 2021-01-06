@@ -1,3 +1,4 @@
+using System;
 using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
@@ -40,28 +41,35 @@ namespace SmallLister.Web.Handlers
                 $" Notes[{item.Notes}=>{request.Model.Notes}]" +
                 $" NextDueDate[{item.NextDueDate}=>{request.Model.Due}]");
 
-            item.UserAccount = user;
-            item.Description = request.Model.Description;
-            item.Notes = request.Model.Notes;
-            item.Repeat = request.Model.Repeat;
-
             UserList list = null;
-            if (request.Model.List != null)
+            if (request.Model.Delete ?? false)
             {
-                list = await _userListRepository.GetListAsync(user, request.Model.List.Value);
-                if (list == null)
+                item.DeletedDateTime = DateTime.UtcNow;
+            }
+            else
+            {
+                item.UserAccount = user;
+                item.Description = request.Model.Description;
+                item.Notes = request.Model.Notes;
+                item.Repeat = request.Model.Repeat;
+
+                if (request.Model.List != null)
                 {
-                    _logger.LogInformation($"Could not find list {request.Model.List}");
+                    list = await _userListRepository.GetListAsync(user, request.Model.List.Value);
+                    if (list == null)
+                    {
+                        _logger.LogInformation($"Could not find list {request.Model.List}");
+                        return false;
+                    }
+                }
+
+                if (!AddItemHandler.TryGetDueDate(request.Model.Due, out var dueDate))
+                {
+                    _logger.LogInformation($"Could not parse due date {request.Model.Due}");
                     return false;
                 }
+                item.NextDueDate = dueDate;
             }
-
-            if (!AddItemHandler.TryGetDueDate(request.Model.Due, out var dueDate))
-            {
-                _logger.LogInformation($"Could not parse due date {request.Model.Due}");
-                return false;
-            }
-            item.NextDueDate = dueDate;
 
             await _userItemRepository.SaveAsync(item, list);
             return true;
