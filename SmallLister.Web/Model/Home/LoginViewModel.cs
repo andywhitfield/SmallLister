@@ -4,6 +4,7 @@ namespace SmallLister.Web.Model.Home
 {
     public class LoginViewModel : BaseViewModel
     {
-        public LoginViewModel(HttpContext context) : base(context) { }
+        public string ReturnUrl { get; }
+        public LoginViewModel(HttpContext context, string returnUrl) : base(context) => ReturnUrl = returnUrl;
     }
 }

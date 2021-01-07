@@ -1,4 +1,5 @@
 using System.Threading.Tasks;
+using System.Web;
 using MediatR;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
@@ -30,19 +31,15 @@ namespace SmallLister.Web.Controllers
         public IActionResult Error() => View(new ErrorViewModel(HttpContext));
 
         [HttpGet("~/signin")]
-        public IActionResult Signin() => View("Login", new LoginViewModel(HttpContext));
+        public IActionResult Signin([FromQuery] string returnUrl) => View("Login", new LoginViewModel(HttpContext, returnUrl));
 
         [HttpPost("~/signin")]
         [ValidateAntiForgeryToken]
-        public IActionResult SigninChallenge() => Challenge(new AuthenticationProperties { RedirectUri = "/signedin" }, OpenIdConnectDefaults.AuthenticationScheme);
+        public IActionResult SigninChallenge([FromForm] string returnUrl) => Challenge(new AuthenticationProperties { RedirectUri = $"/signedin?returnUrl={HttpUtility.UrlEncode(returnUrl)}" }, OpenIdConnectDefaults.AuthenticationScheme);
 
         [Authorize]
         [HttpGet("~/signedin")]
-        public async Task<IActionResult> SignedIn()
-        {
-            await _mediator.Send(new SignedInRequest(User));
-            return Redirect("~/");
-        }
+        public async Task<IActionResult> SignedIn([FromQuery] string returnUrl) => Redirect(await _mediator.Send(new SignedInRequest(User, returnUrl)));
 
         [HttpGet("~/signout"), HttpPost("~/signout")]
         public IActionResult Signout()
