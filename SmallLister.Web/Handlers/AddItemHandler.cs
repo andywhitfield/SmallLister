@@ -31,9 +31,9 @@ namespace SmallLister.Web.Handlers
         {
             var user = await _userAccountRepository.GetUserAccountAsync(request.User);
             UserList list = null;
-            if (request.Model.List.HasValue)
+            if (!string.IsNullOrEmpty(request.Model.List) && int.TryParse(request.Model.List, out var listId))
             {
-                list = await _userListRepository.GetListAsync(user, request.Model.List.Value);
+                list = await _userListRepository.GetListAsync(user, listId);
                 if (list == null)
                 {
                     _logger.LogInformation($"Could not find list {request.Model.List}");

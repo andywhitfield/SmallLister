@@ -53,9 +53,9 @@ namespace SmallLister.Web.Handlers
                 item.Notes = request.Model.Notes;
                 item.Repeat = request.Model.Repeat;
 
-                if (request.Model.List != null)
+                if (!string.IsNullOrEmpty(request.Model.List) && int.TryParse(request.Model.List, out var listId))
                 {
-                    list = await _userListRepository.GetListAsync(user, request.Model.List.Value);
+                    list = await _userListRepository.GetListAsync(user, listId);
                     if (list == null)
                     {
                         _logger.LogInformation($"Could not find list {request.Model.List}");

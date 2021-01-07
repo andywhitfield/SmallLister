@@ -5,7 +5,7 @@ namespace SmallLister.Web.Model.Request
 {
     public class AddOrUpdateItemRequest
     {
-        public int? List { get; set; }
+        public string List { get; set; }
         [Required]
         public string Description { get; set; }
         public string Due { get; set; }
