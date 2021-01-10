@@ -1,0 +1,14 @@
+POST https://localhost:5001/api/v1/token HTTP/1.1
+Authorization: Basic gznsww25X0uVHUSRk5NqHQ:zGG6Gpk48Ue2SKPr5-aZ0A
+Content-Type: application/json
+
+{
+    "refreshToken": "BoOH0aZZY0ajHfBMOWj73Q"
+}
+
+###
+
+GET https://localhost:5001/api/v1/list HTTP/1.1
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1bmlxdWVfbmFtZSI6IloteDRKeWkyMms2UmxYNWZCOURBR0EiLCJuYmYiOjE2MTAyMjIyNzEsImV4cCI6MTYxMDIyNDA3MCwiaWF0IjoxNjEwMjIyMjcxLCJpc3MiOiJodHRwczovL3NtYWxsbGlzdGVyLm5vc3VjaGJsb2dnZXIuY29tIiwiYXVkIjoiaHR0cHM6Ly9zbWFsbGxpc3Rlci5ub3N1Y2hibG9nZ2VyLmNvbSJ9.14ZO9G44NU0yptvgvFDj6uWE6c8iAsaAZlFkEdyY7AQ
+
+###

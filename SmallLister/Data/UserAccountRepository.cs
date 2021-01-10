@@ -18,6 +18,9 @@ namespace SmallLister.Data
             _logger = logger;
         }
 
+        public Task<UserAccount> GetAsync(int userAccountId) =>
+            _context.UserAccounts.SingleOrDefaultAsync(a => a.UserAccountId == userAccountId && a.DeletedDateTime == null);
+
         public Task CreateNewUserAsync(ClaimsPrincipal user)
         {
             var authenticationUri = GetIdentifierFromPrincipal(user);

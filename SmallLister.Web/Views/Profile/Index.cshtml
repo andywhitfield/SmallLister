@@ -1,0 +1,74 @@
+﻿@model SmallLister.Web.Model.Profile.IndexViewModel
+
+<article>
+    <h2>External API Access</h2>
+
+    @if (Model.ExternalApiAccessList.Any()) {
+    <div>These applications have access to your lists:</div>
+    <ul>
+        @foreach (var externalApiAccess in Model.ExternalApiAccessList) {
+        <li>
+            <div>@externalApiAccess.DisplayName approved on @externalApiAccess.ApprovedDate</div>
+            <div>Last accessed on @externalApiAccess.LastAccessedDate</div>
+            @if (externalApiAccess.IsRevoked) {
+            <div>Revoked on @externalApiAccess.RevokedDate</div>
+            }
+
+            @if (!externalApiAccess.IsRevoked) {
+            <form method="post" action="/profile/externalapp/revoke/@externalApiAccess.UserAccountApiAccessId">
+            @Html.AntiForgeryToken()
+            <button data-confirm="This will prevent any future access to your lists from @externalApiAccess.DisplayName - are you sure?">Revoke Access</button>
+            </form>
+            }
+        </li>
+        }
+    </ul>
+    } else {
+    <p>No applications have access to your lists.</p>
+    }
+
+    <h2>External API Clients</h2>
+
+    @if (Model.ExternalApiClients.Any()) {
+    <ul>
+        @foreach (var externalApiClient in Model.ExternalApiClients) {
+        <li>
+            <div>@externalApiClient.DisplayName:</div>
+            <div>AppKey: <input type="text" value="@externalApiClient.AppKey" /></div>
+            <div>RedirectUri: <input type="text" value="@externalApiClient.RedirectUri" /></div>
+            <form method="post" action="/profile/externalclient/update/@externalApiClient.ApiClientId">
+            @Html.AntiForgeryToken()
+            @if (externalApiClient.IsEnabled) {
+            <button name="state" value="disable">Disable</button>
+            } else {
+            <button name="state" value="enable">Enabled</button>
+            }
+            </form>
+        </li>
+        }
+    </ul>
+    } else {
+    <p>No external clients have been registered.</p>
+    }
+
+    <div>
+    <form name="sml-list-add" method="post" action="/profile/externalclient">
+    @Html.AntiForgeryToken()
+    <fieldset>
+    <legend>Create a new external API client</legend>
+    <div>
+        <label for="sml-list-add-name">Display Name:</label>
+        <input type="text" id="sml-list-add-name" name="name" class="sml-list-add-name" />
+    </div>
+    <div>
+        <label for="sml-list-add-uri">Redirect URI:</label>
+        <input type="text" id="sml-list-add-uri" name="uri" class="sml-list-add-uri" />
+    </div>
+    <div>
+        <label></label>
+        <button type="submit" data-depends="input.sml-list-add-name">Add</button>
+    </div>
+    </fieldset>
+    </form>
+    </div>
+</article>

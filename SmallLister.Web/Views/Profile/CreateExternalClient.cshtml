@@ -1,0 +1,25 @@
+@model SmallLister.Web.Model.Profile.CreatedExternalClientViewModel
+
+<article>
+    <h2>New External API Client registered</h2>
+
+    <p>
+        <div>Name: @Model.DisplayName</div>
+        <div>Redirect URI: @Model.RedirectUri</div>
+        <div>AppKey: @Model.AppKey</div>
+        <div>AppSecret: @Model.AppSecret</div>
+    </p>
+
+    <p>
+        <div><strong>Important</strong></div>
+        <div>
+            Please make a note of the AppKey and AppSecret which is used to access the API.
+            The AppSecret should be stored securely and is not saved by us and cannot be recovered.
+            If lost, a new app registration is required.
+        </div>
+    </p>
+
+    <p>
+        <button data-href="/profile">Continue</button> once you have saved the AppKey and AppSecret.
+    </p>
+</article>

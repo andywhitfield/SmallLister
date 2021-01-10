@@ -1,0 +1,19 @@
+﻿@model SmallLister.Web.Model.Api.ApiAuthorizeModel
+
+<article>
+<h1>External application access</h1>
+
+<form action="/api/v1/authorize" method="post">
+    <p>
+        The external application '@Model.ApplicationName' is requesting access to read and update your lists.
+        Do you want to allow this?
+    </p>
+    <p>
+        <button type="submit" name="allowapiauth" value="true">Yes</button>
+        <button type="submit" name="allowapiauth" value="false">No</button>
+    </p>
+    <input type="hidden" name="appkey" value="@Model.AppKey"/>
+    <input type="hidden" name="redirecturi" value="@Model.RedirectUri"/>
+    @Html.AntiForgeryToken()
+</form>
+</article>

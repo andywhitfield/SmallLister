@@ -2,9 +2,11 @@
 using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
 using System.IO;
+using System.Text;
 using MediatR;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Hosting;
@@ -16,7 +18,9 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
+using Microsoft.IdentityModel.Tokens;
 using SmallLister.Data;
+using SmallLister.Security;
 
 namespace SmallLister.Web
 {
@@ -76,7 +80,31 @@ namespace SmallLister.Web
                     options.TokenValidationParameters.RoleClaimType = "role";
 
                     options.AccessDeniedPath = "/";
+                })
+                .AddJwtBearer("ApiJwt", options =>
+                {
+                    var tokenOptions = Configuration.GetSection("SmallListerApiJwt");
+                    var signingKey = tokenOptions.GetValue("SigningKey", "");
+                    var issuer = tokenOptions.GetValue("Issuer", "");
+                    var audience = tokenOptions.GetValue("Audience", "");
+
+                    options.SaveToken = false;
+                    options.TokenValidationParameters = new TokenValidationParameters()
+                    {
+                        ValidateAudience = true,
+                        ValidateIssuer = true,
+                        ValidateLifetime = true,
+                        ClockSkew = TimeSpan.Zero,
+                        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(signingKey)),
+                        ValidIssuer = issuer,
+                        ValidAudience = audience
+                    };
                 });
+            services.AddAuthorization(options =>
+                options.AddPolicy("ApiJwt", new AuthorizationPolicyBuilder()
+                    .RequireAuthenticatedUser()
+                    .AddAuthenticationSchemes("ApiJwt")
+                    .Build()));
 
             services
                 .AddDataProtection()
@@ -96,15 +124,20 @@ namespace SmallLister.Web
                 o.MinimumSameSitePolicy = SameSiteMode.None;
             });
 
-            services.AddDbContext<SqliteDataContext>((serviceProvider, options) => {
+            services.AddDbContext<SqliteDataContext>((serviceProvider, options) =>
+            {
                 var sqliteConnectionString = Configuration.GetConnectionString("SmallLister");
                 serviceProvider.GetRequiredService<ILogger<Startup>>().LogInformation($"Using connection string: {sqliteConnectionString}");
-                options.UseSqlite(sqliteConnectionString);                
+                options.UseSqlite(sqliteConnectionString);
             });
             services
                 .AddScoped<IUserAccountRepository, UserAccountRepository>()
                 .AddScoped<IUserListRepository, UserListRepository>()
-                .AddScoped<IUserItemRepository, UserItemRepository>();
+                .AddScoped<IUserItemRepository, UserItemRepository>()
+                .AddScoped<IUserAccountApiAccessRepository, UserAccountApiAccessRepository>()
+                .AddScoped<IUserAccountTokenRepository, UserAccountTokenRepository>()
+                .AddScoped<IApiClientRepository, ApiClientRepository>()
+                .AddScoped<IJwtService, JwtService>();
 
             services.AddMediatR(typeof(Startup));
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_3_0).AddSessionStateTempDataProvider();

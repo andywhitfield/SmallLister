@@ -22,8 +22,8 @@ namespace SmallLister.Data
         public Task<UserList> GetListAsync(UserAccount user, int userListId) =>
             _context.UserLists.SingleOrDefaultAsync(l => l.UserListId == userListId && l.UserAccount == user && l.DeletedDateTime == null);
 
-        public async Task<List<UserList>> GetListsAsync(UserAccount user) =>
-            await _context.UserLists.Where(l => l.UserAccount == user && l.DeletedDateTime == null).OrderBy(l => l.SortOrder).ToListAsync();
+        public Task<List<UserList>> GetListsAsync(UserAccount user) =>
+            _context.UserLists.Where(l => l.UserAccount == user && l.DeletedDateTime == null).OrderBy(l => l.SortOrder).ToListAsync();
 
         public async Task<(int OverdueCount, int DueCount, int TotalCount, IDictionary<int, int> ListCounts)> GetListCountsAsync(UserAccount user)
         {
