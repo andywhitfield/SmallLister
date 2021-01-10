@@ -60,6 +60,10 @@ namespace SmallLister.Data
             return orderByClause(query).ToListAsync();
         }
 
+        public Task<List<UserItem>> GetItemsOnNoListAsync(UserAccount user) => _context.UserItems
+            .Where(i => i.UserAccount == user && i.UserList == null && i.CompletedDateTime == null && i.DeletedDateTime == null)
+            .OrderBy(i => i.SortOrder).ToListAsync();
+
         public async Task AddItemAsync(UserAccount user, UserList list, string description, string notes, DateTime? dueDate, ItemRepeat? repeat)
         {
             var maxSortOrder = await GetMaxSortOrderAsync(user, list?.UserListId);
@@ -111,7 +115,7 @@ namespace SmallLister.Data
                 item.UserListId = newList?.UserListId;
                 item.SortOrder = (await GetMaxSortOrderAsync(item.UserAccount, item.UserListId)) + 1;
             }
-            
+
             item.LastUpdateDateTime = DateTime.UtcNow;
             await _context.SaveChangesAsync();
         }

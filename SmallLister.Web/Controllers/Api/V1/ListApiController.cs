@@ -1,3 +1,4 @@
+using System.ComponentModel.DataAnnotations;
 using System.Threading.Tasks;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -38,6 +39,26 @@ namespace SmallLister.Web.Controllers.Api.V1
             }
 
             return Ok(await _mediator.Send(new GetAllListsRequest(user)));
+        }
+
+        [HttpGet("~/api/v1/list/{listId}")]
+        [ProducesResponseType(typeof(GetListResponse), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        public async Task<IActionResult> GetList([Required] string listId)
+        {
+            var user = await _jwtService.GetUserAccountAsync(User);
+            if (user == null)
+            {
+                _logger.LogInformation($"Could not get user account from token {User.Identity.Name}, returning unauthorized");
+                return Unauthorized();
+            }
+
+            var response = await _mediator.Send(new GetListRequest(user, listId));
+            if (response == null)
+                return NotFound();
+
+            return Ok(response);
         }
     }
 }
