@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -36,6 +37,12 @@ namespace SmallLister.Data
                 RefreshToken = refreshToken
             });
             await _context.SaveChangesAsync();
+        }
+
+        public Task UpdateAsync(UserAccountApiAccess userAccountApiAccess)
+        {
+            userAccountApiAccess.LastUpdateDateTime = DateTime.UtcNow;
+            return _context.SaveChangesAsync();
         }
     }
 }

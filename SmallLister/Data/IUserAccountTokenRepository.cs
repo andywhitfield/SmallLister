@@ -10,5 +10,6 @@ namespace SmallLister.Data
         Task<List<UserAccountToken>> GetAsync(UserAccountApiAccess userAccountApiAccess);
         Task<UserAccountToken> GetAsync(string tokenData);
         Task CreateAsync(UserAccountApiAccess userAccountApiAccess, string tokenData, DateTime expires);
+        Task<UserAccountToken> GetLatestAsync(UserAccountApiAccess userAccountApiAccess);
     }
 }

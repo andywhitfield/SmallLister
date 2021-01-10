@@ -33,7 +33,7 @@ namespace SmallLister.Web.Handlers
             var externalApiAccessModels = new List<ExternalApiAccessModel>();
             foreach (var apiAccess in apiAccesses)
             {
-                var mostRecentToken = (await _userAccountTokenRepository.GetAsync(apiAccess)).OrderByDescending(t => t.CreatedDateTime).FirstOrDefault();
+                var mostRecentToken = await _userAccountTokenRepository.GetLatestAsync(apiAccess);
                 var lastAccessed = mostRecentToken?.CreatedDateTime ?? apiAccess.CreatedDateTime;
                 externalApiAccessModels.Add(new ExternalApiAccessModel(apiAccess.UserAccountApiAccessId, apiAccess.ApiClient.DisplayName, apiAccess.CreatedDateTime, lastAccessed, apiAccess.RevokedDateTime));
             }

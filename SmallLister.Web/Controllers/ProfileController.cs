@@ -59,5 +59,22 @@ namespace SmallLister.Web.Controllers
 
             return Redirect("~/profile");
         }
+
+        [HttpPost("~/profile/externalapp/revoke/{userAccountApiAccessId}")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> RevokeExternalApiAccess([FromRoute, Required] int userAccountApiAccessId)
+        {
+            if (!ModelState.IsValid)
+            {
+                _logger.LogInformation("Model state is invalid, returning bad request");
+                return BadRequest();
+            }
+
+            var revoked = await _mediator.Send(new RevokeExternalApiAccessRequest(User, userAccountApiAccessId));
+            if (!revoked)
+                return BadRequest();
+
+            return Redirect("~/profile");
+        }
     }
 }

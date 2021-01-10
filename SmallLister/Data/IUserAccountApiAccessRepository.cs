@@ -10,5 +10,6 @@ namespace SmallLister.Data
         Task<List<UserAccountApiAccess>> GetAsync(UserAccount user);
         Task<UserAccountApiAccess> GetByRefreshTokenAsync(string refreshToken);
         Task Create(ApiClient apiClient, UserAccount userAccount, string refreshToken);
+        Task UpdateAsync(UserAccountApiAccess userAccountApiAccess);
     }
 }

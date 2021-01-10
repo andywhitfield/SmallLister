@@ -43,11 +43,23 @@ namespace SmallLister.Data
             await _context.SaveChangesAsync();
         }
 
+        public async Task<UserAccountToken> GetLatestAsync(UserAccountApiAccess userAccountApiAccess)
+        {
+            await DeleteExpiredTokensAsync();
+            return await _context.UserAccountTokens
+                .Where(t => t.UserAccountApiAccess == userAccountApiAccess)
+                .OrderByDescending(t => t.CreatedDateTime)
+                .FirstOrDefaultAsync();
+        }
+
         private async Task DeleteExpiredTokensAsync()
         {
             var now = DateTime.UtcNow;
             await foreach (var token in _context.UserAccountTokens.Where(t => t.DeletedDateTime == null && t.ExpiryDateTime < now).AsAsyncEnumerable())
+            {
                 token.DeletedDateTime = now;
+                token.LastUpdateDateTime = now;
+            }
             await _context.SaveChangesAsync();
         }
     }
