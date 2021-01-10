@@ -51,7 +51,39 @@ namespace SmallLister.Web.Handlers
                 ItemRepeat.Weekly => dueDate.AddDays(7),
                 ItemRepeat.Monthly => dueDate.AddMonths(1),
                 ItemRepeat.Yearly => dueDate.AddYears(1),
+                ItemRepeat.DailyExcludingWeekend => NextWorkingDay(dueDate),
+                ItemRepeat.Weekends => NextWeekendDay(dueDate),
+                ItemRepeat.Biweekly => dueDate.AddDays(14),
+                ItemRepeat.Triweekly => dueDate.AddDays(21),
+                ItemRepeat.LastDayMonthly => NextLastDayOfTheMonth(dueDate),
                 _ => throw new ArgumentException($"Unsupported repeat option: {repeat}")
             };
+
+        private DateTime NextWorkingDay(DateTime date)
+        {
+            do
+                date = date.AddDays(1);
+            while (IsWeekend(date));
+            return date;
+        }
+
+        private DateTime NextWeekendDay(DateTime date)
+        {
+            do
+                date = date.AddDays(1);
+            while (!IsWeekend(date));
+            return date;
+        }
+
+        private DateTime NextLastDayOfTheMonth(DateTime date)
+        {
+            date = date.AddMonths(1);
+            var daysInMonth = DateTime.DaysInMonth(date.Year, date.Month);
+            if (date.Day != daysInMonth)
+                date = date.AddDays(daysInMonth - date.Day);
+            return date;
+        }
+
+        private bool IsWeekend(DateTime date) => date.DayOfWeek == DayOfWeek.Saturday || date.DayOfWeek == DayOfWeek.Sunday;
     }
 }

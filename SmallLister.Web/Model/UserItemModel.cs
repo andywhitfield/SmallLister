@@ -18,6 +18,11 @@ namespace SmallLister.Web.Model
                 ItemRepeat.Weekly => "Repeats every week",
                 ItemRepeat.Monthly => "Repeats every month",
                 ItemRepeat.Yearly => "Repeats every year",
+                ItemRepeat.DailyExcludingWeekend => "Repeats every day, except Saturday and Sunday",
+                ItemRepeat.Weekends => "Repeats every Saturday and Sunday",
+                ItemRepeat.Biweekly => "Repeats every 2 weeks",
+                ItemRepeat.Triweekly => "Repeats every 3 weekes",
+                ItemRepeat.LastDayMonthly => "Repeats on the last day of every month",
                 _ => ""
             };
         }
@@ -35,7 +40,7 @@ namespace SmallLister.Web.Model
         {
             if (DueDate == null)
                 return cssClass;
-            
+
             var today = DateTime.Today;
             if (DueDate == today)
                 return $"{cssClass} sml-list-item-due";

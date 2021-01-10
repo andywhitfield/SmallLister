@@ -34,15 +34,40 @@
             } else {
             <option value="daily">Every day</option>
             }
+            @if (Model.ItemToEdit.Repeat == SmallLister.Model.ItemRepeat.DailyExcludingWeekend) {
+            <option value="dailyExcludingWeekend" selected>Every day except Saturday and Sunday</option>
+            } else {
+            <option value="dailyExcludingWeekend">Every day except Saturday and Sunday</option>
+            }
+            @if (Model.ItemToEdit.Repeat == SmallLister.Model.ItemRepeat.Weekends) {
+            <option value="weekends" selected>Every Saturday and Sunday</option>
+            } else {
+            <option value="weekends">Every Saturday and Sunday</option>
+            }
             @if (Model.ItemToEdit.Repeat == SmallLister.Model.ItemRepeat.Weekly) {
             <option value="weekly" selected>Every week</option>
             } else {
             <option value="weekly">Every week</option>
             }
+            @if (Model.ItemToEdit.Repeat == SmallLister.Model.ItemRepeat.Biweekly) {
+            <option value="biweekly" selected>Every 2 weeks</option>
+            } else {
+            <option value="biweekly">Every 2 weeks</option>
+            }
+            @if (Model.ItemToEdit.Repeat == SmallLister.Model.ItemRepeat.Triweekly) {
+            <option value="triweekly" selected>Every 3 weeks</option>
+            } else {
+            <option value="triweekly">Every 3 weeks</option>
+            }
             @if (Model.ItemToEdit.Repeat == SmallLister.Model.ItemRepeat.Monthly) {
             <option value="monthly" selected>Every month</option>
             } else {
             <option value="monthly">Every month</option>
+            }
+            @if (Model.ItemToEdit.Repeat == SmallLister.Model.ItemRepeat.LastDayMonthly) {
+            <option value="lastDayMonthly" selected>On the last day of every month</option>
+            } else {
+            <option value="lastDayMonthly">On the last day of every month</option>
             }
             @if (Model.ItemToEdit.Repeat == SmallLister.Model.ItemRepeat.Yearly) {
             <option value="yearly" selected>Every year</option>

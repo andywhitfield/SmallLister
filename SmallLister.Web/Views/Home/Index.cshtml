@@ -89,8 +89,13 @@
         <select id="sml-list-add-repeat" name="repeat" class="sml-list-add-repeat" data-depends="input.sml-list-add-due">
             <option value="" selected="selected">None</option>
             <option value="daily">Every day</option>
+            <option value="dailyExcludingWeekend">Every day except Saturday and Sunday</option>
+            <option value="weekends">Every Saturday and Sunday</option>
             <option value="weekly">Every week</option>
+            <option value="biweekly">Every 2 weeks</option>
+            <option value="triweekly">Every 3 weeks</option>
             <option value="monthly">Every month</option>
+            <option value="lastDayMonthly">On the last day of every month</option>
             <option value="yearly">Every year</option>
         </select>
     </div>
