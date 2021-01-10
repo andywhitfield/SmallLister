@@ -1,3 +1,4 @@
+using System.ComponentModel.DataAnnotations;
 using System.Threading.Tasks;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -40,6 +41,23 @@ namespace SmallLister.Web.Controllers
 
             var response = await _mediator.Send(new CreateExternalClientRequest(User, model));
             return View(new CreatedExternalClientViewModel(HttpContext, response.DisplayName, response.RedirectUri, response.AppKey, response.AppSecret));
+        }
+
+        [HttpPost("~/profile/externalclient/update/{apiClientId}")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> UpdateExternalClient([FromRoute, Required] int apiClientId, [FromForm, Required] string state)
+        {
+            if (!ModelState.IsValid)
+            {
+                _logger.LogInformation("Model state is invalid, returning bad request");
+                return BadRequest();
+            }
+
+            var updated = await _mediator.Send(new UpdateExternalClientRequest(User, apiClientId, state));
+            if (!updated)
+                return BadRequest();
+
+            return Redirect("~/profile");
         }
     }
 }

@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -18,11 +19,14 @@ namespace SmallLister.Data
             _logger = logger;
         }
 
-        public async Task<List<ApiClient>> GetAsync(UserAccount createdBy) =>
-            await _context.ApiClients.Where(a => a.CreatedBy == createdBy && a.DeletedDateTime == null).ToListAsync();
+        public Task<List<ApiClient>> GetAsync(UserAccount createdBy) =>
+            _context.ApiClients.Where(a => a.CreatedBy == createdBy && a.DeletedDateTime == null).ToListAsync();
 
-        public async Task<ApiClient> GetAsync(string appKey) =>
-            await _context.ApiClients.SingleOrDefaultAsync(a => a.AppKey == appKey && a.DeletedDateTime == null);
+        public Task<ApiClient> GetAsync(int apiClientId) =>
+            _context.ApiClients.SingleOrDefaultAsync(a => a.ApiClientId == apiClientId && a.DeletedDateTime == null);
+
+        public Task<ApiClient> GetAsync(string appKey) =>
+            _context.ApiClients.SingleOrDefaultAsync(a => a.AppKey == appKey && a.DeletedDateTime == null);
 
         public async Task CreateAsync(string displayName, string redirectUri, string appKey, string appSecretHash, string appSecretSalt,
             UserAccount createdBy)
@@ -37,6 +41,12 @@ namespace SmallLister.Data
                 CreatedBy = createdBy
             });
             await _context.SaveChangesAsync();
+        }
+
+        public Task UpdateAsync(ApiClient apiClient)
+        {
+            apiClient.LastUpdateDateTime = DateTime.UtcNow;
+            return _context.SaveChangesAsync();
         }
     }
 }

@@ -6,8 +6,10 @@ namespace SmallLister.Data
 {
     public interface IApiClientRepository
     {
-         Task<List<ApiClient>> GetAsync(UserAccount createdBy);
-         Task<ApiClient> GetAsync(string appKey);
-         Task CreateAsync(string displayName, string redirectUri, string appKey, string appSecretHash, string appSecretSalt, UserAccount createdBy);
+        Task<List<ApiClient>> GetAsync(UserAccount createdBy);
+        Task<ApiClient> GetAsync(int apiClientId);
+        Task<ApiClient> GetAsync(string appKey);
+        Task CreateAsync(string displayName, string redirectUri, string appKey, string appSecretHash, string appSecretSalt, UserAccount createdBy);
+        Task UpdateAsync(ApiClient apiClient);
     }
 }
