@@ -10,14 +10,14 @@ using SmallLister.Web.Model.Home;
 
 namespace SmallLister.Web.Handlers
 {
-    public class GetItemForEditHandler : IRequestHandler<GetItemForEditRequest, GetItemForEditResponse>
+    public class GetItemForEditRequestHandler : IRequestHandler<GetItemForEditRequest, GetItemForEditResponse>
     {
-        private readonly ILogger<GetItemForEditHandler> _logger;
+        private readonly ILogger<GetItemForEditRequestHandler> _logger;
         private readonly IUserAccountRepository _userAccountRepository;
         private readonly IUserListRepository _userListRepository;
         private readonly IUserItemRepository _userItemRepository;
 
-        public GetItemForEditHandler(ILogger<GetItemForEditHandler> logger,
+        public GetItemForEditRequestHandler(ILogger<GetItemForEditRequestHandler> logger,
             IUserAccountRepository userAccountRepository, IUserListRepository userListRepository,
             IUserItemRepository userItemRepository)
         {

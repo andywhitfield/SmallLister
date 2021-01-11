@@ -8,12 +8,12 @@ using SmallLister.Web.Handlers.RequestResponse;
 
 namespace SmallLister.Web.Handlers
 {
-    public class DeleteListHandler : IRequestHandler<DeleteListRequest, bool>
+    public class DeleteListRequestHandler : IRequestHandler<DeleteListRequest, bool>
     {
-        private readonly ILogger<DeleteListHandler> _logger;
+        private readonly ILogger<DeleteListRequestHandler> _logger;
         private readonly IUserAccountRepository _userAccountRepository;
         private readonly IUserListRepository _userListRepository;
-        public DeleteListHandler(ILogger<DeleteListHandler> logger, IUserAccountRepository userAccountRepository, IUserListRepository userListRepository)
+        public DeleteListRequestHandler(ILogger<DeleteListRequestHandler> logger, IUserAccountRepository userAccountRepository, IUserListRepository userListRepository)
         {
             _logger = logger;
             _userAccountRepository = userAccountRepository;

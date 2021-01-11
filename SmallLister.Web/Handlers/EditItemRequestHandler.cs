@@ -9,13 +9,13 @@ using SmallLister.Web.Handlers.RequestResponse;
 
 namespace SmallLister.Web.Handlers
 {
-    public class EditItemHandler : IRequestHandler<EditItemRequest, bool>
+    public class EditItemRequestHandler : IRequestHandler<EditItemRequest, bool>
     {
-        private readonly ILogger<EditItemHandler> _logger;
+        private readonly ILogger<EditItemRequestHandler> _logger;
         private readonly IUserAccountRepository _userAccountRepository;
         private readonly IUserItemRepository _userItemRepository;
         private readonly IUserListRepository _userListRepository;
-        public EditItemHandler(ILogger<EditItemHandler> logger, IUserAccountRepository userAccountRepository,
+        public EditItemRequestHandler(ILogger<EditItemRequestHandler> logger, IUserAccountRepository userAccountRepository,
             IUserItemRepository userItemRepository, IUserListRepository userListRepository)
         {
             _logger = logger;
@@ -63,7 +63,7 @@ namespace SmallLister.Web.Handlers
                     }
                 }
 
-                if (!AddItemHandler.TryGetDueDate(request.Model.Due, out var dueDate))
+                if (!AddItemRequestHandler.TryGetDueDate(request.Model.Due, out var dueDate))
                 {
                     _logger.LogInformation($"Could not parse due date {request.Model.Due}");
                     return false;

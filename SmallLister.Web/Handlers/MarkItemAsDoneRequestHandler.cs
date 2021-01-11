@@ -9,13 +9,13 @@ using SmallLister.Web.Handlers.RequestResponse;
 
 namespace SmallLister.Web.Handlers
 {
-    public class MarkItemAsDoneHandler : IRequestHandler<MarkItemAsDoneRequest, bool>
+    public class MarkItemAsDoneRequestHandler : IRequestHandler<MarkItemAsDoneRequest, bool>
     {
-        private readonly ILogger<MarkItemAsDoneHandler> _logger;
+        private readonly ILogger<MarkItemAsDoneRequestHandler> _logger;
         private readonly IUserAccountRepository _userAccountRepository;
         private readonly IUserItemRepository _userItemRepository;
         private readonly IUserListRepository _userListRepository;
-        public MarkItemAsDoneHandler(ILogger<MarkItemAsDoneHandler> logger, IUserAccountRepository userAccountRepository,
+        public MarkItemAsDoneRequestHandler(ILogger<MarkItemAsDoneRequestHandler> logger, IUserAccountRepository userAccountRepository,
             IUserItemRepository userItemRepository, IUserListRepository userListRepository)
         {
             _logger = logger;

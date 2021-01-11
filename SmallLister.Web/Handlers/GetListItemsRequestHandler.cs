@@ -12,14 +12,14 @@ using SmallLister.Web.Model.Home;
 
 namespace SmallLister.Web.Handlers
 {
-    public class GetListItemsHandler : IRequestHandler<GetListItemsRequest, GetListItemsResponse>
+    public class GetListItemsRequestHandler : IRequestHandler<GetListItemsRequest, GetListItemsResponse>
     {
-        private readonly ILogger<GetListItemsHandler> _logger;
+        private readonly ILogger<GetListItemsRequestHandler> _logger;
         private readonly IUserAccountRepository _userAccountRepository;
         private readonly IUserListRepository _userListRepository;
         private readonly IUserItemRepository _userItemRepository;
 
-        public GetListItemsHandler(ILogger<GetListItemsHandler> logger,
+        public GetListItemsRequestHandler(ILogger<GetListItemsRequestHandler> logger,
             IUserAccountRepository userAccountRepository, IUserListRepository userListRepository,
             IUserItemRepository userItemRepository)
         {

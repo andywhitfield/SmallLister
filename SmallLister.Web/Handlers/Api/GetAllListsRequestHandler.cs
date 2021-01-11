@@ -8,11 +8,11 @@ using SmallLister.Web.Model.Response;
 
 namespace SmallLister.Web.Handlers.Api
 {
-    public class GetAllListsHandler : IRequestHandler<GetAllListsRequest, GetAllListsResponse>
+    public class GetAllListsRequestHandler : IRequestHandler<GetAllListsRequest, GetAllListsResponse>
     {
         private readonly IUserListRepository _userListRepository;
 
-        public GetAllListsHandler(IUserListRepository userListRepository) => _userListRepository = userListRepository;
+        public GetAllListsRequestHandler(IUserListRepository userListRepository) => _userListRepository = userListRepository;
 
         public async Task<GetAllListsResponse> Handle(GetAllListsRequest request, CancellationToken cancellationToken)
         {

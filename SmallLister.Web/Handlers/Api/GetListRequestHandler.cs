@@ -11,13 +11,13 @@ using SmallLister.Web.Model.Response;
 
 namespace SmallLister.Web.Handlers.Api
 {
-    public class GetListHandler : IRequestHandler<GetListRequest, GetListResponse>
+    public class GetListRequestHandler : IRequestHandler<GetListRequest, GetListResponse>
     {
-        private readonly ILogger<GetListHandler> _logger;
+        private readonly ILogger<GetListRequestHandler> _logger;
         private readonly IUserListRepository _userListRepository;
         private readonly IUserItemRepository _userItemRepository;
 
-        public GetListHandler(ILogger<GetListHandler> logger, IUserListRepository userListRepository, IUserItemRepository userItemRepository)
+        public GetListRequestHandler(ILogger<GetListRequestHandler> logger, IUserListRepository userListRepository, IUserItemRepository userItemRepository)
         {
             _logger = logger;
             _userListRepository = userListRepository;

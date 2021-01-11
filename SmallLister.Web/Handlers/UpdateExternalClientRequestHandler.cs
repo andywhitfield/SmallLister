@@ -7,13 +7,13 @@ using SmallLister.Web.Handlers.RequestResponse;
 
 namespace SmallLister.Web.Handlers
 {
-    public class UpdateExternalClientHandler : IRequestHandler<UpdateExternalClientRequest, bool>
+    public class UpdateExternalClientRequestHandler : IRequestHandler<UpdateExternalClientRequest, bool>
     {
-        private readonly ILogger<UpdateExternalClientHandler> _logger;
+        private readonly ILogger<UpdateExternalClientRequestHandler> _logger;
         private readonly IUserAccountRepository _userAccountRepository;
         private readonly IApiClientRepository _apiClientRepository;
 
-        public UpdateExternalClientHandler(ILogger<UpdateExternalClientHandler> logger, IUserAccountRepository userAccountRepository, IApiClientRepository apiClientRepository)
+        public UpdateExternalClientRequestHandler(ILogger<UpdateExternalClientRequestHandler> logger, IUserAccountRepository userAccountRepository, IApiClientRepository apiClientRepository)
         {
             _logger = logger;
             _userAccountRepository = userAccountRepository;

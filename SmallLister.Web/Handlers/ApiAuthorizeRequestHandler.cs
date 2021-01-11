@@ -9,14 +9,14 @@ using SmallLister.Web.Handlers.RequestResponse;
 
 namespace SmallLister.Web.Handlers
 {
-    public class ApiAuthorizeHandler : IRequestHandler<ApiAuthorizeRequest, string>
+    public class ApiAuthorizeRequestHandler : IRequestHandler<ApiAuthorizeRequest, string>
     {
-        private readonly ILogger<ApiAuthorizeHandler> _logger;
+        private readonly ILogger<ApiAuthorizeRequestHandler> _logger;
         private readonly IApiClientRepository _apiClientRepository;
         private readonly IUserAccountRepository _userAccountRepository;
         private readonly IUserAccountApiAccessRepository _userAccountApiAccessRepository;
 
-        public ApiAuthorizeHandler(ILogger<ApiAuthorizeHandler> logger, IApiClientRepository apiClientRepository,
+        public ApiAuthorizeRequestHandler(ILogger<ApiAuthorizeRequestHandler> logger, IApiClientRepository apiClientRepository,
             IUserAccountRepository userAccountRepository, IUserAccountApiAccessRepository userAccountApiAccessRepository)
         {
             _logger = logger;

@@ -15,16 +15,16 @@ using SmallLister.Web.Model.Response;
 
 namespace SmallLister.Web.Handlers
 {
-    public class ValidateCredentialsAndCreateAccessTokenHandler : IRequestHandler<ValidateCredentialsAndCreateAccessTokenRequest, GetAccessTokenResponse>
+    public class ValidateCredentialsAndCreateAccessTokenRequestHandler : IRequestHandler<ValidateCredentialsAndCreateAccessTokenRequest, GetAccessTokenResponse>
     {
-        private readonly ILogger<ValidateCredentialsAndCreateAccessTokenHandler> _logger;
+        private readonly ILogger<ValidateCredentialsAndCreateAccessTokenRequestHandler> _logger;
         private readonly IApiClientRepository _apiClientRepository;
         private readonly IUserAccountRepository _userAccountRepository;
         private readonly IUserAccountApiAccessRepository _userAccountApiAccessRepository;
         private readonly IUserAccountTokenRepository _userAccountTokenRepository;
         private readonly IConfiguration _configuration;
 
-        public ValidateCredentialsAndCreateAccessTokenHandler(ILogger<ValidateCredentialsAndCreateAccessTokenHandler> logger,
+        public ValidateCredentialsAndCreateAccessTokenRequestHandler(ILogger<ValidateCredentialsAndCreateAccessTokenRequestHandler> logger,
             IApiClientRepository apiClientRepository, IUserAccountRepository userAccountRepository,
             IUserAccountApiAccessRepository userAccountApiAccessRepository, IUserAccountTokenRepository userAccountTokenRepository,
             IConfiguration configuration)

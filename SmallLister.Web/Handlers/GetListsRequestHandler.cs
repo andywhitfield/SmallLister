@@ -9,11 +9,11 @@ using SmallLister.Web.Model;
 
 namespace SmallLister.Web.Handlers
 {
-    public class GetListsHandler : IRequestHandler<GetListsRequest, IEnumerable<UserListModel>>
+    public class GetListsRequestHandler : IRequestHandler<GetListsRequest, IEnumerable<UserListModel>>
     {
         private readonly IUserAccountRepository _userAccountRepository;
         private readonly IUserListRepository _userListRepository;
-        public GetListsHandler(IUserAccountRepository userAccountRepository, IUserListRepository userListRepository)
+        public GetListsRequestHandler(IUserAccountRepository userAccountRepository, IUserListRepository userListRepository)
         {
             _userAccountRepository = userAccountRepository;
             _userListRepository = userListRepository;

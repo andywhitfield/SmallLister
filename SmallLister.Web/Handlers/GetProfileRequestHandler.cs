@@ -10,14 +10,14 @@ using SmallLister.Web.Model.Profile;
 
 namespace SmallLister.Web.Handlers
 {
-    public class GetProfileHandler : IRequestHandler<GetProfileRequest, GetProfileResponse>
+    public class GetProfileRequestHandler : IRequestHandler<GetProfileRequest, GetProfileResponse>
     {
         private readonly IUserAccountRepository _userAccountRepository;
         private readonly IUserAccountApiAccessRepository _userAccountApiAccessRepository;
         private readonly IUserAccountTokenRepository _userAccountTokenRepository;
         private readonly IApiClientRepository _apiClientRepository;
 
-        public GetProfileHandler(IUserAccountRepository userAccountRepository, IUserAccountApiAccessRepository userAccountApiAccessRepository,
+        public GetProfileRequestHandler(IUserAccountRepository userAccountRepository, IUserAccountApiAccessRepository userAccountApiAccessRepository,
             IUserAccountTokenRepository userAccountTokenRepository, IApiClientRepository apiClientRepository)
         {
             _userAccountRepository = userAccountRepository;

@@ -7,12 +7,12 @@ using SmallLister.Web.Handlers.RequestResponse;
 
 namespace SmallLister.Web.Handlers
 {
-    public class CreateExternalClientHandler : IRequestHandler<CreateExternalClientRequest, CreateExternalClientResponse>
+    public class CreateExternalClientRequestHandler : IRequestHandler<CreateExternalClientRequest, CreateExternalClientResponse>
     {
         private readonly IUserAccountRepository _userAccountRepository;
         private readonly IApiClientRepository _apiClientRepository;
 
-        public CreateExternalClientHandler(IUserAccountRepository userAccountRepository, IApiClientRepository apiClientRepository)
+        public CreateExternalClientRequestHandler(IUserAccountRepository userAccountRepository, IApiClientRepository apiClientRepository)
         {
             _userAccountRepository = userAccountRepository;
             _apiClientRepository = apiClientRepository;

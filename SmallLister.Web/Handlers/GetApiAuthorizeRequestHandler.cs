@@ -7,12 +7,12 @@ using SmallLister.Web.Handlers.RequestResponse;
 
 namespace SmallLister.Web.Handlers
 {
-    public class GetApiAuthorizeHandler : IRequestHandler<GetApiAuthorizeRequest, GetApiAuthorizeResponse>
+    public class GetApiAuthorizeRequestHandler : IRequestHandler<GetApiAuthorizeRequest, GetApiAuthorizeResponse>
     {
-        private readonly ILogger<GetApiAuthorizeHandler> _logger;
+        private readonly ILogger<GetApiAuthorizeRequestHandler> _logger;
         private readonly IApiClientRepository _apiClientRepository;
 
-        public GetApiAuthorizeHandler(ILogger<GetApiAuthorizeHandler> logger, IApiClientRepository apiClientRepository)
+        public GetApiAuthorizeRequestHandler(ILogger<GetApiAuthorizeRequestHandler> logger, IApiClientRepository apiClientRepository)
         {
             _logger = logger;
             _apiClientRepository = apiClientRepository;

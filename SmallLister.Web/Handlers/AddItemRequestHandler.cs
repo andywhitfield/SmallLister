@@ -10,14 +10,14 @@ using SmallLister.Web.Handlers.RequestResponse;
 
 namespace SmallLister.Web.Handlers
 {
-    public class AddItemHandler : IRequestHandler<AddItemRequest, bool>
+    public class AddItemRequestHandler : IRequestHandler<AddItemRequest, bool>
     {
-        private readonly ILogger<AddItemHandler> _logger;
+        private readonly ILogger<AddItemRequestHandler> _logger;
         private readonly IUserAccountRepository _userAccountRepository;
         private readonly IUserListRepository _userListRepository;
         private readonly IUserItemRepository _userItemRepository;
 
-        public AddItemHandler(ILogger<AddItemHandler> logger,
+        public AddItemRequestHandler(ILogger<AddItemRequestHandler> logger,
             IUserAccountRepository userAccountRepository, IUserListRepository userListRepository,
             IUserItemRepository userItemRepository)
         {

@@ -7,11 +7,11 @@ using SmallLister.Web.Handlers.RequestResponse;
 
 namespace SmallLister.Web.Handlers
 {
-    public class SignedInHandler : IRequestHandler<SignedInRequest, string>
+    public class SignedInRequestHandler : IRequestHandler<SignedInRequest, string>
     {
         private readonly IUserAccountRepository _userAccountRepository;
 
-        public SignedInHandler(IUserAccountRepository userAccountRepository) => _userAccountRepository = userAccountRepository;
+        public SignedInRequestHandler(IUserAccountRepository userAccountRepository) => _userAccountRepository = userAccountRepository;
 
         public async Task<string> Handle(SignedInRequest request, CancellationToken cancellationToken)
         {

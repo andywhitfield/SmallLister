@@ -7,12 +7,12 @@ using SmallLister.Web.Handlers.RequestResponse;
 
 namespace SmallLister.Web.Handlers
 {
-    public class AddListHandler : IRequestHandler<AddListRequest>
+    public class AddListRequestHandler : IRequestHandler<AddListRequest>
     {
-        private readonly ILogger<AddListHandler> _logger;
+        private readonly ILogger<AddListRequestHandler> _logger;
         private readonly IUserAccountRepository _userAccountRepository;
         private readonly IUserListRepository _userListRepository;
-        public AddListHandler(ILogger<AddListHandler> logger, IUserAccountRepository userAccountRepository, IUserListRepository userListRepository)
+        public AddListRequestHandler(ILogger<AddListRequestHandler> logger, IUserAccountRepository userAccountRepository, IUserListRepository userListRepository)
         {
             _logger = logger;
             _userAccountRepository = userAccountRepository;

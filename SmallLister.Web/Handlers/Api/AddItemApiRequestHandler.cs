@@ -8,13 +8,13 @@ using SmallLister.Web.Handlers.RequestResponse.Api;
 
 namespace SmallLister.Web.Handlers.Api
 {
-    public class AddItemApiHandler : IRequestHandler<AddItemApiRequest, bool>
+    public class AddItemApiRequestHandler : IRequestHandler<AddItemApiRequest, bool>
     {
-        private readonly ILogger<AddItemApiHandler> _logger;
+        private readonly ILogger<AddItemApiRequestHandler> _logger;
         private readonly IUserListRepository _userListRepository;
         private readonly IUserItemRepository _userItemRepository;
 
-        public AddItemApiHandler(ILogger<AddItemApiHandler> logger, IUserListRepository userListRepository, IUserItemRepository userItemRepository)
+        public AddItemApiRequestHandler(ILogger<AddItemApiRequestHandler> logger, IUserListRepository userListRepository, IUserItemRepository userItemRepository)
         {
             _logger = logger;
             _userListRepository = userListRepository;

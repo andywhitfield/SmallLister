@@ -8,14 +8,14 @@ using SmallLister.Web.Handlers.RequestResponse;
 
 namespace SmallLister.Web.Handlers
 {
-    public class RevokeExternalApiAccessHandler : IRequestHandler<RevokeExternalApiAccessRequest, bool>
+    public class RevokeExternalApiAccessRequestHandler : IRequestHandler<RevokeExternalApiAccessRequest, bool>
     {
-        private readonly ILogger<RevokeExternalApiAccessHandler> _logger;
+        private readonly ILogger<RevokeExternalApiAccessRequestHandler> _logger;
         private readonly IUserAccountRepository _userAccountRepository;
         private readonly IUserAccountApiAccessRepository _userAccountApiAccessRepository;
         private readonly IApiClientRepository _apiClientRepository;
 
-        public RevokeExternalApiAccessHandler(ILogger<RevokeExternalApiAccessHandler> logger, IUserAccountRepository userAccountRepository,
+        public RevokeExternalApiAccessRequestHandler(ILogger<RevokeExternalApiAccessRequestHandler> logger, IUserAccountRepository userAccountRepository,
             IUserAccountApiAccessRepository userAccountApiAccessRepository, IApiClientRepository apiClientRepository)
         {
             _logger = logger;

@@ -8,13 +8,13 @@ using SmallLister.Web.Handlers.RequestResponse;
 
 namespace SmallLister.Web.Handlers
 {
-    public class ReorderItemHandler : IRequestHandler<ReorderItemRequest, bool>
+    public class ReorderItemRequestHandler : IRequestHandler<ReorderItemRequest, bool>
     {
-        private readonly ILogger<ReorderItemHandler> _logger;
+        private readonly ILogger<ReorderItemRequestHandler> _logger;
         private readonly IUserAccountRepository _userAccountRepository;
         private readonly IUserItemRepository _userItemRepository;
 
-        public ReorderItemHandler(ILogger<ReorderItemHandler> logger,
+        public ReorderItemRequestHandler(ILogger<ReorderItemRequestHandler> logger,
             IUserAccountRepository userAccountRepository, IUserItemRepository userItemRepository,
             IUserListRepository userListRepository)
         {
