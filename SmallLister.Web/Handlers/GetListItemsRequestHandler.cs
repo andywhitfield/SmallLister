@@ -35,7 +35,7 @@ namespace SmallLister.Web.Handlers
             var userLists = await _userListRepository.GetListsAsync(user);
             var (overdueCount, dueCount, totalCount, userListCounts) = await _userListRepository.GetListCountsAsync(user);
             var lists = userLists
-                .Select(l => new UserListModel { UserListId = l.UserListId.ToString(), Name = l.Name, CanAddItems = true, ItemCount = userListCounts.TryGetValue(l.UserListId, out var listCount) ? listCount : 0 })
+                .Select(l => new UserListModel { UserListId = l.UserListId.ToString(), Name = l.Name, CanAddItems = true, ItemCount = userListCounts.TryGetValue(l.UserListId, out var listCount) ? listCount : 0, ItemSortOrder = l.ItemSortOrder })
                 .Prepend(new UserListModel { Name = "All", UserListId = IndexViewModel.AllList, CanAddItems = true, ItemCount = totalCount });
             var hasDueItems = overdueCount > 0 || dueCount > 0;
             if (hasDueItems)
@@ -70,7 +70,7 @@ namespace SmallLister.Web.Handlers
                     if (!userLists.Any(l => l.UserListId == listId))
                         return GetListItemsResponse.BadRequest;
 
-                    (selectedList, items) = await GetListItemsAsync(user, userLists, lists, listId);
+                    (selectedList, items) = await GetListItemsAsync(user, userLists, lists, listId, request.Sort);
                     await _userAccountRepository.SetLastSelectedUserListIdAsync(user, listId);
                 }
             }
@@ -83,7 +83,7 @@ namespace SmallLister.Web.Handlers
                     else
                         (selectedList, items) = await GetAllItemsAsync(user, lists);
                 else
-                    (_, items) = await GetListItemsAsync(user, userLists, lists, user.LastSelectedUserListId.Value);
+                    (_, items) = await GetListItemsAsync(user, userLists, lists, user.LastSelectedUserListId.Value, request.Sort);
             }
 
             return new GetListItemsResponse(lists, selectedList, items.Select(i => new UserItemModel(i)));
@@ -95,7 +95,21 @@ namespace SmallLister.Web.Handlers
         private async Task<(UserListModel, IEnumerable<UserItem>)> GetDueItemsAsync(UserAccount user, IEnumerable<UserListModel> lists) =>
             (lists.Single(l => l.UserListId == IndexViewModel.DueList), await _userItemRepository.GetItemsAsync(user, null, new UserItemFilter { Overdue = true, DueToday = true }));
 
-        private async Task<(UserListModel, IEnumerable<UserItem>)> GetListItemsAsync(UserAccount user, IEnumerable<UserList> userLists, IEnumerable<UserListModel> lists, int listId) =>
-            (lists.Single(l => l.UserListId == listId.ToString()), await _userItemRepository.GetItemsAsync(user, userLists.FirstOrDefault(l => l.UserListId == listId)));
+        private async Task<(UserListModel, IEnumerable<UserItem>)> GetListItemsAsync(UserAccount user, IEnumerable<UserList> userLists, IEnumerable<UserListModel> lists, int listId, ItemSortOrder? sortOrder)
+        {
+            var selectedList = lists.Single(l => l.UserListId == listId.ToString());
+            var list = userLists.FirstOrDefault(l => l.UserListId == listId);
+
+            if (list != null && sortOrder != null)
+            {
+                await _userItemRepository.UpdateOrderAsync(user, list, sortOrder);
+
+                list.ItemSortOrder = sortOrder;
+                await _userListRepository.SaveAsync(list);
+                selectedList.ItemSortOrder = sortOrder;
+            }
+
+            return (selectedList, await _userItemRepository.GetItemsAsync(user, list));
+        }
     }
 }

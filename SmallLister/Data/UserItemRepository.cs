@@ -78,6 +78,9 @@ namespace SmallLister.Data
                 SortOrder = maxSortOrder + 1
             });
             await _context.SaveChangesAsync();
+
+            if (list?.ItemSortOrder != null)
+                await UpdateOrderAsync(user, list, list.ItemSortOrder);
         }
 
         public async Task UpdateOrderAsync(UserItem item, UserItem precedingItem)
@@ -97,6 +100,14 @@ namespace SmallLister.Data
                 if (precedingItem?.UserItemId == i.UserItemId)
                     UpdateItemSortOrder(item, sortOrder++, now);
             }
+
+            var list = item.UserListId == null ? null : await _context.UserLists.SingleOrDefaultAsync(l => l.UserListId == item.UserListId && l.DeletedDateTime == null);
+            if (list != null)
+            {
+                list.ItemSortOrder = null;
+                list.LastUpdateDateTime = now;
+            }
+
             await _context.SaveChangesAsync();
 
             void UpdateItemSortOrder(UserItem itemToUpdate, int newSortOrder, DateTime lastUpdateDateTime)
@@ -106,6 +117,34 @@ namespace SmallLister.Data
                 itemToUpdate.SortOrder = newSortOrder;
                 itemToUpdate.LastUpdateDateTime = lastUpdateDateTime;
             }
+        }
+
+        public async Task UpdateOrderAsync(UserAccount user, UserList list, ItemSortOrder? sortOrder)
+        {
+            var items = _context.UserItems.Where(i => i.UserAccountId == user.UserAccountId && i.UserListId == list.UserListId && i.CompletedDateTime == null && i.DeletedDateTime == null);
+            switch (sortOrder)
+            {
+                case ItemSortOrder.DueDate:
+                    items = items.OrderBy(i => i.NextDueDate ?? DateTime.MaxValue).ThenBy(i => i.SortOrder);
+                    break;
+                case ItemSortOrder.Description:
+                    items = items.OrderBy(i => i.Description).ThenBy(i => i.SortOrder);
+                    break;
+                default:
+                    return;
+            }
+            var order = 0;
+            var now = DateTime.UtcNow;
+            await foreach (var item in items.AsAsyncEnumerable())
+            {
+                var newSortOrder = order++;
+                if (item.SortOrder == newSortOrder)
+                    continue;
+                item.LastUpdateDateTime = now;
+                item.SortOrder = newSortOrder;
+            }
+
+            await _context.SaveChangesAsync();
         }
 
         public async Task SaveAsync(UserItem item, UserList newList)
@@ -118,6 +157,22 @@ namespace SmallLister.Data
 
             item.LastUpdateDateTime = DateTime.UtcNow;
             await _context.SaveChangesAsync();
+
+            if (item.DeletedDateTime == null)
+            {
+                if (newList != null && newList.ItemSortOrder != null)
+                {
+                    await UpdateOrderAsync(item.UserAccount, newList, newList.ItemSortOrder);
+                }
+                else if (item.UserListId != null)
+                {
+                    var list = await _context.UserLists.SingleOrDefaultAsync(l => l.UserListId == item.UserListId && l.DeletedDateTime == null);
+                    if (list != null)
+                    {
+                        await UpdateOrderAsync(item.UserAccount, list, list.ItemSortOrder);
+                    }
+                }
+            }
         }
 
         private async Task<int> GetMaxSortOrderAsync(UserAccount user, int? listId) =>

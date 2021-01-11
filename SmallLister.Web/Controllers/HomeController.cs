@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using SmallLister.Model;
 using SmallLister.Web.Handlers.RequestResponse;
 using SmallLister.Web.Model.Home;
 
@@ -19,9 +20,9 @@ namespace SmallLister.Web.Controllers
 
         [Authorize]
         [HttpGet("~/")]
-        public async Task<IActionResult> Index([FromQuery] string list)
+        public async Task<IActionResult> Index([FromQuery] string list, [FromQuery] ItemSortOrder? sort)
         {
-            var response = await _mediator.Send(new GetListItemsRequest(User, list));
+            var response = await _mediator.Send(new GetListItemsRequest(User, list, sort));
             if (!response.IsValid)
                 return BadRequest();
 

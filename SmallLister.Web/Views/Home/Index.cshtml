@@ -12,7 +12,19 @@
 
 <article>
     @if (!Model.IsAllListSelected && !Model.IsDueListSelected) {
-    <span class="sml-toolbar">Sort by: <a href="/todo">due date</a> or <a href="/todo">description</a></span>
+    <span class="sml-toolbar">Sort by:
+        @if (Model.SelectedList.ItemSortOrder == SmallLister.Model.ItemSortOrder.DueDate) {
+        <text>due date</text>
+        } else {
+        <a href="/?sort=@SmallLister.Model.ItemSortOrder.DueDate">due date</a>
+        }
+        |
+        @if (Model.SelectedList.ItemSortOrder == SmallLister.Model.ItemSortOrder.Description) {
+        <text>description</text>
+        } else {
+        <a href="/?sort=@SmallLister.Model.ItemSortOrder.Description">description</a>
+        }
+    </span>
     }
     <h2>@Model.SelectedList.Name</h2>
 

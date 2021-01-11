@@ -1,5 +1,6 @@
 using System.Security.Claims;
 using MediatR;
+using SmallLister.Model;
 
 namespace SmallLister.Web.Handlers.RequestResponse
 {
@@ -7,10 +8,12 @@ namespace SmallLister.Web.Handlers.RequestResponse
     {
         public ClaimsPrincipal User { get; }
         public string List { get; }
-        public GetListItemsRequest(ClaimsPrincipal user, string list)
+        public ItemSortOrder? Sort { get; }
+        public GetListItemsRequest(ClaimsPrincipal user, string list, ItemSortOrder? sort)
         {
             User = user;
             List = list;
+            Sort = sort;
         }
     }
 }
