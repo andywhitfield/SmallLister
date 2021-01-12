@@ -122,10 +122,6 @@ span.sml-toolbar {
     float: right;
 }
 
-span.sml-toolbar a {
-    color: white;
-}
-
 ul.sml-list,
 ul.sml-list-item {
     margin: 0;
@@ -299,6 +295,9 @@ ul.sml-list li.placeholder:before {
         color: white;
     }
     footer {
+        color: white;
+    }
+    span.sml-toolbar a {
         color: white;
     }
     .pagination>a {
