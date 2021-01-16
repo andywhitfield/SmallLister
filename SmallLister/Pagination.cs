@@ -5,15 +5,10 @@ namespace SmallLister
 {
     public class Pagination
     {
-        public const string SortByDescription = "description";
-        public const string SortByDueDate = "due";
-
-        public Pagination(int pageNumber, int pageCount, string sort, string filter)
+        public Pagination(int pageNumber, int pageCount)
         {
             PageNumber = pageNumber;
             PageCount = pageCount;
-            Sort = sort;
-            Filter = filter;
 
             if (PageCount <= 10)
             {
@@ -62,10 +57,6 @@ namespace SmallLister
 
         public int PageNumber { get; }
         public int PageCount { get; }
-        public string Sort { get; }
-        public bool SortedByDescription => Sort == SortByDescription;
-        public bool SortedByDueDate => !SortedByDescription;
-        public string Filter { get; }
         public IEnumerable<Page> Pages { get; }
     }
 }

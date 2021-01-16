@@ -20,13 +20,13 @@ namespace SmallLister.Web.Controllers
 
         [Authorize]
         [HttpGet("~/")]
-        public async Task<IActionResult> Index([FromQuery] string list, [FromQuery] ItemSortOrder? sort)
+        public async Task<IActionResult> Index([FromQuery] string list, [FromQuery] ItemSortOrder? sort, [FromQuery] int? pageNumber)
         {
-            var response = await _mediator.Send(new GetListItemsRequest(User, list, sort));
+            var response = await _mediator.Send(new GetListItemsRequest(User, list, sort, pageNumber));
             if (!response.IsValid)
                 return BadRequest();
 
-            return View(new IndexViewModel(HttpContext, response.Lists, response.SelectedList, response.Items));
+            return View(new IndexViewModel(HttpContext, response.Lists, response.SelectedList, response.Items, response.Pagination));
         }
 
         public IActionResult Error() => View(new ErrorViewModel(HttpContext));

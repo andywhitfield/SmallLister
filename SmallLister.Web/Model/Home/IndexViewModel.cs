@@ -8,12 +8,14 @@ namespace SmallLister.Web.Model.Home
         public const string AllList = "all";
         public const string DueList = "due";
 
-        public IndexViewModel(HttpContext context, IEnumerable<UserListModel> lists, UserListModel selectedList, IEnumerable<UserItemModel> items)
+        public IndexViewModel(HttpContext context, IEnumerable<UserListModel> lists, UserListModel selectedList,
+            IEnumerable<UserItemModel> items, Pagination pagination)
             : base(context)
         {
             Lists = lists;
             SelectedList = selectedList;
             Items = items;
+            Pagination = pagination;
 
             foreach (var list in Lists)
             {
@@ -33,5 +35,6 @@ namespace SmallLister.Web.Model.Home
         public IEnumerable<UserItemModel> Items { get; }
         public bool IsDueListSelected => SelectedList.UserListId == DueList;
         public bool IsAllListSelected => SelectedList.UserListId == AllList;
+        public Pagination Pagination { get; }
     }
 }

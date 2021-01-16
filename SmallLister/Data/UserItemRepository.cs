@@ -10,6 +10,8 @@ namespace SmallLister.Data
 {
     public class UserItemRepository : IUserItemRepository
     {
+        private const int DefaultPageSize = 100;
+
         private readonly SqliteDataContext _context;
         private readonly ILogger<UserItemRepository> _logger;
 
@@ -22,7 +24,7 @@ namespace SmallLister.Data
         public Task<UserItem> GetItemAsync(UserAccount user, int userItemId) =>
             _context.UserItems.SingleOrDefaultAsync(i => i.UserItemId == userItemId && i.UserAccount == user && i.CompletedDateTime == null && i.DeletedDateTime == null);
 
-        public Task<List<UserItem>> GetItemsAsync(UserAccount user, UserList list, UserItemFilter filter = null)
+        public async Task<(List<UserItem> UserItems, int PageNumber, int PageCount)> GetItemsAsync(UserAccount user, UserList list, UserItemFilter filter = null, int? pageNumber = null, int? pageSize = null)
         {
             var query = _context.UserItems.Where(i => i.UserAccount == user && i.CompletedDateTime == null && i.DeletedDateTime == null);
             Func<IQueryable<UserItem>, IQueryable<UserItem>> orderByClause;
@@ -57,7 +59,15 @@ namespace SmallLister.Data
                 }
             }
 
-            return orderByClause(query).ToListAsync();
+            var total = await query.CountAsync();
+            var actualPageSize = pageSize ?? DefaultPageSize;
+            var pagination = Paging.GetPageInfo(total, actualPageSize, pageNumber ?? 1);
+            _logger.LogTrace($"Getting page index {pagination.PageIndex} of {pagination.PageCount} total pages, total items: {total}, requested page: {pageNumber}");
+
+            return (await orderByClause(query)
+                .Skip(pagination.PageIndex * actualPageSize)
+                .Take(actualPageSize)
+                .ToListAsync(), pagination.PageIndex + 1, pagination.PageCount);
         }
 
         public Task<List<UserItem>> GetItemsOnNoListAsync(UserAccount user) => _context.UserItems

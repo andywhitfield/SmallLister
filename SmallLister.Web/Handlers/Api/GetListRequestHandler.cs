@@ -13,6 +13,8 @@ namespace SmallLister.Web.Handlers.Api
 {
     public class GetListRequestHandler : IRequestHandler<GetListRequest, GetListResponse>
     {
+        private const int ApiPageSize = 1000;
+
         private readonly ILogger<GetListRequestHandler> _logger;
         private readonly IUserListRepository _userListRepository;
         private readonly IUserItemRepository _userItemRepository;
@@ -44,7 +46,7 @@ namespace SmallLister.Web.Handlers.Api
                     return null;
 
                 listName = list.Name;
-                items = await _userItemRepository.GetItemsAsync(request.User, list);
+                items = (await _userItemRepository.GetItemsAsync(request.User, list, pageSize: ApiPageSize)).UserItems;
             }
 
             return new GetListResponse(listName, items.Select(i => new ItemResponse(i.UserItemId.ToString(), i.Description, i.NextDueDate, i.Notes)));

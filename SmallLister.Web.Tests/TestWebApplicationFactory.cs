@@ -49,7 +49,7 @@ namespace SmallLister.Web.Tests
             _addTestAuth = true;
             UserAccountRepositoryMock.Setup(r => r.GetUserAccountAsync(It.IsAny<ClaimsPrincipal>())).ReturnsAsync(new UserAccount());
             UserListRepositoryMock.Setup(r => r.GetListsAsync(It.IsAny<UserAccount>())).ReturnsAsync(new List<UserList>());
-            UserItemRepositoryMock.Setup(r => r.GetItemsAsync(It.IsAny<UserAccount>(), It.IsAny<UserList>(), null)).ReturnsAsync(new List<UserItem>());
+            UserItemRepositoryMock.Setup(r => r.GetItemsAsync(It.IsAny<UserAccount>(), It.IsAny<UserList>(), null, null, null)).ReturnsAsync((new List<UserItem>(), 1, 1));
 
             var client = CreateClient(new WebApplicationFactoryClientOptions { AllowAutoRedirect = false });
             client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Test");

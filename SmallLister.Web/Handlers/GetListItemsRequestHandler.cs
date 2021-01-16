@@ -49,16 +49,17 @@ namespace SmallLister.Web.Handlers
 
             IEnumerable<UserItem> items;
             UserListModel selectedList;
+            int pageNumber, pageCount;
             if (request.List != null)
             {
                 if (request.List == IndexViewModel.AllList || (request.List == IndexViewModel.DueList && !hasDueItems))
                 {
-                    (selectedList, items) = await GetAllItemsAsync(user, lists);
+                    (selectedList, items, pageNumber, pageCount) = await GetAllItemsAsync(user, lists, request.PageNumber);
                     await _userAccountRepository.SetLastSelectedUserListIdAsync(user, null);
                 }
                 else if (request.List == IndexViewModel.DueList && hasDueItems)
                 {
-                    (selectedList, items) = await GetDueItemsAsync(user, lists);
+                    (selectedList, items, pageNumber, pageCount) = await GetDueItemsAsync(user, lists, request.PageNumber);
                     await _userAccountRepository.SetLastSelectedUserListIdAsync(user, -1);
                 }
                 else if (!int.TryParse(request.List, out var listId))
@@ -70,7 +71,7 @@ namespace SmallLister.Web.Handlers
                     if (!userLists.Any(l => l.UserListId == listId))
                         return GetListItemsResponse.BadRequest;
 
-                    (selectedList, items) = await GetListItemsAsync(user, userLists, lists, listId, request.Sort);
+                    (selectedList, items, pageNumber, pageCount) = await GetListItemsAsync(user, userLists, lists, listId, request.Sort, request.PageNumber);
                     await _userAccountRepository.SetLastSelectedUserListIdAsync(user, listId);
                 }
             }
@@ -79,23 +80,29 @@ namespace SmallLister.Web.Handlers
                 selectedList = lists.FirstOrDefault(l => l.UserListId == user.LastSelectedUserListId?.ToString());
                 if (selectedList == null)
                     if (user.LastSelectedUserListId == -1 && hasDueItems)
-                        (selectedList, items) = await GetDueItemsAsync(user, lists);
+                        (selectedList, items, pageNumber, pageCount) = await GetDueItemsAsync(user, lists, request.PageNumber);
                     else
-                        (selectedList, items) = await GetAllItemsAsync(user, lists);
+                        (selectedList, items, pageNumber, pageCount) = await GetAllItemsAsync(user, lists, request.PageNumber);
                 else
-                    (_, items) = await GetListItemsAsync(user, userLists, lists, user.LastSelectedUserListId.Value, request.Sort);
+                    (_, items, pageNumber, pageCount) = await GetListItemsAsync(user, userLists, lists, user.LastSelectedUserListId.Value, request.Sort, request.PageNumber);
             }
 
-            return new GetListItemsResponse(lists, selectedList, items.Select(i => new UserItemModel(i)));
+            return new GetListItemsResponse(lists, selectedList, items.Select(i => new UserItemModel(i)), new Pagination(pageNumber, pageCount));
         }
 
-        private async Task<(UserListModel, IEnumerable<UserItem>)> GetAllItemsAsync(UserAccount user, IEnumerable<UserListModel> lists) =>
-            (lists.Single(l => l.UserListId == IndexViewModel.AllList), await _userItemRepository.GetItemsAsync(user, null));
+        private async Task<(UserListModel ListModel, IEnumerable<UserItem> Items, int PageNumber, int PageCount)> GetAllItemsAsync(UserAccount user, IEnumerable<UserListModel> lists, int? pageNumber)
+        {
+            var (userItems, resultPageNumber, pageCount) = await _userItemRepository.GetItemsAsync(user, null, pageNumber: pageNumber);
+            return (lists.Single(l => l.UserListId == IndexViewModel.AllList), userItems, resultPageNumber, pageCount);
+        }
 
-        private async Task<(UserListModel, IEnumerable<UserItem>)> GetDueItemsAsync(UserAccount user, IEnumerable<UserListModel> lists) =>
-            (lists.Single(l => l.UserListId == IndexViewModel.DueList), await _userItemRepository.GetItemsAsync(user, null, new UserItemFilter { Overdue = true, DueToday = true }));
+        private async Task<(UserListModel, IEnumerable<UserItem>, int PageNumber, int PageCount)> GetDueItemsAsync(UserAccount user, IEnumerable<UserListModel> lists, int? pageNumber)
+        {
+            var (userItems, resultPageNumber, pageCount) = await _userItemRepository.GetItemsAsync(user, null, new UserItemFilter { Overdue = true, DueToday = true }, pageNumber);
+            return (lists.Single(l => l.UserListId == IndexViewModel.DueList), userItems, resultPageNumber, pageCount);
+        }
 
-        private async Task<(UserListModel, IEnumerable<UserItem>)> GetListItemsAsync(UserAccount user, IEnumerable<UserList> userLists, IEnumerable<UserListModel> lists, int listId, ItemSortOrder? sortOrder)
+        private async Task<(UserListModel, IEnumerable<UserItem>, int PageNumber, int PageCount)> GetListItemsAsync(UserAccount user, IEnumerable<UserList> userLists, IEnumerable<UserListModel> lists, int listId, ItemSortOrder? sortOrder, int? pageNumber)
         {
             var selectedList = lists.Single(l => l.UserListId == listId.ToString());
             var list = userLists.FirstOrDefault(l => l.UserListId == listId);
@@ -109,7 +116,8 @@ namespace SmallLister.Web.Handlers
                 selectedList.ItemSortOrder = sortOrder;
             }
 
-            return (selectedList, await _userItemRepository.GetItemsAsync(user, list));
+            var (userItems, resultPageNumber, pageCount) = await _userItemRepository.GetItemsAsync(user, list, pageNumber: pageNumber);
+            return (selectedList, userItems, resultPageNumber, pageCount);
         }
     }
 }

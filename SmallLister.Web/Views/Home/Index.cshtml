@@ -59,17 +59,26 @@
         </li>
     </ul>
 
-@*
+    @if (Model.Pagination.PageCount > 1) {
     <div class="pagination">
-        <a href="/todo">&laquo;</a>
-        <a class="pagination-active">1</a>
-        <a href="/todo">2</a>
-        <a href="/todo">3</a>
+        @if (Model.Pagination.PageNumber > 1) {
+        <a href="/?pageNumber=@(Model.Pagination.PageNumber - 1)">&laquo;</a>
+        }
+        @foreach (var pg in Model.Pagination.Pages) {
+        @if (pg.IsSelected) {
+        <a class="pagination-active">@pg.PageNumber</a>
+        } else {
+        <a href="/?pageNumber=@pg.PageNumber">@pg.PageNumber</a>
+        }
+        @if (pg.IsNextPageSkipped) {
         <span>&bull;&bull;</span>
-        <a href="/todo">12</a>
-        <a href="/todo">&raquo;</a>
+        }
+        }
+        @if (Model.Pagination.PageNumber < Model.Pagination.PageCount) {
+        <a href="/?pageNumber=@(Model.Pagination.PageNumber + 1)">&raquo;</a>
+        }
     </div>
-*@
+    }
 
     <div>
     <form name="sml-list-add" method="post" action="/items/add">
