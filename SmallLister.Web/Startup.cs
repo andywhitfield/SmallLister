@@ -131,6 +131,7 @@ namespace SmallLister.Web
                 options.UseSqlite(sqliteConnectionString);
             });
             services
+                .AddScoped(sp => (ISqliteDataContext)sp.GetRequiredService<SqliteDataContext>())
                 .AddScoped<IUserAccountRepository, UserAccountRepository>()
                 .AddScoped<IUserListRepository, UserListRepository>()
                 .AddScoped<IUserItemRepository, UserItemRepository>()
@@ -169,7 +170,7 @@ namespace SmallLister.Web
                 pattern: "{controller=Home}/{action=Index}/{id?}"));
 
             using var scope = app.ApplicationServices.GetRequiredService<IServiceScopeFactory>().CreateScope();
-            scope.ServiceProvider.GetRequiredService<SqliteDataContext>().Database.Migrate();
+            scope.ServiceProvider.GetRequiredService<ISqliteDataContext>().Migrate();
         }
     }
 }

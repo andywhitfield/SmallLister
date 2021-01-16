@@ -3,7 +3,7 @@ using SmallLister.Model;
 
 namespace SmallLister.Data
 {
-    public class SqliteDataContext : DbContext
+    public class SqliteDataContext : DbContext, ISqliteDataContext
     {
         public SqliteDataContext(DbContextOptions<SqliteDataContext> options) : base(options) { }
 
@@ -13,5 +13,6 @@ namespace SmallLister.Data
         public DbSet<ApiClient> ApiClients { get; set; }
         public DbSet<UserAccountToken> UserAccountTokens { get; set; }
         public DbSet<UserAccountApiAccess> UserAccountApiAccesses { get; set; }
+        public void Migrate() => Database.Migrate();
     }
 }
