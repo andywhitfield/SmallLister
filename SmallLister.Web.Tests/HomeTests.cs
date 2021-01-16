@@ -6,11 +6,9 @@ using Xunit;
 
 namespace SmallLister.Web.Tests
 {
-    public class HomeTests : IClassFixture<TestWebApplicationFactory<Startup>>
+    public class HomeTests
     {
-        private readonly TestWebApplicationFactory<Startup> _factory;
-
-        public HomeTests(TestWebApplicationFactory<Startup> factory) => _factory = factory;
+        private readonly TestWebApplicationFactory<Startup> _factory = new TestWebApplicationFactory<Startup>();
 
         [Fact]
         public async Task Unauthorized_HomePage_Should_Redirect_To_Login()
@@ -19,6 +17,16 @@ namespace SmallLister.Web.Tests
             var response = await client.GetAsync("/");
             response.StatusCode.Should().Be(HttpStatusCode.Redirect);
             response.Headers.Location.Should().Be("http://localhost/signin?ReturnUrl=%2F");
+        }
+
+        [Fact]
+        public async Task Get_HomePage()
+        {
+            var client = _factory.CreateAuthenticatedClient();
+            var response = await client.GetAsync("/");
+            response.StatusCode.Should().Be(HttpStatusCode.OK);
+            var responseContent = await response.Content.ReadAsStringAsync();
+            responseContent.Should().Contain("Logout").And.Contain("Nothing on this list");
         }
     }
 }
