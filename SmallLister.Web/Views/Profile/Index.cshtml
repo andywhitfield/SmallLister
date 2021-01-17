@@ -8,15 +8,14 @@
     <ul>
         @foreach (var feed in Model.Feeds) {
         <li>
-            <div>Feed URL: https://smalllister.nosuchblogger.com/feed/@feed.UserFeedIdentifier</div>
-            <div>Created on @feed.CreatedDate</div>
-            <div>Showing @feed.SummaryInfo</div>
+            <div>Feed URL: @(Context.Request.Scheme)://@(Context.Request.Host)/feed/@feed.UserFeedIdentifier</div>
+            <div>Created: @feed.CreatedDate</div>
+            <div>Showing: @feed.SummaryInfo</div>
 
             <form method="post" action="/profile/feed/delete/@feed.UserFeedId">
             @Html.AntiForgeryToken()
             <button data-confirm="This will stop your lists being available on this feed URL - are you sure?">Delete</button>
             </form>
-            }
         </li>
         }
     </ul>
@@ -32,8 +31,8 @@
     <div>
         <label for="sml-feed-type">Show:</label>
         <select id="sml-feed-type" name="type" class="sml-feed-type">
-            <option value="overdue">Due and Overdue items</option>
-            <option value="due">Overdue items only</option>
+            <option value="due">Due and Overdue items</option>
+            <option value="overdue">Overdue items only</option>
         </select>
     </div>
     <div>

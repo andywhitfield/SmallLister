@@ -31,7 +31,7 @@ namespace SmallLister.Web.Controllers
 
         [HttpPost("~/profile/externalclient")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> CreateExternalClient([FromForm] AddExternalClientRequest model)
+        public async Task<IActionResult> CreateExternalClient([FromForm, Required] AddExternalClientRequest model)
         {
             if (!ModelState.IsValid)
             {
@@ -72,6 +72,37 @@ namespace SmallLister.Web.Controllers
 
             var revoked = await _mediator.Send(new RevokeExternalApiAccessRequest(User, userAccountApiAccessId));
             if (!revoked)
+                return BadRequest();
+
+            return Redirect("~/profile");
+        }
+
+        [HttpPost("~/profile/feed")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> CreateFeed([FromForm, Required] AddFeedRequest model)
+        {
+            if (!ModelState.IsValid)
+            {
+                _logger.LogInformation("Model state is invalid, returning bad request");
+                return BadRequest();
+            }
+
+            await _mediator.Send(new CreateFeedRequest(User, model));
+            return Redirect("~/profile");
+        }
+
+        [HttpPost("~/profile/feed/delete/{userFeedId}")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteFeed([FromRoute, Required] int userFeedId)
+        {
+            if (!ModelState.IsValid)
+            {
+                _logger.LogInformation("Model state is invalid, returning bad request");
+                return BadRequest();
+            }
+
+            var deleted = await _mediator.Send(new DeleteFeedRequest(User, userFeedId));
+            if (!deleted)
                 return BadRequest();
 
             return Redirect("~/profile");

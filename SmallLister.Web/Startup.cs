@@ -137,6 +137,7 @@ namespace SmallLister.Web
                 .AddScoped<IUserItemRepository, UserItemRepository>()
                 .AddScoped<IUserAccountApiAccessRepository, UserAccountApiAccessRepository>()
                 .AddScoped<IUserAccountTokenRepository, UserAccountTokenRepository>()
+                .AddScoped<IUserFeedRepository, UserFeedRepository>()
                 .AddScoped<IApiClientRepository, ApiClientRepository>()
                 .AddScoped<IJwtService, JwtService>();
 
