@@ -192,7 +192,8 @@ ul.sml-list-item>li>div {
     white-space: pre-line;
 }
 
-form[name="sml-list-add"] label {
+form[name="sml-list-add"] label,
+form[name="sml-feed-add"] label {
     width: 105px;
     display: inline-block;
     vertical-align: top;

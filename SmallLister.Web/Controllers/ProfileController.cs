@@ -26,7 +26,7 @@ namespace SmallLister.Web.Controllers
         public async Task<IActionResult> Index()
         {
             var response = await _mediator.Send(new GetProfileRequest(User));
-            return View(new IndexViewModel(HttpContext, response.ExternalApiAccessList, response.ExternalApiClients));
+            return View(new IndexViewModel(HttpContext, response.Feeds, response.ExternalApiAccessList, response.ExternalApiClients));
         }
 
         [HttpPost("~/profile/externalclient")]

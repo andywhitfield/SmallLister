@@ -1,6 +1,57 @@
 ﻿@model SmallLister.Web.Model.Profile.IndexViewModel
 
 <article>
+    <h2>Feeds</h2>
+
+    @if (Model.Feeds.Any()) {
+    <div>Your feeds:</div>
+    <ul>
+        @foreach (var feed in Model.Feeds) {
+        <li>
+            <div>Feed URL: https://smalllister.nosuchblogger.com/feed/@feed.UserFeedIdentifier</div>
+            <div>Created on @feed.CreatedDate</div>
+            <div>Showing @feed.SummaryInfo</div>
+
+            <form method="post" action="/profile/feed/delete/@feed.UserFeedId">
+            @Html.AntiForgeryToken()
+            <button data-confirm="This will stop your lists being available on this feed URL - are you sure?">Delete</button>
+            </form>
+            }
+        </li>
+        }
+    </ul>
+    } else {
+    <p>No feeds created.</p>
+    }
+
+    <p>
+    <form name="sml-feed-add" method="post" action="/profile/feed">
+    @Html.AntiForgeryToken()
+    <fieldset>
+    <legend>Create a new feed</legend>
+    <div>
+        <label for="sml-feed-type">Show:</label>
+        <select id="sml-feed-type" name="type" class="sml-feed-type">
+            <option value="overdue">Due and Overdue items</option>
+            <option value="due">Overdue items only</option>
+        </select>
+    </div>
+    <div>
+        <label for="sml-feed-display">Item display:</label>
+        <select id="sml-feed-display" name="display" class="sml-feed-display">
+            <option value="none">Just a link to the item</option>
+            <option value="shortDescription">First word of the item's description</option>
+            <option value="description">Entire description</option>
+        </select>
+    </div>
+    <div>
+        <label></label>
+        <button type="submit">Create</button>
+    </div>
+    </fieldset>
+    </form>
+    </p>
+
     <h2>External API Access</h2>
 
     @if (Model.ExternalApiAccessList.Any()) {
@@ -51,7 +102,7 @@
     <p>No external clients have been registered.</p>
     }
 
-    <div>
+    <p>
     <form name="sml-list-add" method="post" action="/profile/externalclient">
     @Html.AntiForgeryToken()
     <fieldset>
@@ -70,5 +121,5 @@
     </div>
     </fieldset>
     </form>
-    </div>
+    </p>
 </article>

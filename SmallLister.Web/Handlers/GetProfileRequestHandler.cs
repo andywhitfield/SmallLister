@@ -40,6 +40,7 @@ namespace SmallLister.Web.Handlers
 
             var externalApiClients = await _apiClientRepository.GetAsync(user);
             return new GetProfileResponse(
+                new List<FeedModel>(),
                 externalApiAccessModels.OrderByDescending(a => a.RevokedDateTime ?? DateTime.MaxValue).ThenByDescending(a => a.LastAccessedDateTime),
                 externalApiClients.OrderBy(a => a.DisplayName).Select(a => new ExternalApiClientModel(
                     a.ApiClientId, a.DisplayName, a.AppKey, a.RedirectUri, a.IsEnabled
