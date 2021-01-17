@@ -62,8 +62,11 @@ namespace SmallLister.Web.Controllers
                 _logger.LogInformation("Model state is invalid, returning bad request");
                 return BadRequest();
             }
-            
-            if (!await _mediator.Send(new EditItemRequest(User, userItemId, updateModel)))
+
+            IRequest<bool> request = (updateModel.Done ?? false)
+                ? new MarkItemAsDoneRequest(User, userItemId)
+                : new EditItemRequest(User, userItemId, updateModel);            
+            if (!await _mediator.Send(request))
             {
                 _logger.LogInformation($"Could not update item {userItemId}, returning not found");
                 return NotFound();
