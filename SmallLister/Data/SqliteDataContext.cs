@@ -13,6 +13,8 @@ namespace SmallLister.Data
         public DbSet<ApiClient> ApiClients { get; set; }
         public DbSet<UserAccountToken> UserAccountTokens { get; set; }
         public DbSet<UserAccountApiAccess> UserAccountApiAccesses { get; set; }
+        public DbSet<UserFeed> UserFeeds { get; set; }
+        public DbSet<UserFeedItem> UserFeedItems { get; set; }
         public void Migrate() => Database.Migrate();
     }
 }
