@@ -20,6 +20,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using Microsoft.IdentityModel.Tokens;
 using SmallLister.Data;
+using SmallLister.Feed;
 using SmallLister.Security;
 
 namespace SmallLister.Web
@@ -139,7 +140,8 @@ namespace SmallLister.Web
                 .AddScoped<IUserAccountTokenRepository, UserAccountTokenRepository>()
                 .AddScoped<IUserFeedRepository, UserFeedRepository>()
                 .AddScoped<IApiClientRepository, ApiClientRepository>()
-                .AddScoped<IJwtService, JwtService>();
+                .AddScoped<IJwtService, JwtService>()
+                .AddScoped<IFeedGenerator, AtomFeedGenerator>();
 
             services.AddMediatR(typeof(Startup));
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_3_0).AddSessionStateTempDataProvider();

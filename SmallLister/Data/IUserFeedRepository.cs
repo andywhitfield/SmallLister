@@ -10,5 +10,6 @@ namespace SmallLister.Data
         Task<List<UserFeed>> GetAsync(UserAccount user);
         Task CreateAsync(UserAccount user, string uniqueFeedIdentifier, UserFeedType type, UserFeedItemDisplay display);
         Task SaveAsync(UserFeed userFeed);
+        Task<UserFeed> FindByIdentifierAsync(string feedIdentifier);
     }
 }

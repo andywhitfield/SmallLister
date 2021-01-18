@@ -36,6 +36,9 @@ namespace SmallLister.Data
         public Task<UserFeed> GetAsync(int userFeedId) =>
             _context.UserFeeds.SingleOrDefaultAsync(f => f.UserFeedId == userFeedId && f.DeletedDateTime == null);
 
+        public Task<UserFeed> FindByIdentifierAsync(string feedIdentifier) =>
+            _context.UserFeeds.SingleOrDefaultAsync(f => f.UserFeedIdentifier == feedIdentifier && f.DeletedDateTime == null);
+
         public Task<List<UserFeed>> GetAsync(UserAccount user) =>
             _context.UserFeeds.Where(f => f.UserAccount == user && f.DeletedDateTime == null).OrderByDescending(f => f.CreatedDateTime).ToListAsync();
 
