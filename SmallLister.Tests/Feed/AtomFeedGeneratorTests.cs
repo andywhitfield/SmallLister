@@ -14,7 +14,7 @@ namespace SmallLister.Tests.Feed
         public void Generate_empty_feed()
         {
             var generator = new AtomFeedGenerator();
-            var atomDoc = generator.GenerateFeed("https://smalllister.nosuchblogger.com", new List<UserItem>(), new UserFeed
+            var atomDoc = generator.GenerateFeed("https://smalllister.nosuchblogger.com", DateTime.UtcNow, new List<UserItem>(), new UserFeed
             {
                 UserFeedIdentifier = "mytestfeed"
             });
@@ -34,7 +34,7 @@ namespace SmallLister.Tests.Feed
             var userFeed = fixture.Create<UserFeed>();
             userFeed.ItemDisplay = UserFeedItemDisplay.Description;
             var items = fixture.Build<UserItem>().CreateMany();
-            var atomDoc = generator.GenerateFeed("https://smalllister.nosuchblogger.com", items, userFeed);
+            var atomDoc = generator.GenerateFeed("https://smalllister.nosuchblogger.com", DateTime.UtcNow, items, userFeed);
             atomDoc.Should().NotBeNull();
 
             var atomXmlString = atomDoc.ToXmlString();
@@ -51,7 +51,7 @@ namespace SmallLister.Tests.Feed
             var userFeed = fixture.Create<UserFeed>();
             var item = fixture.Create<UserItem>();
             item.NextDueDate = DateTime.Today;
-            var atomDoc = generator.GenerateFeed("https://smalllister.nosuchblogger.com", new[] { item }, userFeed);
+            var atomDoc = generator.GenerateFeed("https://smalllister.nosuchblogger.com", DateTime.UtcNow, new[] { item }, userFeed);
             atomDoc.Should().NotBeNull();
 
             var atomXmlString = atomDoc.ToXmlString();
@@ -68,7 +68,7 @@ namespace SmallLister.Tests.Feed
             var userFeed = fixture.Create<UserFeed>();
             var item = fixture.Create<UserItem>();
             item.NextDueDate = DateTime.Today.AddDays(-1);
-            var atomDoc = generator.GenerateFeed("https://smalllister.nosuchblogger.com", new[] { item }, userFeed);
+            var atomDoc = generator.GenerateFeed("https://smalllister.nosuchblogger.com", DateTime.UtcNow, new[] { item }, userFeed);
             atomDoc.Should().NotBeNull();
 
             var atomXmlString = atomDoc.ToXmlString();
@@ -90,7 +90,7 @@ namespace SmallLister.Tests.Feed
                 item.NextDueDate = dueDate;
                 dueDate = dueDate.AddDays(-1);
             }
-            var atomDoc = generator.GenerateFeed("https://smalllister.nosuchblogger.com", items, userFeed);
+            var atomDoc = generator.GenerateFeed("https://smalllister.nosuchblogger.com", DateTime.UtcNow, items, userFeed);
             atomDoc.Should().NotBeNull();
 
             var atomXmlString = atomDoc.ToXmlString();
@@ -118,7 +118,7 @@ namespace SmallLister.Tests.Feed
                 item.NextDueDate = dueDate;
                 dueDate = dueDate.AddDays(-1);
             }
-            var atomDoc = generator.GenerateFeed("https://smalllister.nosuchblogger.com", items, userFeed);
+            var atomDoc = generator.GenerateFeed("https://smalllister.nosuchblogger.com", DateTime.UtcNow, items, userFeed);
             atomDoc.Should().NotBeNull();
 
             var atomXmlString = atomDoc.ToXmlString();

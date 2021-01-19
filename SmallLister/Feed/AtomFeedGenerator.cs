@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text.RegularExpressions;
 using System.Xml.Linq;
 using SmallLister.Model;
@@ -11,14 +10,14 @@ namespace SmallLister.Feed
     {
         private readonly XNamespace ns = "http://www.w3.org/2005/Atom";
 
-        public XDocument GenerateFeed(string baseUri, IEnumerable<UserItem> items, UserFeed userFeed)
+        public XDocument GenerateFeed(string baseUri, DateTime publishDate, IEnumerable<UserItem> items, UserFeed userFeed)
         {
             var atom = new XDocument(new XDeclaration("1.0", "utf-8", null));
             var docRoot = new XElement(ns + "feed");
 
             docRoot.Add(new XElement(ns + "title", "SmallLister"));
             docRoot.Add(new XElement(ns + "link", new XAttribute("type", "text/html"), new XAttribute("href", baseUri), new XAttribute("rel", "alternate")));
-            docRoot.Add(new XElement(ns + "updated", (items.Any() ? items.Max(x => x.LastUpdateDateTime ?? x.CreatedDateTime) : DateTime.Today).ToString("O")));
+            docRoot.Add(new XElement(ns + "updated", publishDate.ToString("O")));
             docRoot.Add(new XElement(ns + "id", $"{baseUri}/feed/{userFeed.UserFeedIdentifier}"));
 
             foreach (var item in items)
@@ -30,7 +29,7 @@ namespace SmallLister.Feed
                 var itemUri = $"{baseUri}/items/{item.UserItemId}";
                 entry.Add(new XElement(ns + "title", userFeed.ItemDisplay == UserFeedItemDisplay.Description ? $"{(isOverdue ? "Overdue" : "Due")}: {item.Description}" : (isOverdue ? "Overdue item" : "Due item")));
                 entry.Add(new XElement(ns + "link", new XAttribute("href", itemUri)));
-                entry.Add(new XElement(ns + "updated", (item.LastUpdateDateTime ?? item.CreatedDateTime).ToString("O")));
+                entry.Add(new XElement(ns + "updated", publishDate.ToString("O")));
                 entry.Add(new XElement(ns + "id", $"{item.UserItemId}/{isOverdue.ToString().ToLowerInvariant()}/{dueDate.ToString("yyyyMMdd")}"));
 
                 var content = new XElement(ns + "content", new XAttribute("type", "html"));

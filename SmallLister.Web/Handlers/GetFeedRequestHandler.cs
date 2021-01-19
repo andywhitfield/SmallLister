@@ -1,3 +1,6 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
@@ -48,7 +51,22 @@ namespace SmallLister.Web.Handlers
                 DueToday = userFeed.FeedType == UserFeedType.Due,
                 Overdue = true
             });
-            return _feedGenerator.GenerateFeed(request.BaseUri, items, userFeed).ToXmlString();
+            var itemHash = GenerateHash(items.Select(i => i.UserItemId).Append(DateTime.Today.GetHashCode()));
+            if (userFeed.ItemHash != itemHash)
+            {
+                userFeed.ItemHash = itemHash;
+                await _userFeedRepository.SaveAsync(userFeed);
+            }
+
+            return _feedGenerator.GenerateFeed(request.BaseUri, userFeed.LastUpdateDateTime ?? userFeed.CreatedDateTime, items, userFeed).ToXmlString();
+        }
+
+        private int GenerateHash(IEnumerable<int> ids)
+        {
+            var hash = 23;
+            foreach (var id in ids)
+                hash = hash * 31 + id;
+            return hash;
         }
     }
 }

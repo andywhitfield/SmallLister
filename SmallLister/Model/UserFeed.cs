@@ -13,6 +13,7 @@ namespace SmallLister.Model
         public UserAccount UserAccount { get; set; }
         public UserFeedType FeedType { get; set; }
         public UserFeedItemDisplay ItemDisplay { get; set; }
+        public int ItemHash { get; set; }
         public DateTime CreatedDateTime { get; set; } = DateTime.UtcNow;
         public DateTime? LastUpdateDateTime { get; set; }
         public DateTime? DeletedDateTime { get; set; }
