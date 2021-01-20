@@ -22,10 +22,7 @@ namespace SmallLister.Web.Controllers
         }
 
         [HttpGet("~/lists")]
-        public async Task<IActionResult> Index() => View(new IndexViewModel(HttpContext)
-        {
-            Lists = await _mediator.Send(new GetListsRequest(User))
-        });
+        public async Task<IActionResult> Index() => View(new IndexViewModel(HttpContext, await _mediator.Send(new GetListsRequest(User))));
 
         [HttpPost("~/lists")]
         [ValidateAntiForgeryToken]

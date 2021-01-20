@@ -39,8 +39,8 @@ namespace SmallLister.Web.Handlers
 
             var userLists = await _userListRepository.GetListsAsync(user);
             var lists = userLists
-                .Select(l => new UserListModel { UserListId = l.UserListId.ToString(), Name = l.Name, CanAddItems = true })
-                .Prepend(new UserListModel { Name = "All", UserListId = IndexViewModel.AllList, CanAddItems = true });
+                .Select(l => new UserListModel(l.UserListId.ToString(), l.Name, true))
+                .Prepend(new UserListModel(IndexViewModel.AllList, "All", true));
             var selectedList = lists.FirstOrDefault(l => l.UserListId == item.UserListId?.ToString());
             if (selectedList == null)
                 selectedList = lists.Single(l => l.UserListId == IndexViewModel.AllList);

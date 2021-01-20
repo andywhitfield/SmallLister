@@ -70,7 +70,7 @@ namespace SmallLister.Web.Handlers
             if (userAccountApiAccess.RevokedDateTime != null)
             {
                 _logger.LogInformation($"API Access has been revoked");
-                return new GetAccessTokenResponse { ErrorCode = "user_revoked" };
+                return new GetAccessTokenResponse("user_revoked", null);
             }
 
             var tokenData = GuidString.NewGuidString();
@@ -92,7 +92,7 @@ namespace SmallLister.Web.Handlers
                 SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(Encoding.UTF8.GetBytes(signingKey)), SecurityAlgorithms.HmacSha256Signature)
             };
 
-            return new GetAccessTokenResponse { AccessToken = tokenHandler.WriteToken(tokenHandler.CreateToken(securityTokenDescriptor)) };
+            return new GetAccessTokenResponse(null, tokenHandler.WriteToken(tokenHandler.CreateToken(securityTokenDescriptor)));
         }
     }
 }

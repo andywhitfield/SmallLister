@@ -5,10 +5,7 @@ namespace SmallLister.Web.Model.Lists
 {
     public class IndexViewModel : BaseViewModel
     {
-        public IndexViewModel(HttpContext context) : base(context)
-        {
-        }
-
-        public IEnumerable<UserListModel> Lists { get; set; }
+        public IndexViewModel(HttpContext context, IEnumerable<UserListModel> lists) : base(context) => Lists = lists;
+        public IEnumerable<UserListModel> Lists { get; }
     }
 }

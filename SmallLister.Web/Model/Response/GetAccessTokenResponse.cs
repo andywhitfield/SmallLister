@@ -2,7 +2,12 @@ namespace SmallLister.Web.Model.Response
 {
     public class GetAccessTokenResponse
     {
-        public string ErrorCode { get; set; }
-        public string AccessToken { get; set; }
+        public GetAccessTokenResponse(string errorCode, string accessToken)
+        {
+            ErrorCode = errorCode;
+            AccessToken = accessToken;
+        }
+        public string ErrorCode { get; }
+        public string AccessToken { get; }
     }
 }

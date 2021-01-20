@@ -23,11 +23,7 @@ namespace SmallLister.Web.Handlers
         {
             var user = await _userAccountRepository.GetUserAccountAsync(request.User);
             var lists = await _userListRepository.GetListsAsync(user);
-            return lists.Select(l => new UserListModel
-            {
-                UserListId = l.UserListId.ToString(),
-                Name = l.Name
-            });
+            return lists.Select(l => new UserListModel(l.UserListId.ToString(), l.Name, false));
         }
     }
 }

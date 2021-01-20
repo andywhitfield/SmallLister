@@ -35,15 +35,15 @@ namespace SmallLister.Web.Handlers
             var userLists = await _userListRepository.GetListsAsync(user);
             var (overdueCount, dueCount, totalCount, userListCounts) = await _userListRepository.GetListCountsAsync(user);
             var lists = userLists
-                .Select(l => new UserListModel { UserListId = l.UserListId.ToString(), Name = l.Name, CanAddItems = true, ItemCount = userListCounts.TryGetValue(l.UserListId, out var listCount) ? listCount : 0, ItemSortOrder = l.ItemSortOrder })
-                .Prepend(new UserListModel { Name = "All", UserListId = IndexViewModel.AllList, CanAddItems = true, ItemCount = totalCount });
+                .Select(l => new UserListModel(l.UserListId.ToString(), l.Name, true, userListCounts.TryGetValue(l.UserListId, out var listCount) ? listCount : 0, l.ItemSortOrder))
+                .Prepend(new UserListModel(IndexViewModel.AllList, "All", true, totalCount));
             var hasDueItems = overdueCount > 0 || dueCount > 0;
             if (hasDueItems)
             {
                 var name = overdueCount > 0 && dueCount > 0
                     ? $"{overdueCount} overdue and {dueCount} due today"
                     : overdueCount > 0 ? $"{overdueCount} overdue" : $"{dueCount} due today";
-                lists = lists.Prepend(new UserListModel { Name = name, UserListId = IndexViewModel.DueList, CanAddItems = false, ItemCount = overdueCount + dueCount });
+                lists = lists.Prepend(new UserListModel(IndexViewModel.DueList, name, false, overdueCount + dueCount));
             }
             lists = lists.ToList();
 
