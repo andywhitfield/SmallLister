@@ -1,0 +1,84 @@
+using System.Collections.Generic;
+using System.Linq;
+using System.Security.Claims;
+using System.Threading;
+using System.Threading.Tasks;
+using AutoFixture;
+using FluentAssertions;
+using Microsoft.Extensions.Logging;
+using Moq;
+using SmallLister.Data;
+using SmallLister.Model;
+using SmallLister.Web.Handlers;
+using SmallLister.Web.Handlers.RequestResponse;
+using SmallLister.Web.Model.Home;
+using Xunit;
+
+namespace SmallLister.Web.Tests.Handlers
+{
+    public class GetItemForEditRequestHandlerTests
+    {
+        private readonly GetItemForEditRequestHandler _handler;
+        private readonly ClaimsPrincipal _user;
+        private readonly UserItem _userItem;
+        private readonly List<UserList> _userLists;
+
+        public GetItemForEditRequestHandlerTests()
+        {
+            var userAccountRepository = new Mock<IUserAccountRepository>();
+            var userListRepository = new Mock<IUserListRepository>();
+            var userItemRepository = new Mock<IUserItemRepository>();
+
+            var fixture = new Fixture();
+            _user = fixture.Create<ClaimsPrincipal>();
+            var userAccount = fixture.Create<UserAccount>();
+            _userItem = fixture.Create<UserItem>();
+            _userLists = fixture.CreateMany<UserList>().ToList();
+
+            userAccountRepository.Setup(x => x.GetUserAccountAsync(_user)).ReturnsAsync(userAccount);
+            userItemRepository.Setup(x => x.GetItemAsync(userAccount, _userItem.UserItemId)).ReturnsAsync(_userItem);
+            userListRepository.Setup(x => x.GetListsAsync(userAccount)).ReturnsAsync(_userLists);
+
+            _handler = new GetItemForEditRequestHandler(Mock.Of<ILogger<GetItemForEditRequestHandler>>(),
+                userAccountRepository.Object, userListRepository.Object, userItemRepository.Object);
+        }
+
+        [Fact]
+        public async Task Selected_list_should_default_to_all()
+        {
+            var response = await _handler.Handle(new GetItemForEditRequest(_user, _userItem.UserItemId), CancellationToken.None);
+
+            response.Should().NotBeNull();
+            response.IsValid.Should().BeTrue();
+
+            response.UserItem.UserItemId.Should().Be(_userItem.UserItemId);
+
+            response.SelectedList.Should().NotBeNull();
+            response.SelectedList.UserListId.Should().Be(IndexViewModel.AllList);
+
+            response.Lists.Should().HaveCount(_userLists.Count + 1);
+            response.Lists.First().Name.Should().Be("All");
+            response.Lists.Skip(1).Select(l => l.Name).Should().BeEquivalentTo(_userLists.Select(l => l.Name));
+        }
+
+        [Fact]
+        public async Task Selected_list_should_be_list_of_requested_item()
+        {
+            _userItem.UserList = _userLists.First();
+            _userItem.UserListId = _userItem.UserList.UserListId;
+            var response = await _handler.Handle(new GetItemForEditRequest(_user, _userItem.UserItemId), CancellationToken.None);
+
+            response.Should().NotBeNull();
+            response.IsValid.Should().BeTrue();
+
+            response.UserItem.UserItemId.Should().Be(_userItem.UserItemId);
+
+            response.SelectedList.Should().NotBeNull();
+            response.SelectedList.UserListId.Should().Be(_userItem.UserListId.ToString());
+
+            response.Lists.Should().HaveCount(_userLists.Count + 1);
+            response.Lists.First().Name.Should().Be("All");
+            response.Lists.Skip(1).Select(l => l.Name).Should().BeEquivalentTo(_userLists.Select(l => l.Name));
+        }
+    }
+}
