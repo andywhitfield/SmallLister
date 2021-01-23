@@ -1,3 +1,4 @@
+using System;
 using System.Net;
 using System.Threading.Tasks;
 using FluentAssertions;
@@ -6,7 +7,7 @@ using Xunit;
 
 namespace SmallLister.Web.Tests
 {
-    public class HomeTests
+    public class HomeTests : IDisposable
     {
         private readonly TestWebApplicationFactory<Startup> _factory = new TestWebApplicationFactory<Startup>();
 
@@ -28,5 +29,7 @@ namespace SmallLister.Web.Tests
             var responseContent = await response.Content.ReadAsStringAsync();
             responseContent.Should().Contain("Logout").And.Contain("Nothing on this list");
         }
+
+        public void Dispose() => _factory.Dispose();
     }
 }
