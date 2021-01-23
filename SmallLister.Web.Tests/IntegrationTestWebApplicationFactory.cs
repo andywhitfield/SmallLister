@@ -37,7 +37,7 @@ namespace SmallLister.Web.Tests
 
         public HttpClient CreateAuthenticatedClient()
         {
-            var client = CreateClient(new WebApplicationFactoryClientOptions { AllowAutoRedirect = false });
+            var client = CreateClient();
             client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Test");
             return client;
         }

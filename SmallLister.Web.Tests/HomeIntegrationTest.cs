@@ -15,19 +15,17 @@ namespace SmallLister.Web.Tests
 
         public async Task InitializeAsync()
         {
-            using (var serviceScope = _factory.Services.CreateScope())
-            {
-                using var context = serviceScope.ServiceProvider.GetRequiredService<SqliteDataContext>();
-                context.Migrate();
-                var userAccount = await context.UserAccounts.AddAsync(new UserAccount { AuthenticationUri = "http://test/user/1" });
-                var userList = await context.UserLists.AddAsync(new UserList { Name = "Test list", UserAccount = userAccount.Entity });
-                await context.UserItems.AddRangeAsync(
-                    new UserItem { Description = "Test item 1", UserAccount = userAccount.Entity },
-                    new UserItem { Description = "Test item 2", UserAccount = userAccount.Entity, UserList = userList.Entity, NextDueDate = DateTime.Today },
-                    new UserItem { Description = "Test item 3", UserAccount = userAccount.Entity, NextDueDate = DateTime.Today.AddDays(-1), Repeat = ItemRepeat.Daily }
-                );
-                await context.SaveChangesAsync();
-            }
+            using var serviceScope = _factory.Services.CreateScope();
+            using var context = serviceScope.ServiceProvider.GetRequiredService<SqliteDataContext>();
+            context.Migrate();
+            var userAccount = await context.UserAccounts.AddAsync(new UserAccount { AuthenticationUri = "http://test/user/1" });
+            var userList = await context.UserLists.AddAsync(new UserList { Name = "Test list", UserAccount = userAccount.Entity });
+            await context.UserItems.AddRangeAsync(
+                new UserItem { Description = "Test item 1", UserAccount = userAccount.Entity },
+                new UserItem { Description = "Test item 2", UserAccount = userAccount.Entity, UserList = userList.Entity, NextDueDate = DateTime.Today },
+                new UserItem { Description = "Test item 3", UserAccount = userAccount.Entity, NextDueDate = DateTime.Today.AddDays(-1), Repeat = ItemRepeat.Daily }
+            );
+            await context.SaveChangesAsync();
         }
 
         [Fact]
@@ -48,7 +46,6 @@ namespace SmallLister.Web.Tests
                 .And.Contain("Repeats every day")
                 .And.Contain("Due today");
         }
-        
 
         public Task DisposeAsync()
         {
