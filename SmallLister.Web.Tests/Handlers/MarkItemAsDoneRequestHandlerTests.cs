@@ -67,6 +67,12 @@ namespace SmallLister.Web.Tests.Handlers
         [InlineData("2021-01-31", ItemRepeat.Monthly, "2021-02-28")]
         [InlineData("2021-01-31", ItemRepeat.LastDayMonthly, "2021-02-28")]
         [InlineData("2021-02-28", ItemRepeat.LastDayMonthly, "2021-03-31")]
+        [InlineData("2021-01-18", ItemRepeat.BiMonthly, "2021-03-18")]
+        [InlineData("2021-11-18", ItemRepeat.BiMonthly, "2022-01-18")]
+        [InlineData("2021-01-18", ItemRepeat.Quarterly, "2021-04-18")]
+        [InlineData("2021-10-18", ItemRepeat.Quarterly, "2022-01-18")]
+        [InlineData("2021-01-18", ItemRepeat.HalfYearly, "2021-07-18")]
+        [InlineData("2021-07-18", ItemRepeat.HalfYearly, "2022-01-18")]
         [InlineData("2021-02-28", ItemRepeat.Yearly, "2022-02-28")]
         [InlineData("2020-02-29", ItemRepeat.Yearly, "2021-02-28")]
         public async Task Repeating_item_should_update_next_due_date(string currentDueDate, ItemRepeat repeat, string expectedDueDate)

@@ -69,6 +69,21 @@
             } else {
             <option value="lastDayMonthly">On the last day of every month</option>
             }
+            @if (Model.ItemToEdit.Repeat == SmallLister.Model.ItemRepeat.BiMonthly) {
+            <option value="biMonthly" selected>Every 2 months</option>
+            } else {
+            <option value="biMonthly">Every 2 months</option>
+            }
+            @if (Model.ItemToEdit.Repeat == SmallLister.Model.ItemRepeat.Quarterly) {
+            <option value="quarterly" selected>Every 3 months</option>
+            } else {
+            <option value="quarterly">Every 3 months</option>
+            }
+            @if (Model.ItemToEdit.Repeat == SmallLister.Model.ItemRepeat.HalfYearly) {
+            <option value="halfYearly" selected>Every 6 months</option>
+            } else {
+            <option value="halfYearly">Every 6 months</option>
+            }
             @if (Model.ItemToEdit.Repeat == SmallLister.Model.ItemRepeat.Yearly) {
             <option value="yearly" selected>Every year</option>
             } else {

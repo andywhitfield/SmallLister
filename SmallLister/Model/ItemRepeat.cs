@@ -10,6 +10,9 @@ namespace SmallLister.Model
         Weekends,
         Biweekly,
         Triweekly,
-        LastDayMonthly
+        LastDayMonthly,
+        BiMonthly,
+        Quarterly,
+        HalfYearly
     }
 }

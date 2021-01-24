@@ -23,6 +23,9 @@ namespace SmallLister.Web.Model
                 ItemRepeat.Biweekly => "Repeats every 2 weeks",
                 ItemRepeat.Triweekly => "Repeats every 3 weekes",
                 ItemRepeat.LastDayMonthly => "Repeats on the last day of every month",
+                ItemRepeat.BiMonthly => "Repeats every 2 months",
+                ItemRepeat.Quarterly => "Repeats every 3 months",
+                ItemRepeat.HalfYearly => "Repeats every 6 months",
                 _ => ""
             };
         }

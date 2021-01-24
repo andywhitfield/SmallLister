@@ -56,6 +56,9 @@ namespace SmallLister.Web.Handlers
                 ItemRepeat.Biweekly => dueDate.AddDays(14),
                 ItemRepeat.Triweekly => dueDate.AddDays(21),
                 ItemRepeat.LastDayMonthly => NextLastDayOfTheMonth(dueDate),
+                ItemRepeat.BiMonthly => dueDate.AddMonths(2),
+                ItemRepeat.Quarterly => dueDate.AddMonths(3),
+                ItemRepeat.HalfYearly => dueDate.AddMonths(6),
                 _ => throw new ArgumentException($"Unsupported repeat option: {repeat}")
             };
 
