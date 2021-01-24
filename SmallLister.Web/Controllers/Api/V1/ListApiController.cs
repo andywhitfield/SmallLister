@@ -11,6 +11,7 @@ using SmallLister.Web.Model.Response;
 
 namespace SmallLister.Web.Controllers.Api.V1
 {
+    [ApiVersion("1.0")]
     [ApiController]
     [Authorize("ApiJwt")]
     public class ListApiController : ControllerBase
@@ -26,7 +27,7 @@ namespace SmallLister.Web.Controllers.Api.V1
             _mediator = mediator;
         }
 
-        [HttpGet("~/api/v1/list")]
+        [HttpGet("~/api/v{version:apiVersion}/list")]
         [ProducesResponseType(typeof(GetAllListsResponse), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         public async Task<IActionResult> GetAllLists()
@@ -41,7 +42,7 @@ namespace SmallLister.Web.Controllers.Api.V1
             return Ok(await _mediator.Send(new GetAllListsRequest(user)));
         }
 
-        [HttpGet("~/api/v1/list/{listId}")]
+        [HttpGet("~/api/v{version:apiVersion}/list/{listId}")]
         [ProducesResponseType(typeof(GetListResponse), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]

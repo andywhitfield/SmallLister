@@ -10,6 +10,7 @@ using SmallLister.Web.Model.Request;
 
 namespace SmallLister.Web.Controllers.Api.V1
 {
+    [ApiVersion("1.0")]
     [Authorize]
     public class AuthorizeController : Controller
     {
@@ -22,7 +23,7 @@ namespace SmallLister.Web.Controllers.Api.V1
             _mediator = mediator;
         }
 
-        [HttpGet("~/api/v1/authorize")]
+        [HttpGet("~/api/v{version:apiVersion}/authorize")]
         public async Task<IActionResult> Authorize(
             [Required, FromQuery(Name = "appkey")] string appKey,
             [Required, FromQuery(Name = "redirect_uri")] string redirectUri)
@@ -43,7 +44,7 @@ namespace SmallLister.Web.Controllers.Api.V1
             return View(new ApiAuthorizeModel(HttpContext, response.ApplicationName, response.AppKey, response.RedirectUri));
         }
 
-        [HttpPost("~/api/v1/authorize")]
+        [HttpPost("~/api/v{version:apiVersion}/authorize")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> AuthorizeAsync([FromForm] AuthorizeRequest model)
         {

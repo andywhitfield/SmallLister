@@ -11,6 +11,7 @@ using SmallLister.Web.Model.Api;
 
 namespace SmallLister.Web.Controllers.Api.V1
 {
+    [ApiVersion("1.0")]
     [ApiController]
     [Authorize("ApiJwt")]
     public class ItemApiController : ControllerBase
@@ -26,7 +27,7 @@ namespace SmallLister.Web.Controllers.Api.V1
             _mediator = mediator;
         }
 
-        [HttpPost("~/api/v1/item")]
+        [HttpPost("~/api/v{version:apiVersion}/item")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
@@ -37,7 +38,7 @@ namespace SmallLister.Web.Controllers.Api.V1
                 _logger.LogInformation("Model state is invalid, returning bad request");
                 return BadRequest();
             }
-            
+
             var user = await _jwtService.GetUserAccountAsync(User);
             if (user == null)
             {

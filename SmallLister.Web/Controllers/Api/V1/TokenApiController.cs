@@ -11,6 +11,7 @@ using SmallLister.Web.Model.Response;
 
 namespace SmallLister.Web.Controllers.Api.V1
 {
+    [ApiVersion("1.0")]
     [ApiController]
     public class TokenApiController : ControllerBase
     {
@@ -23,7 +24,7 @@ namespace SmallLister.Web.Controllers.Api.V1
             _mediator = mediator;
         }
 
-        [HttpPost("~/api/v1/token")]
+        [HttpPost("~/api/v{version:apiVersion}/token")]
         [ProducesResponseType(typeof(GetAccessTokenResponse), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
