@@ -32,7 +32,7 @@
             <div class="navbar-nav">
                 @if (Model.IsLoggedIn) {
                     <form method="get" action="/find">
-                    <input type="text" name="q" placeholder="Find item..." /> <input type="submit" value="Find"/> | <a href="/lists">Edit lists</a> | <a href="/profile">Profile</a> | <a href="/signout">Logout</a>
+                    <span class="narrow-hide"><input type="text" name="q" placeholder="Find item..." /> <input type="submit" value="Find"/> |</span> <a href="/lists">Edit lists</a> | <a href="/profile">Profile</a> | <a href="/signout">Logout</a>
                     </form>
                 }
             </div>

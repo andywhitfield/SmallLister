@@ -282,6 +282,9 @@ ul.sml-list li.placeholder:before {
     .nav-show {
         display: inline;
     }
+    .narrow-hide {
+        display: none;
+    }
     ul.sml-list-item>li {
         flex-direction: column;
     }
