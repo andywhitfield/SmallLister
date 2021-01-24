@@ -185,6 +185,11 @@ namespace SmallLister.Data
             }
         }
 
+        public Task<List<UserItem>> FindItemsByQueryAsync(UserAccount user, string searchQuery) => _context.UserItems
+                .Where(i => i.UserAccount == user && i.CompletedDateTime == null && i.DeletedDateTime == null && EF.Functions.Like(i.Description, $"%{searchQuery}%"))
+                .OrderByDescending(i => i.LastUpdateDateTime ?? i.CreatedDateTime)
+                .ToListAsync();
+
         private async Task<int> GetMaxSortOrderAsync(UserAccount user, int? listId) =>
             (await _context.UserItems
                 .Where(i => i.UserAccount == user && i.CompletedDateTime == null && i.DeletedDateTime == null && i.UserListId == listId)

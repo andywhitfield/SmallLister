@@ -29,11 +29,8 @@ namespace SmallLister.Web.Handlers
             _userItemRepository = userItemRepository;
         }
 
-        public async Task<GetListItemsResponse> Handle(GetListItemsRequest request, CancellationToken cancellationToken)
+        public static (IEnumerable<UserListModel> Lists, bool HasDueItems) GetUserListModels(List<UserList> userLists, int overdueCount, int dueCount, int totalCount, IDictionary<int, int> userListCounts)
         {
-            var user = await _userAccountRepository.GetUserAccountAsync(request.User);
-            var userLists = await _userListRepository.GetListsAsync(user);
-            var (overdueCount, dueCount, totalCount, userListCounts) = await _userListRepository.GetListCountsAsync(user);
             var lists = userLists
                 .Select(l => new UserListModel(l.UserListId.ToString(), l.Name, true, userListCounts.TryGetValue(l.UserListId, out var listCount) ? listCount : 0, l.ItemSortOrder))
                 .Prepend(new UserListModel(IndexViewModel.AllList, "All", true, totalCount));
@@ -45,7 +42,15 @@ namespace SmallLister.Web.Handlers
                     : overdueCount > 0 ? $"{overdueCount} overdue" : $"{dueCount} due today";
                 lists = lists.Prepend(new UserListModel(IndexViewModel.DueList, name, false, overdueCount + dueCount));
             }
-            lists = lists.ToList();
+            return (lists.ToList(), hasDueItems);
+        }
+
+        public async Task<GetListItemsResponse> Handle(GetListItemsRequest request, CancellationToken cancellationToken)
+        {
+            var user = await _userAccountRepository.GetUserAccountAsync(request.User);
+            var userLists = await _userListRepository.GetListsAsync(user);
+            var (overdueCount, dueCount, totalCount, userListCounts) = await _userListRepository.GetListCountsAsync(user);
+            var (lists, hasDueItems) = GetUserListModels(userLists, overdueCount, dueCount, totalCount, userListCounts);
 
             IEnumerable<UserItem> items;
             UserListModel selectedList;

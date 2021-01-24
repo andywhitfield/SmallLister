@@ -31,9 +31,9 @@
         <nav class="navbar-main">
             <div class="navbar-nav">
                 @if (Model.IsLoggedIn) {
-                    <text>
-                    <a href="/lists">Edit lists</a> | <a href="/profile">Profile</a> | <a href="/signout">Logout</a>
-                    </text>
+                    <form method="get" action="/find">
+                    <input type="text" name="q" placeholder="Find item..." /> <input type="submit" value="Find"/> | <a href="/lists">Edit lists</a> | <a href="/profile">Profile</a> | <a href="/signout">Logout</a>
+                    </form>
                 }
             </div>
             <div>

@@ -1,0 +1,50 @@
+﻿@model SmallLister.Web.Model.Find.FindViewModel
+
+<aside>
+    <nav>
+        <ul>
+            @foreach (var list in Model.Lists) {
+            <li class="@list.CssClass"><a href="/?list=@list.UserListId">@list.Name (@list.ItemCount)</a></li>
+            }
+        </ul>
+    </nav>
+</aside>
+
+<article>
+    <h2>Find Item</h2>
+
+    <ul class="sml-list">
+        <li class="sml-list">
+            @if (Model.Items.Any()) {
+            <ul class="sml-list-item">
+            @foreach (var item in Model.Items) {
+                <li class="@item.AppendDueCssClass("sml-list-item")" data-listitem="@item.UserItemId">
+                    <div></div>
+                    <div>
+                        <div>@item.Description</div>
+                        <div class="sml-list-item-notes">@item.Notes</div>
+                        
+                        <form method="post" action="/items/done/@item.UserItemId">
+                        @Html.AntiForgeryToken()
+                        <button title="Done"><img src="/images/tick.png" height="15" width="15" /> Done</button>
+                        </form>
+                        <button title="Edit" data-href="/items/@item.UserItemId"><img src="/images/notes.png" height="15" width="15" /> Edit</button>
+                    </div>
+                    <div title="@item.Due">@item.DueSummary<br/><span>@item.RepeatSummary</span></div>
+                </li>
+            }
+            </ul>
+            } else if (string.IsNullOrWhiteSpace(Model.FindText)) {
+            <text>No search string query entered</text>
+            } else {
+            <text>Could not find any items with description @Model.FindText</text>
+            }
+        </li>
+    </ul>
+
+    <div>
+    <form method="get" action="/find">
+    <input type="text" name="q" value="@Model.FindText" /> <input type="submit" value="Find"/>
+    </form>
+    </div>
+</article>

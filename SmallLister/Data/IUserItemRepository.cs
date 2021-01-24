@@ -14,5 +14,6 @@ namespace SmallLister.Data
         Task UpdateOrderAsync(UserItem item, UserItem precedingItem);
         Task UpdateOrderAsync(UserAccount user, UserList list, ItemSortOrder? sortOrder);
         Task SaveAsync(UserItem item, UserList newList);
+        Task<List<UserItem>> FindItemsByQueryAsync(UserAccount user, string searchQuery);
     }
 }
