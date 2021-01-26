@@ -48,7 +48,7 @@ namespace SmallLister.Web.Tests
             item.NextDueDate.Should().Be(DateTime.Today.AddDays(-1));
             item.LastUpdateDateTime.Should().BeNull();
             var doneAction = $"/items/done/{item.UserItemId}";
-            var validationToken = GetFormValidationTokenForItemDescription(responseContent, item.Description, doneAction);
+            var validationToken = IntegrationTestWebApplicationFactory.GetFormValidationToken(responseContent, doneAction);
 
             var beforeEdit = DateTime.UtcNow;
             response = await client.PostAsync(doneAction, new FormUrlEncodedContent(new[] { KeyValuePair.Create("__RequestVerificationToken", validationToken) }));
@@ -80,7 +80,7 @@ namespace SmallLister.Web.Tests
             item.NextDueDate.Should().Be(DateTime.Today);
             item.LastUpdateDateTime.Should().BeNull();
             var doneAction = $"/items/done/{item.UserItemId}";
-            var validationToken = GetFormValidationTokenForItemDescription(responseContent, item.Description, doneAction);
+            var validationToken = IntegrationTestWebApplicationFactory.GetFormValidationToken(responseContent, doneAction);
 
             var beforeEdit = DateTime.UtcNow;
             response = await client.PostAsync(doneAction, new FormUrlEncodedContent(new[] { KeyValuePair.Create("__RequestVerificationToken", validationToken) }));
@@ -94,15 +94,6 @@ namespace SmallLister.Web.Tests
             item.NextDueDate.Should().Be(DateTime.Today);
             item.CompletedDateTime.Should().BeAfter(beforeEdit);
             item.LastUpdateDateTime.Should().BeAfter(beforeEdit);
-        }
-
-        private string GetFormValidationTokenForItemDescription(string responseContent, string description, string formAction)
-        {
-            var validationToken = responseContent.Substring(responseContent.IndexOf($"action=\"{formAction}\""));
-            validationToken = validationToken.Substring(validationToken.IndexOf("__RequestVerificationToken"));
-            validationToken = validationToken.Substring(validationToken.IndexOf("value=\"") + 7);
-            validationToken = validationToken.Substring(0, validationToken.IndexOf('"'));
-            return validationToken;
         }
 
         private Task<UserItem> GetUserItemWithDescriptionAsync(string description)

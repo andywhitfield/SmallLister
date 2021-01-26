@@ -35,9 +35,9 @@ namespace SmallLister.Web.Tests
                     .AddScheme<AuthenticationSchemeOptions, TestStubAuthHandler>("Test", null);
             }));
 
-        public HttpClient CreateAuthenticatedClient()
+        public HttpClient CreateAuthenticatedClient(bool allowAutoRedirect = true)
         {
-            var client = CreateClient();
+            var client = CreateClient(new WebApplicationFactoryClientOptions { AllowAutoRedirect = allowAutoRedirect });
             client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Test");
             return client;
         }
@@ -48,6 +48,15 @@ namespace SmallLister.Web.Tests
 
             if (disposing)
                 _connection.Dispose();
+        }
+
+        public static string GetFormValidationToken(string responseContent, string formAction)
+        {
+            var validationToken = responseContent.Substring(responseContent.IndexOf($"action=\"{formAction}\""));
+            validationToken = validationToken.Substring(validationToken.IndexOf("__RequestVerificationToken"));
+            validationToken = validationToken.Substring(validationToken.IndexOf("value=\"") + 7);
+            validationToken = validationToken.Substring(0, validationToken.IndexOf('"'));
+            return validationToken;
         }
     }
 }
