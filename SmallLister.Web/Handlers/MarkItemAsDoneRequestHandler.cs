@@ -3,6 +3,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
 using Microsoft.Extensions.Logging;
+using SmallLister.Actions;
 using SmallLister.Data;
 using SmallLister.Model;
 using SmallLister.Web.Handlers.RequestResponse;
@@ -15,13 +16,16 @@ namespace SmallLister.Web.Handlers
         private readonly IUserAccountRepository _userAccountRepository;
         private readonly IUserItemRepository _userItemRepository;
         private readonly IUserListRepository _userListRepository;
+        private readonly IUserActionsService _userActionsService;
         public MarkItemAsDoneRequestHandler(ILogger<MarkItemAsDoneRequestHandler> logger, IUserAccountRepository userAccountRepository,
-            IUserItemRepository userItemRepository, IUserListRepository userListRepository)
+            IUserItemRepository userItemRepository, IUserListRepository userListRepository,
+            IUserActionsService userActionsService)
         {
             _logger = logger;
             _userAccountRepository = userAccountRepository;
             _userItemRepository = userItemRepository;
             _userListRepository = userListRepository;
+            _userActionsService = userActionsService;
         }
 
         public async Task<bool> Handle(MarkItemAsDoneRequest request, CancellationToken cancellationToken)
@@ -40,7 +44,7 @@ namespace SmallLister.Web.Handlers
             else
                 item.NextDueDate = CalculateNextDueDate(item.NextDueDate.Value, item.Repeat.Value);
 
-            await _userItemRepository.SaveAsync(item, list);
+            await _userItemRepository.SaveAsync(item, list, _userActionsService);
             return true;
         }
 

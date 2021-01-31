@@ -6,6 +6,7 @@ using AutoFixture;
 using FluentAssertions;
 using Microsoft.Extensions.Logging;
 using Moq;
+using SmallLister.Actions;
 using SmallLister.Data;
 using SmallLister.Model;
 using SmallLister.Web.Handlers;
@@ -36,7 +37,8 @@ namespace SmallLister.Web.Tests.Handlers
 
             var userListRepository = new Mock<IUserListRepository>();
             _handler = new MarkItemAsDoneRequestHandler(Mock.Of<ILogger<MarkItemAsDoneRequestHandler>>(), userAccountRepository.Object,
-                _userItemRepository.Object, userListRepository.Object);
+                _userItemRepository.Object, userListRepository.Object, Mock.Of<IUserActionsService>());
+            // TODO: tests around the IUserActionsService
         }
 
         [Fact]
@@ -49,7 +51,7 @@ namespace SmallLister.Web.Tests.Handlers
             result.Should().BeTrue();
 
             _userItem.CompletedDateTime.Should().NotBeNull();
-            _userItemRepository.Verify(x => x.SaveAsync(_userItem, It.IsAny<UserList>()), Times.Once);
+            _userItemRepository.Verify(x => x.SaveAsync(_userItem, It.IsAny<UserList>(), It.IsAny<IUserActionsService>()), Times.Once);
         }
 
         [Theory]
@@ -86,7 +88,7 @@ namespace SmallLister.Web.Tests.Handlers
 
             _userItem.CompletedDateTime.Should().BeNull();
             _userItem.NextDueDate.Should().Be(DateTime.ParseExact(expectedDueDate, "yyyy-MM-dd", null));
-            _userItemRepository.Verify(x => x.SaveAsync(_userItem, It.IsAny<UserList>()), Times.Once);
+            _userItemRepository.Verify(x => x.SaveAsync(_userItem, It.IsAny<UserList>(), It.IsAny<IUserActionsService>()), Times.Once);
         }
     }
 }

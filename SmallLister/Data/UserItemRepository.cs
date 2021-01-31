@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using SmallLister.Actions;
 using SmallLister.Model;
 
 namespace SmallLister.Data
@@ -74,10 +75,10 @@ namespace SmallLister.Data
             .Where(i => i.UserAccount == user && i.UserList == null && i.CompletedDateTime == null && i.DeletedDateTime == null)
             .OrderBy(i => i.SortOrder).ToListAsync();
 
-        public async Task AddItemAsync(UserAccount user, UserList list, string description, string notes, DateTime? dueDate, ItemRepeat? repeat)
+        public async Task AddItemAsync(UserAccount user, UserList list, string description, string notes, DateTime? dueDate, ItemRepeat? repeat, IUserActionsService userActions)
         {
             var maxSortOrder = await GetMaxSortOrderAsync(user, list?.UserListId);
-            _context.UserItems.Add(new UserItem
+            var newUserItem = new UserItem
             {
                 UserAccount = user,
                 UserList = list,
@@ -86,11 +87,15 @@ namespace SmallLister.Data
                 NextDueDate = dueDate,
                 Repeat = repeat,
                 SortOrder = maxSortOrder + 1
-            });
+            };
+            _context.UserItems.Add(newUserItem);
             await _context.SaveChangesAsync();
 
+            var savedItemSortOrders = new List<(int, int, int)>();
             if (list?.ItemSortOrder != null)
-                await UpdateOrderAsync(user, list, list.ItemSortOrder);
+                await UpdateOrderAsync(user, list, list.ItemSortOrder, savedItemSortOrders);
+
+            await userActions.AddAsync(user, new AddItemAction(newUserItem, savedItemSortOrders));
         }
 
         public async Task UpdateOrderAsync(UserItem item, UserItem precedingItem)
@@ -129,7 +134,10 @@ namespace SmallLister.Data
             }
         }
 
-        public async Task UpdateOrderAsync(UserAccount user, UserList list, ItemSortOrder? sortOrder)
+        public Task UpdateOrderAsync(UserAccount user, UserList list, ItemSortOrder? sortOrder) =>
+            UpdateOrderAsync(user, list, sortOrder, null);
+
+        private async Task UpdateOrderAsync(UserAccount user, UserList list, ItemSortOrder? sortOrder, IList<(int UserItemId, int OriginalSortOrder, int UpdatedSortOrder)> collectItemChanges)
         {
             var items = _context.UserItems.Where(i => i.UserAccountId == user.UserAccountId && i.UserListId == list.UserListId && i.CompletedDateTime == null && i.DeletedDateTime == null);
             switch (sortOrder)
@@ -150,6 +158,7 @@ namespace SmallLister.Data
                 var newSortOrder = order++;
                 if (item.SortOrder == newSortOrder)
                     continue;
+                collectItemChanges?.Add((item.UserItemId, item.SortOrder, newSortOrder));
                 item.LastUpdateDateTime = now;
                 item.SortOrder = newSortOrder;
             }
@@ -157,7 +166,7 @@ namespace SmallLister.Data
             await _context.SaveChangesAsync();
         }
 
-        public async Task SaveAsync(UserItem item, UserList newList)
+        public async Task SaveAsync(UserItem item, UserList newList, IUserActionsService userActions)
         {
             if (item.DeletedDateTime == null && item.UserListId != newList?.UserListId)
             {
@@ -166,8 +175,10 @@ namespace SmallLister.Data
             }
 
             item.LastUpdateDateTime = DateTime.UtcNow;
+            var originalItem = (UserItem)_context.Entry(item).OriginalValues.ToObject();
             await _context.SaveChangesAsync();
 
+            var savedItemSortOrders = new List<(int, int, int)>();
             if (item.DeletedDateTime == null)
             {
                 if (newList != null && newList.ItemSortOrder != null)
@@ -179,10 +190,11 @@ namespace SmallLister.Data
                     var list = await _context.UserLists.SingleOrDefaultAsync(l => l.UserListId == item.UserListId && l.DeletedDateTime == null);
                     if (list != null)
                     {
-                        await UpdateOrderAsync(item.UserAccount, list, list.ItemSortOrder);
+                        await UpdateOrderAsync(item.UserAccount, list, list.ItemSortOrder, savedItemSortOrders);
                     }
                 }
             }
+            await userActions.AddAsync(item.UserAccount, new UpdateItemAction(originalItem, item, savedItemSortOrders));
         }
 
         public Task<List<UserItem>> FindItemsByQueryAsync(UserAccount user, string searchQuery) => _context.UserItems

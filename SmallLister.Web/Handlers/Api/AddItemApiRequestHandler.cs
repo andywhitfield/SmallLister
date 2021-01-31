@@ -2,6 +2,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
 using Microsoft.Extensions.Logging;
+using SmallLister.Actions;
 using SmallLister.Data;
 using SmallLister.Model;
 using SmallLister.Web.Handlers.RequestResponse.Api;
@@ -13,12 +14,15 @@ namespace SmallLister.Web.Handlers.Api
         private readonly ILogger<AddItemApiRequestHandler> _logger;
         private readonly IUserListRepository _userListRepository;
         private readonly IUserItemRepository _userItemRepository;
+        private readonly IUserActionsService _userActionsService;
 
-        public AddItemApiRequestHandler(ILogger<AddItemApiRequestHandler> logger, IUserListRepository userListRepository, IUserItemRepository userItemRepository)
+        public AddItemApiRequestHandler(ILogger<AddItemApiRequestHandler> logger, IUserListRepository userListRepository,
+            IUserItemRepository userItemRepository, IUserActionsService userActionsService)
         {
             _logger = logger;
             _userListRepository = userListRepository;
             _userItemRepository = userItemRepository;
+            _userActionsService = userActionsService;
         }
 
         public async Task<bool> Handle(AddItemApiRequest request, CancellationToken cancellationToken)
@@ -41,7 +45,7 @@ namespace SmallLister.Web.Handlers.Api
             }
 
             _logger.LogInformation($"Adding item to list {list?.UserListId} [{list?.Name}]: {request.Model.Description}; due={request.Model.DueDate}; notes={request.Model.Notes}");
-            await _userItemRepository.AddItemAsync(request.User, list, request.Model.Description?.Trim(), request.Model.Notes?.Trim(), request.Model.DueDate?.Date, null);
+            await _userItemRepository.AddItemAsync(request.User, list, request.Model.Description?.Trim(), request.Model.Notes?.Trim(), request.Model.DueDate?.Date, null, _userActionsService);
 
             return true;
         }

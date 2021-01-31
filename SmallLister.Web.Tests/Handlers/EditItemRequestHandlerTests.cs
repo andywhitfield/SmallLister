@@ -5,6 +5,7 @@ using AutoFixture;
 using FluentAssertions;
 using Microsoft.Extensions.Logging;
 using Moq;
+using SmallLister.Actions;
 using SmallLister.Data;
 using SmallLister.Model;
 using SmallLister.Web.Handlers;
@@ -40,7 +41,9 @@ namespace SmallLister.Web.Tests.Handlers
             userListRepository.Setup(x => x.GetListAsync(userAccount, _updatedUserItemInfo.UserListId.Value)).ReturnsAsync(_updatedUserItemInfo.UserList);
 
             _handler = new EditItemRequestHandler(Mock.Of<ILogger<EditItemRequestHandler>>(),
-                userAccountRepository.Object, _userItemRepository.Object, userListRepository.Object);
+                userAccountRepository.Object, _userItemRepository.Object, userListRepository.Object,
+                Mock.Of<IUserActionsService>());
+            // TODO: tests around the IUserActionsService
         }
 
         [Fact]
@@ -60,7 +63,8 @@ namespace SmallLister.Web.Tests.Handlers
                 x.Description == _updatedUserItemInfo.Description &&
                 x.NextDueDate == _updatedUserItemInfo.NextDueDate.Value.Date &&
                 x.Notes == _updatedUserItemInfo.Notes &&
-                x.Repeat == _updatedUserItemInfo.Repeat), _updatedUserItemInfo.UserList), Times.Once);
+                x.Repeat == _updatedUserItemInfo.Repeat), _updatedUserItemInfo.UserList,
+                It.IsAny<IUserActionsService>()), Times.Once);
         }
 
         [Fact]
@@ -76,7 +80,7 @@ namespace SmallLister.Web.Tests.Handlers
             }), CancellationToken.None);
 
             result.Should().BeFalse();
-            _userItemRepository.Verify(x => x.SaveAsync(It.IsAny<UserItem>(), It.IsAny<UserList>()), Times.Never);
+            _userItemRepository.Verify(x => x.SaveAsync(It.IsAny<UserItem>(), It.IsAny<UserList>(), It.IsAny<IUserActionsService>()), Times.Never);
         }
 
         [Fact]
@@ -97,7 +101,7 @@ namespace SmallLister.Web.Tests.Handlers
                 x.Description == _userItem.Description &&
                 x.NextDueDate == _userItem.NextDueDate &&
                 x.Notes == _userItem.Notes &&
-                x.Repeat == _userItem.Repeat), null), Times.Once);
+                x.Repeat == _userItem.Repeat), null, It.IsAny<IUserActionsService>()), Times.Once);
         }
     }
 }

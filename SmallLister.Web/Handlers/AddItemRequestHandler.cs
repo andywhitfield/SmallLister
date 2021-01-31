@@ -4,6 +4,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
 using Microsoft.Extensions.Logging;
+using SmallLister.Actions;
 using SmallLister.Data;
 using SmallLister.Model;
 using SmallLister.Web.Handlers.RequestResponse;
@@ -16,15 +17,17 @@ namespace SmallLister.Web.Handlers
         private readonly IUserAccountRepository _userAccountRepository;
         private readonly IUserListRepository _userListRepository;
         private readonly IUserItemRepository _userItemRepository;
+        private readonly IUserActionsService _userActionsService;
 
         public AddItemRequestHandler(ILogger<AddItemRequestHandler> logger,
             IUserAccountRepository userAccountRepository, IUserListRepository userListRepository,
-            IUserItemRepository userItemRepository)
+            IUserItemRepository userItemRepository, IUserActionsService userActionsService)
         {
             _logger = logger;
             _userAccountRepository = userAccountRepository;
             _userListRepository = userListRepository;
             _userItemRepository = userItemRepository;
+            _userActionsService = userActionsService;
         }
 
         public async Task<bool> Handle(AddItemRequest request, CancellationToken cancellationToken)
@@ -48,7 +51,7 @@ namespace SmallLister.Web.Handlers
             }
 
             _logger.LogInformation($"Adding item to list {list?.UserListId} [{list?.Name}]: {request.Model.Description}; due={dueDate}; repeat={request.Model.Repeat}; notes={request.Model.Notes}");
-            await _userItemRepository.AddItemAsync(user, list, request.Model.Description?.Trim(), request.Model.Notes?.Trim(), dueDate, request.Model.Repeat);
+            await _userItemRepository.AddItemAsync(user, list, request.Model.Description?.Trim(), request.Model.Notes?.Trim(), dueDate, request.Model.Repeat, _userActionsService);
 
             return true;
         }
