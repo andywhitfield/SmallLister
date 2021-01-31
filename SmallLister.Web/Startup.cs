@@ -146,7 +146,8 @@ namespace SmallLister.Web
                 .AddScoped<IApiClientRepository, ApiClientRepository>()
                 .AddScoped<IJwtService, JwtService>()
                 .AddScoped<IFeedGenerator, AtomFeedGenerator>()
-                .AddScoped<IUserActionsService, UserActionsService>();
+                .AddScoped<IUserActionsService, UserActionsService>()
+                .AddScoped<IUserActionRepository, UserActionRepository>();
 
             services.AddMediatR(typeof(Startup));
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_3_0).AddSessionStateTempDataProvider();

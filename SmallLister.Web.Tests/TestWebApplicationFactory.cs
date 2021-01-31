@@ -39,6 +39,7 @@ namespace SmallLister.Web.Tests
                 services.Replace(ServiceDescriptor.Scoped<IUserItemRepository>(_ => UserItemRepositoryMock.Object));
                 services.Replace(ServiceDescriptor.Scoped<IUserListRepository>(_ => UserListRepositoryMock.Object));
                 services.Replace(ServiceDescriptor.Scoped<IUserFeedRepository>(_ => Mock.Of<IUserFeedRepository>()));
+                services.Replace(ServiceDescriptor.Scoped<IUserActionRepository>(_ => Mock.Of<IUserActionRepository>()));
                 if (_addTestAuth)
                     services
                         .AddAuthentication("Test")

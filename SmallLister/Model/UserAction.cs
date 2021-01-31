@@ -15,6 +15,8 @@ namespace SmallLister.Model
         [Required]
         public UserActionType ActionType { get; set; }
         [Required]
+        public string Description { get; set; }
+        [Required]
         public string UserActionData { get; set; }
         public DateTime CreatedDateTime { get; set; } = DateTime.UtcNow;
         public DateTime? LastUpdateDateTime { get; set; }
