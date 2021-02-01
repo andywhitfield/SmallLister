@@ -30,6 +30,12 @@ namespace SmallLister.Data
                 nextActionNumber = currentAction.ActionNumber + 1;
             }
 
+            await foreach (var redoAction in _context.UserActions.Where(a => a.UserAccount == user && a.DeletedDateTime == null && a.ActionNumber >= nextActionNumber).AsAsyncEnumerable())
+            {
+                redoAction.DeletedDateTime = now;
+                redoAction.LastUpdateDateTime = now;
+            }
+
             await _context.UserActions.AddAsync(new UserAction
             {
                 UserAccount = user,
@@ -40,6 +46,7 @@ namespace SmallLister.Data
                 ActionNumber = nextActionNumber,
                 CreatedDateTime = now
             });
+
             await _context.SaveChangesAsync();
         }
     }
