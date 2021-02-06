@@ -11,5 +11,6 @@ namespace SmallLister.Data
         Task SetActionUndoneAsync(UserAction undoAction);
 
         Task DeleteUserItemAsync(UserItem item);
+        Task UpdateUserItemAsync(UserItem item, int sortOrder);
     }
 }

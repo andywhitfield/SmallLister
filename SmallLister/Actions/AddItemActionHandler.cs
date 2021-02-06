@@ -1,4 +1,3 @@
-using System;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using SmallLister.Data;
@@ -27,17 +26,35 @@ namespace SmallLister.Actions
         public async Task<bool> HandleAsync(UserAccount user, UserAction userAction, bool forUndo)
         {
             var addItemAction = GetUserAction(userAction);
+            var userItemAdded = addItemAction.GetUserItemAdded();
+            var item = await _userItemRepository.GetItemAsync(user, userItemAdded.UserItemId);
+            if (item == null)
+            {
+                _logger.LogWarning($"Cannot find item that was added: {userItemAdded.UserAccountId}");
+                return false;
+            }
+
             if (forUndo)
             {
-                var userItemAdded = addItemAction.GetUserItemAdded();
-                var item = await _userItemRepository.GetItemAsync(user, userItemAdded.UserItemId);
-                if (item == null)
+                await _userActionRepository.DeleteUserItemAsync(item);
+                _logger.LogWarning($"Undo previous add - deleted item {item.UserItemId}");
+
+                foreach (var sortOrder in addItemAction.GetSortOrders())
                 {
-                    _logger.LogWarning($"Cannot find item that was added: {userItemAdded.UserAccountId}");
-                    return false;
+                    if (sortOrder.UserItemId == userItemAdded.UserItemId)
+                        continue;
+
+                    item = await _userItemRepository.GetItemAsync(user, sortOrder.UserItemId);
+                    if (item == null)
+                    {
+                        _logger.LogWarning($"Cannot find item that was moved [{sortOrder.UserItemId}] as part of undoing action: {userAction.UserActionId}");
+                        return false;
+                    }
+
+                    await _userActionRepository.UpdateUserItemAsync(item, sortOrder.OriginalSortOrder);
+                    _logger.LogWarning($"Undo previous add - reverted sort order of item {item.UserItemId}");
                 }
 
-                await _userActionRepository.DeleteUserItemAsync(item);
                 return true;
             }
 

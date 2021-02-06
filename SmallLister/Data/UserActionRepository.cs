@@ -89,5 +89,15 @@ namespace SmallLister.Data
             item.DeletedDateTime = item.LastUpdateDateTime = DateTime.UtcNow;
             return _context.SaveChangesAsync();
         }
+
+        public Task UpdateUserItemAsync(UserItem item, int sortOrder)
+        {
+            if (item.SortOrder != sortOrder)
+            {
+                item.LastUpdateDateTime = DateTime.UtcNow;
+                item.SortOrder = sortOrder;
+            }
+            return _context.SaveChangesAsync();
+        }
     }
 }
