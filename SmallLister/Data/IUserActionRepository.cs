@@ -7,5 +7,9 @@ namespace SmallLister.Data
     public interface IUserActionRepository
     {
         Task CreateAsync(UserAccount user, string description, UserActionType actionType, string data);
+        Task<(UserAction UndoAction, UserAction RedoAction)> GetUndoRedoActionAsync(UserAccount user);
+        Task SetActionUndoneAsync(UserAction undoAction);
+
+        Task DeleteUserItemAsync(UserItem item);
     }
 }

@@ -6,7 +6,6 @@ namespace SmallLister.Actions
     {
         string Description { get; }
         UserActionType ActionType { get; }
-
         Task<string> GetDataAsync();
     }
 }

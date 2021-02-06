@@ -11,21 +11,22 @@
 </aside>
 
 <article>
+    <span class="sml-toolbar"><a href="/history/undo" title="Undo Update 'Apples'">Undo</a> | <a href="/history/redo" title="Redo Update 'Apples'">Redo</a>
     @if (!Model.IsAllListSelected && !Model.IsDueListSelected) {
-    <span class="sml-toolbar">Sort by:
+        <text>| Sort by:</text>
         @if (Model.SelectedList.ItemSortOrder == SmallLister.Model.ItemSortOrder.DueDate) {
         <text>due date</text>
         } else {
         <a href="/?sort=@SmallLister.Model.ItemSortOrder.DueDate">due date</a>
         }
-        |
+        <text> / </text>
         @if (Model.SelectedList.ItemSortOrder == SmallLister.Model.ItemSortOrder.Description) {
         <text>description</text>
         } else {
         <a href="/?sort=@SmallLister.Model.ItemSortOrder.Description">description</a>
         }
-    </span>
     }
+    </span>
     <h2>@Model.SelectedList.Name</h2>
 
     <ul class="sml-list" data-baseuri="/api/items">

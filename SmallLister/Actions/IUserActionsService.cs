@@ -6,5 +6,7 @@ namespace SmallLister.Actions
     public interface IUserActionsService
     {
         Task AddAsync(UserAccount user, IUserAction userAction);
+        Task<bool> RedoAsync(UserAccount user);
+        Task<bool> UndoAsync(UserAccount user);
     }
 }

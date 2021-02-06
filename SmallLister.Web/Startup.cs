@@ -147,6 +147,8 @@ namespace SmallLister.Web
                 .AddScoped<IJwtService, JwtService>()
                 .AddScoped<IFeedGenerator, AtomFeedGenerator>()
                 .AddScoped<IUserActionsService, UserActionsService>()
+                .AddScoped<IUserActionHandler<IUserAction>, AddItemActionHandler>()
+                .AddScoped<IUserActionHandler<IUserAction>, UpdateItemActionHandler>()
                 .AddScoped<IUserActionRepository, UserActionRepository>();
 
             services.AddMediatR(typeof(Startup));

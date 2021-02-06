@@ -8,6 +8,8 @@ namespace SmallLister.Actions
 {
     public class UpdateItemAction : IUserAction
     {
+        public static UpdateItemAction Create(string data) => new UpdateItemAction(JsonSerializer.Deserialize<DataModel>(data));
+
         private readonly DataModel _model;
 
         public UpdateItemAction(UserItem originalItem, UserItem updatedItem, IList<(int UserItemId, int OriginalSortOrder, int UpdatedSortOrder)> savedItemSortOrders) =>
@@ -17,6 +19,7 @@ namespace SmallLister.Actions
                 UpdatedUserItem = new UserItemDataModel(updatedItem),
                 SortOrders = SortOrders.From(savedItemSortOrders)
             };
+        private UpdateItemAction(DataModel model) => _model = model;
 
         public string Description => $"Update '{DescriptionText(_model.UpdatedUserItem.Description)}'";
         public UserActionType ActionType => UserActionType.UpdateItem;
