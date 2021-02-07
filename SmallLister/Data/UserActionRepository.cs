@@ -87,7 +87,7 @@ namespace SmallLister.Data
         public async Task SetActionRedoneAsync(UserAction redoAction)
         {
             var now = DateTime.UtcNow;
-            foreach (var previousCurrentItem in _context.UserActions.Where(ua => ua.UserAccountId == redoAction.UserAccountId && ua.IsCurrent && ua.DeletedDateTime == null))
+            await foreach (var previousCurrentItem in _context.UserActions.Where(ua => ua.UserAccountId == redoAction.UserAccountId && ua.IsCurrent && ua.DeletedDateTime == null).AsAsyncEnumerable())
             {
                 previousCurrentItem.IsCurrent = false;
                 previousCurrentItem.LastUpdateDateTime = now;

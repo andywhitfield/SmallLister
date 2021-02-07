@@ -98,8 +98,9 @@ namespace SmallLister.Data
             await userActions.AddAsync(user, new AddItemAction(newUserItem, savedItemSortOrders));
         }
 
-        public async Task UpdateOrderAsync(UserItem item, UserItem precedingItem)
+        public async Task UpdateOrderAsync(UserAccount user, UserItem item, UserItem precedingItem, IUserActionsService userActions)
         {
+            var savedItemSortOrders = new List<(int, int, int)>();
             var items = _context.UserItems
                 .Where(i => i.UserItemId != item.UserItemId && i.UserAccountId == item.UserAccountId && i.UserListId == item.UserListId && i.CompletedDateTime == null && i.DeletedDateTime == null)
                 .OrderBy(i => i.SortOrder);
@@ -107,28 +108,33 @@ namespace SmallLister.Data
             var now = DateTime.UtcNow;
 
             if (precedingItem == null)
-                UpdateItemSortOrder(item, sortOrder++, now);
+                UpdateItemSortOrder(item, sortOrder++, now, savedItemSortOrders);
 
             await foreach (var i in items.AsAsyncEnumerable())
             {
-                UpdateItemSortOrder(i, sortOrder++, now);
+                UpdateItemSortOrder(i, sortOrder++, now, savedItemSortOrders);
                 if (precedingItem?.UserItemId == i.UserItemId)
-                    UpdateItemSortOrder(item, sortOrder++, now);
+                    UpdateItemSortOrder(item, sortOrder++, now, savedItemSortOrders);
             }
 
+            var savedListSortOrder = ((int?)null, (ItemSortOrder?)null, (ItemSortOrder?)null);
             var list = item.UserListId == null ? null : await _context.UserLists.SingleOrDefaultAsync(l => l.UserListId == item.UserListId && l.DeletedDateTime == null);
             if (list != null)
             {
+                savedListSortOrder = (list.UserListId, list.ItemSortOrder, null);
                 list.ItemSortOrder = null;
                 list.LastUpdateDateTime = now;
             }
 
             await _context.SaveChangesAsync();
 
-            void UpdateItemSortOrder(UserItem itemToUpdate, int newSortOrder, DateTime lastUpdateDateTime)
+            await userActions.AddAsync(user, new ReorderItemsAction(savedItemSortOrders, savedListSortOrder));
+
+            void UpdateItemSortOrder(UserItem itemToUpdate, int newSortOrder, DateTime lastUpdateDateTime, IList<(int UserItemId, int OriginalSortOrder, int UpdatedSortOrder)> collectItemChanges)
             {
                 if (itemToUpdate.SortOrder == newSortOrder)
                     return;
+                collectItemChanges.Add((itemToUpdate.UserItemId, itemToUpdate.SortOrder, newSortOrder));
                 itemToUpdate.SortOrder = newSortOrder;
                 itemToUpdate.LastUpdateDateTime = lastUpdateDateTime;
             }

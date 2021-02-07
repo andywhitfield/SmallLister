@@ -2,6 +2,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
 using Microsoft.Extensions.Logging;
+using SmallLister.Actions;
 using SmallLister.Data;
 using SmallLister.Model;
 using SmallLister.Web.Handlers.RequestResponse;
@@ -13,14 +14,16 @@ namespace SmallLister.Web.Handlers
         private readonly ILogger<ReorderItemRequestHandler> _logger;
         private readonly IUserAccountRepository _userAccountRepository;
         private readonly IUserItemRepository _userItemRepository;
+        private readonly IUserActionsService _userActionsService;
 
         public ReorderItemRequestHandler(ILogger<ReorderItemRequestHandler> logger,
             IUserAccountRepository userAccountRepository, IUserItemRepository userItemRepository,
-            IUserListRepository userListRepository)
+            IUserListRepository userListRepository, IUserActionsService userActionsService)
         {
             _logger = logger;
             _userAccountRepository = userAccountRepository;
             _userItemRepository = userItemRepository;
+            _userActionsService = userActionsService;
         }
 
         public async Task<bool> Handle(ReorderItemRequest request, CancellationToken cancellationToken)
@@ -55,7 +58,7 @@ namespace SmallLister.Web.Handlers
             }
 
             _logger.LogInformation($"Updating order of item {item.UserItemId} [{item.Description}] to come after item {precedingItem?.UserItemId} [{precedingItem?.Description}]");
-            await _userItemRepository.UpdateOrderAsync(item, precedingItem);
+            await _userItemRepository.UpdateOrderAsync(user, item, precedingItem, _userActionsService);
             return true;
         }
     }

@@ -9,6 +9,7 @@ using SmallLister.Web.Model.Request;
 
 namespace SmallLister.Web.Controllers
 {
+    [ApiVersion("1.0")]
     [ApiController]
     [Authorize]
     public class ListsApiController : ControllerBase
@@ -22,7 +23,7 @@ namespace SmallLister.Web.Controllers
             _mediator = mediator;
         }
 
-        [HttpPut("~/api/lists/{userListId}/move")]
+        [HttpPut("~/api/v{version:apiVersion}/lists/{userListId}/move")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         public async Task<IActionResult> Move(int userListId, MoveRequest moveRequest)
         {

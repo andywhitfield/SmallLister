@@ -149,6 +149,7 @@ namespace SmallLister.Web
                 .AddScoped<IUserActionsService, UserActionsService>()
                 .AddScoped<IUserActionHandler<IUserAction>, AddItemActionHandler>()
                 .AddScoped<IUserActionHandler<IUserAction>, UpdateItemActionHandler>()
+                .AddScoped<IUserActionHandler<IUserAction>, ReorderItemsActionHandler>()
                 .AddScoped<IUserActionRepository, UserActionRepository>();
 
             services.AddMediatR(typeof(Startup));
