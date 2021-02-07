@@ -33,7 +33,7 @@ namespace SmallLister.Web.Tests.Handlers
             userAccountRepository.Setup(x => x.GetUserAccountAsync(_user)).ReturnsAsync(userAccount);
 
             _userItemRepository = new Mock<IUserItemRepository>();
-            _userItemRepository.Setup(x => x.GetItemAsync(userAccount, _userItem.UserItemId)).ReturnsAsync(_userItem);
+            _userItemRepository.Setup(x => x.GetItemAsync(userAccount, _userItem.UserItemId, false)).ReturnsAsync(_userItem);
 
             var userListRepository = new Mock<IUserListRepository>();
             _handler = new MarkItemAsDoneRequestHandler(Mock.Of<ILogger<MarkItemAsDoneRequestHandler>>(), userAccountRepository.Object,

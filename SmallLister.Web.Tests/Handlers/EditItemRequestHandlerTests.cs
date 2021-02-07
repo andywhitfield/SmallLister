@@ -37,7 +37,7 @@ namespace SmallLister.Web.Tests.Handlers
             var userListRepository = new Mock<IUserListRepository>();
 
             userAccountRepository.Setup(x => x.GetUserAccountAsync(_user)).ReturnsAsync(userAccount);
-            _userItemRepository.Setup(x => x.GetItemAsync(userAccount, _userItem.UserItemId)).ReturnsAsync(_userItem);
+            _userItemRepository.Setup(x => x.GetItemAsync(userAccount, _userItem.UserItemId, false)).ReturnsAsync(_userItem);
             userListRepository.Setup(x => x.GetListAsync(userAccount, _updatedUserItemInfo.UserListId.Value)).ReturnsAsync(_updatedUserItemInfo.UserList);
 
             _handler = new EditItemRequestHandler(Mock.Of<ILogger<EditItemRequestHandler>>(),

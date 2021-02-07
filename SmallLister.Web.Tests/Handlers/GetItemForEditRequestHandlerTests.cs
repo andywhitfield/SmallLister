@@ -36,7 +36,7 @@ namespace SmallLister.Web.Tests.Handlers
             _userLists = fixture.CreateMany<UserList>().ToList();
 
             userAccountRepository.Setup(x => x.GetUserAccountAsync(_user)).ReturnsAsync(userAccount);
-            userItemRepository.Setup(x => x.GetItemAsync(userAccount, _userItem.UserItemId)).ReturnsAsync(_userItem);
+            userItemRepository.Setup(x => x.GetItemAsync(userAccount, _userItem.UserItemId, false)).ReturnsAsync(_userItem);
             userListRepository.Setup(x => x.GetListsAsync(userAccount)).ReturnsAsync(_userLists);
 
             _handler = new GetItemForEditRequestHandler(Mock.Of<ILogger<GetItemForEditRequestHandler>>(),
