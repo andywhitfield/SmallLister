@@ -26,6 +26,7 @@ namespace SmallLister.Actions
             var data = await userAction.GetDataAsync();
             await _userActionRepository.CreateAsync(user, userAction.Description, userAction.ActionType, data);
         }
+
         public async Task<bool> RedoAsync(UserAccount user)
         {
             var (_, userActionToRedo) = await _userActionRepository.GetUndoRedoActionAsync(user);
@@ -36,7 +37,8 @@ namespace SmallLister.Actions
             }
 
             var redoSuccess = await UndoRedoAsync(user, userActionToRedo, false);
-            await _userActionRepository.SetActionRedoneAsync(userActionToRedo);
+            if (redoSuccess)
+                await _userActionRepository.SetActionRedoneAsync(userActionToRedo);
             return redoSuccess;
         }
 
@@ -50,7 +52,8 @@ namespace SmallLister.Actions
             }
 
             var undoSuccess = await UndoRedoAsync(user, userActionToUndo, true);
-            await _userActionRepository.SetActionUndoneAsync(userActionToUndo);
+            if (undoSuccess)
+                await _userActionRepository.SetActionUndoneAsync(userActionToUndo);
             return undoSuccess;
         }
 
