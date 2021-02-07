@@ -86,11 +86,10 @@ namespace SmallLister.Actions
                 }
 
                 var newSortOrder = itemSortOrder(sortOrder);
-
-                if (item.SortOrder != sortOrder.UpdatedSortOrder)
+                if (item.SortOrder != newSortOrder)
                 {
                     item.LastUpdateDateTime = DateTime.UtcNow;
-                    item.SortOrder = sortOrder.UpdatedSortOrder;
+                    item.SortOrder = newSortOrder;
                 }
 
                 _logger.LogInformation($"Undo/Redo add - re-applied sort order of item {item.UserItemId}");

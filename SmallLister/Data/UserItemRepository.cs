@@ -183,7 +183,7 @@ namespace SmallLister.Data
             {
                 if (newList != null && newList.ItemSortOrder != null)
                 {
-                    await UpdateOrderAsync(item.UserAccount, newList, newList.ItemSortOrder);
+                    await UpdateOrderAsync(item.UserAccount, newList, newList.ItemSortOrder, savedItemSortOrders);
                 }
                 else if (item.UserListId != null)
                 {
