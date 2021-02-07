@@ -36,7 +36,7 @@ namespace SmallLister.Actions
             }
 
             var redoSuccess = await UndoRedoAsync(user, userActionToRedo, false);
-            //await _userActionRepository.SetActionRedoneAsync(userActionToRedo);
+            await _userActionRepository.SetActionRedoneAsync(userActionToRedo);
             return redoSuccess;
         }
 

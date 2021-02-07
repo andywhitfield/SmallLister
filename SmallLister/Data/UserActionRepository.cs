@@ -84,20 +84,36 @@ namespace SmallLister.Data
             await _context.SaveChangesAsync();
         }
 
-        public Task DeleteUserItemAsync(UserItem item)
+        public async Task SetActionRedoneAsync(UserAction redoAction)
         {
-            item.DeletedDateTime = item.LastUpdateDateTime = DateTime.UtcNow;
-            return _context.SaveChangesAsync();
+            var now = DateTime.UtcNow;
+            foreach (var previousCurrentItem in _context.UserActions.Where(ua => ua.UserAccountId == redoAction.UserAccountId && ua.IsCurrent && ua.DeletedDateTime == null))
+            {
+                previousCurrentItem.IsCurrent = false;
+                previousCurrentItem.LastUpdateDateTime = now;
+            }
+
+            redoAction.IsCurrent = true;
+            redoAction.LastUpdateDateTime = now;
+
+            _logger.LogInformation($"Marked item {redoAction.UserActionId} as current action.");
+
+            await _context.SaveChangesAsync();
         }
 
-        public Task UpdateUserItemAsync(UserItem item, int sortOrder)
+        public Task AddUserItemAsync(UserAccount user, UserList userList, string description, string notes, DateTime? dueDate, ItemRepeat? repeat, int sortOrder, bool saveChanges = false)
         {
-            if (item.SortOrder != sortOrder)
+            _context.UserItems.Add(new UserItem
             {
-                item.LastUpdateDateTime = DateTime.UtcNow;
-                item.SortOrder = sortOrder;
-            }
-            return _context.SaveChangesAsync();
+                UserAccount = user,
+                UserList = userList,
+                Description = description,
+                Notes = notes,
+                NextDueDate = dueDate,
+                Repeat = repeat,
+                SortOrder = sortOrder
+            });
+            return saveChanges ? _context.SaveChangesAsync() : Task.CompletedTask;
         }
     }
 }
