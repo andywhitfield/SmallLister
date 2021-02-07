@@ -22,8 +22,8 @@ namespace SmallLister.Data
             _logger = logger;
         }
 
-        public Task<UserItem> GetItemAsync(UserAccount user, int userItemId) =>
-            _context.UserItems.SingleOrDefaultAsync(i => i.UserItemId == userItemId && i.UserAccount == user && i.CompletedDateTime == null && i.DeletedDateTime == null);
+        public Task<UserItem> GetItemAsync(UserAccount user, int userItemId, bool getCompletedOrDeletedItem = false) =>
+            _context.UserItems.SingleOrDefaultAsync(i => i.UserItemId == userItemId && i.UserAccount == user && (getCompletedOrDeletedItem || (i.CompletedDateTime == null && i.DeletedDateTime == null)));
 
         public async Task<(List<UserItem> UserItems, int PageNumber, int PageCount)> GetItemsAsync(UserAccount user, UserList list, UserItemFilter filter = null, int? pageNumber = null, int? pageSize = null)
         {

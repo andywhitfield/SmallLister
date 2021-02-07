@@ -24,18 +24,19 @@ namespace SmallLister.Actions
         public Task<bool> HandleAsync(UserAccount user, UserAction userAction, bool forUndo)
         {
             var updateItemAction = GetUserAction(userAction);
+            var updatedUserItem = updateItemAction.GetUpdatedUserItem();
 
             return forUndo
-                ? HandleAsync(user, userAction, updateItemAction, updateItemAction.GetOriginalUserItem(), s => s.OriginalSortOrder)
-                : HandleAsync(user, userAction, updateItemAction, updateItemAction.GetUpdatedUserItem(), s => s.UpdatedSortOrder);
+                ? HandleAsync(user, userAction, updateItemAction, updateItemAction.GetOriginalUserItem(), updatedUserItem.CompletedDateTime == null && updatedUserItem.DeletedDateTime == null, s => s.OriginalSortOrder)
+                : HandleAsync(user, userAction, updateItemAction, updatedUserItem, true, s => s.UpdatedSortOrder);
         }
 
-        private async Task<bool> HandleAsync(UserAccount user, UserAction userAction, UpdateItemAction updateItemAction, Serialization.UserItemDataModel userItem, Func<Serialization.SortOrders, int> itemSortOrder)
+        private async Task<bool> HandleAsync(UserAccount user, UserAction userAction, UpdateItemAction updateItemAction, Serialization.UserItemDataModel userItem, bool shouldItemBeActive, Func<Serialization.SortOrders, int> itemSortOrder)
         {
-            var item = await _userItemRepository.GetItemAsync(user, userItem.UserItemId);
+            var item = await _userItemRepository.GetItemAsync(user, userItem.UserItemId, !shouldItemBeActive);
             if (item == null)
             {
-                _logger.LogWarning($"Cannot find item that was updated: {userItem.UserAccountId}");
+                _logger.LogWarning($"Cannot find item that was updated: {userItem.UserItemId}");
                 return false;
             }
 
@@ -46,6 +47,8 @@ namespace SmallLister.Actions
             item.NextDueDate = userItem.NextDueDate;
             item.Repeat = userItem.Repeat;
             item.SortOrder = userItem.SortOrder;
+            item.CompletedDateTime = userItem.CompletedDateTime;
+            item.DeletedDateTime = userItem.DeletedDateTime;
 
             _logger.LogInformation($"Undo previous item update: {item.UserItemId}");
 

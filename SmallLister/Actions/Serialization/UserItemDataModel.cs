@@ -16,6 +16,8 @@ namespace SmallLister.Actions.Serialization
             NextDueDate = userItem.NextDueDate;
             Repeat = userItem.Repeat;
             SortOrder = userItem.SortOrder;
+            CompletedDateTime = userItem.CompletedDateTime;
+            DeletedDateTime = userItem.DeletedDateTime;
         }
 
         public int UserItemId { get; set; }
@@ -26,5 +28,7 @@ namespace SmallLister.Actions.Serialization
         public DateTime? NextDueDate { get; set; }
         public ItemRepeat? Repeat { get; set; }
         public int SortOrder { get; set; }
+        public DateTime? CompletedDateTime { get; set; }
+        public DateTime? DeletedDateTime { get; set; }
     }
 }
