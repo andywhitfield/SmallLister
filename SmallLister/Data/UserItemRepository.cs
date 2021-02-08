@@ -140,10 +140,7 @@ namespace SmallLister.Data
             }
         }
 
-        public Task UpdateOrderAsync(UserAccount user, UserList list, ItemSortOrder? sortOrder) =>
-            UpdateOrderAsync(user, list, sortOrder, null);
-
-        private async Task UpdateOrderAsync(UserAccount user, UserList list, ItemSortOrder? sortOrder, IList<(int UserItemId, int OriginalSortOrder, int UpdatedSortOrder)> collectItemChanges)
+        public async Task UpdateOrderAsync(UserAccount user, UserList list, ItemSortOrder? sortOrder, IList<(int UserItemId, int OriginalSortOrder, int UpdatedSortOrder)> collectItemChanges)
         {
             var items = _context.UserItems.Where(i => i.UserAccountId == user.UserAccountId && i.UserListId == list.UserListId && i.CompletedDateTime == null && i.DeletedDateTime == null);
             switch (sortOrder)

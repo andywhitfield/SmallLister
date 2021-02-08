@@ -7,6 +7,7 @@ using AutoFixture;
 using FluentAssertions;
 using Microsoft.Extensions.Logging;
 using Moq;
+using SmallLister.Actions;
 using SmallLister.Data;
 using SmallLister.Model;
 using SmallLister.Web.Handlers;
@@ -43,7 +44,7 @@ namespace SmallLister.Web.Tests.Handlers
             _userItemRepository.Setup(x => x.GetItemsAsync(_userAccount, null, null, null, null)).ReturnsAsync((_userItems, 1, 1));
 
             _handler = new GetListItemsRequestHandler(Mock.Of<ILogger<GetListItemsRequestHandler>>(),
-                userAccountRepository.Object, userListRepository.Object, _userItemRepository.Object);
+                userAccountRepository.Object, userListRepository.Object, _userItemRepository.Object, Mock.Of<IUserActionsService>());
         }
 
         [Fact]

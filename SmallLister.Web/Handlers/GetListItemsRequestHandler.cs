@@ -4,6 +4,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
 using Microsoft.Extensions.Logging;
+using SmallLister.Actions;
 using SmallLister.Data;
 using SmallLister.Model;
 using SmallLister.Web.Handlers.RequestResponse;
@@ -18,15 +19,17 @@ namespace SmallLister.Web.Handlers
         private readonly IUserAccountRepository _userAccountRepository;
         private readonly IUserListRepository _userListRepository;
         private readonly IUserItemRepository _userItemRepository;
+        private readonly IUserActionsService _userActionsService;
 
         public GetListItemsRequestHandler(ILogger<GetListItemsRequestHandler> logger,
             IUserAccountRepository userAccountRepository, IUserListRepository userListRepository,
-            IUserItemRepository userItemRepository)
+            IUserItemRepository userItemRepository, IUserActionsService userActionsService)
         {
             _logger = logger;
             _userAccountRepository = userAccountRepository;
             _userListRepository = userListRepository;
             _userItemRepository = userItemRepository;
+            _userActionsService = userActionsService;
         }
 
         public static (IEnumerable<UserListModel> Lists, bool HasDueItems) GetUserListModels(List<UserList> userLists, int overdueCount, int dueCount, int totalCount, IDictionary<int, int> userListCounts)
@@ -114,11 +117,15 @@ namespace SmallLister.Web.Handlers
 
             if (list != null && sortOrder != null)
             {
-                await _userItemRepository.UpdateOrderAsync(user, list, sortOrder);
+                var savedItemSortOrders = new List<(int, int, int)>();
+                await _userItemRepository.UpdateOrderAsync(user, list, sortOrder, savedItemSortOrders);
 
+                var savedListItemSortOrder = list.ItemSortOrder;
                 list.ItemSortOrder = sortOrder;
                 await _userListRepository.SaveAsync(list);
                 selectedList.ItemSortOrder = sortOrder;
+
+                await _userActionsService.AddAsync(user, new ReorderItemsAction(savedItemSortOrders, (list.UserListId, savedListItemSortOrder, sortOrder)));
             }
 
             var (userItems, resultPageNumber, pageCount) = await _userItemRepository.GetItemsAsync(user, list, pageNumber: pageNumber);
