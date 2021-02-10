@@ -8,10 +8,11 @@ namespace SmallLister.Web.Handlers.RequestResponse
         public static readonly GetListItemsResponse BadRequest = new GetListItemsResponse();
 
         private GetListItemsResponse() => IsValid = false;
-        public GetListItemsResponse(IEnumerable<UserListModel> lists, UserListModel selectedList, IEnumerable<UserItemModel> items,
+        public GetListItemsResponse(int dueAndOverdueCount, IEnumerable<UserListModel> lists, UserListModel selectedList, IEnumerable<UserItemModel> items,
             Pagination pagination, string undoAction, string redoAction)
         {
             IsValid = lists != null && items != null;
+            DueAndOverdueCount = dueAndOverdueCount;
             Lists = lists;
             SelectedList = selectedList;
             Items = items;
@@ -21,6 +22,7 @@ namespace SmallLister.Web.Handlers.RequestResponse
         }
 
         public bool IsValid { get; }
+        public int DueAndOverdueCount { get; }
         public IEnumerable<UserListModel> Lists { get; }
         public UserListModel SelectedList { get; }
         public IEnumerable<UserItemModel> Items { get; }

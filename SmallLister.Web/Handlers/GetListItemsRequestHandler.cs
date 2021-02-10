@@ -100,7 +100,7 @@ namespace SmallLister.Web.Handlers
 
             var (undoAction, redoAction) = await _userActionRepository.GetUndoRedoActionAsync(user);
 
-            return new GetListItemsResponse(lists, selectedList, items.Select(i => new UserItemModel(i)), new Pagination(pageNumber, pageCount),
+            return new GetListItemsResponse(dueCount + overdueCount, lists, selectedList, items.Select(i => new UserItemModel(i)), new Pagination(pageNumber, pageCount),
                 undoAction?.Description, redoAction?.Description);
         }
 

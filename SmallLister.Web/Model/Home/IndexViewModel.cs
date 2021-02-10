@@ -8,9 +8,9 @@ namespace SmallLister.Web.Model.Home
         public const string AllList = "all";
         public const string DueList = "due";
 
-        public IndexViewModel(HttpContext context, IEnumerable<UserListModel> lists, UserListModel selectedList,
+        public IndexViewModel(HttpContext context, int dueAndOverdueCount, IEnumerable<UserListModel> lists, UserListModel selectedList,
             IEnumerable<UserItemModel> items, Pagination pagination, string undoAction, string redoAction)
-            : base(context)
+            : base(context, dueAndOverdueCount > 0 ? $" ({dueAndOverdueCount})" : null)
         {
             Lists = lists;
             SelectedList = selectedList;
