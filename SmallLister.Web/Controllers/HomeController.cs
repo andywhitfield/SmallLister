@@ -26,7 +26,8 @@ namespace SmallLister.Web.Controllers
             if (!response.IsValid)
                 return BadRequest();
 
-            return View(new IndexViewModel(HttpContext, response.Lists, response.SelectedList, response.Items, response.Pagination));
+            return View(new IndexViewModel(HttpContext, response.Lists, response.SelectedList, response.Items, response.Pagination,
+                response.UndoAction, response.RedoAction));
         }
 
         public IActionResult Error() => View(new ErrorViewModel(HttpContext));

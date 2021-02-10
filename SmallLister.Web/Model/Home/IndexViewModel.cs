@@ -9,13 +9,15 @@ namespace SmallLister.Web.Model.Home
         public const string DueList = "due";
 
         public IndexViewModel(HttpContext context, IEnumerable<UserListModel> lists, UserListModel selectedList,
-            IEnumerable<UserItemModel> items, Pagination pagination)
+            IEnumerable<UserItemModel> items, Pagination pagination, string undoAction, string redoAction)
             : base(context)
         {
             Lists = lists;
             SelectedList = selectedList;
             Items = items;
             Pagination = pagination;
+            UndoAction = undoAction;
+            RedoAction = redoAction;
 
             foreach (var list in Lists)
             {
@@ -36,5 +38,9 @@ namespace SmallLister.Web.Model.Home
         public bool IsDueListSelected => SelectedList.UserListId == DueList;
         public bool IsAllListSelected => SelectedList.UserListId == AllList;
         public Pagination Pagination { get; }
+        public string UndoAction { get; }
+        public bool HasUndoAction => !string.IsNullOrEmpty(UndoAction);
+        public string RedoAction { get; }
+        public bool HasRedoAction => !string.IsNullOrEmpty(RedoAction);
     }
 }

@@ -11,9 +11,24 @@
 </aside>
 
 <article>
-    <span class="sml-toolbar"><a href="/history/undo" title="Undo Update 'Apples'">Undo</a> | <a href="/history/redo" title="Redo Update 'Apples'">Redo</a>
-    @if (!Model.IsAllListSelected && !Model.IsDueListSelected) {
-        <text>| Sort by:</text>
+    <span class="sml-toolbar">
+    @{
+    var isUserList = !Model.IsAllListSelected && !Model.IsDueListSelected;
+    }
+    @if (Model.HasUndoAction) {
+        <a href="/history/undo" title="Undo @Model.UndoAction">Undo</a>
+        @if (Model.HasRedoAction || isUserList) {
+        <text> | </text>
+        }
+    }
+    @if (Model.HasRedoAction) {
+        <a href="/history/redo" title="Redo @Model.RedoAction">Redo</a>
+        @if (isUserList) {
+        <text> | </text>
+        }
+    }
+    @if (isUserList) {
+        <text>Sort by:</text>
         @if (Model.SelectedList.ItemSortOrder == SmallLister.Model.ItemSortOrder.DueDate) {
         <text>due date</text>
         } else {

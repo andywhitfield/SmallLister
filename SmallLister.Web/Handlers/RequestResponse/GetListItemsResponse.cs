@@ -9,13 +9,15 @@ namespace SmallLister.Web.Handlers.RequestResponse
 
         private GetListItemsResponse() => IsValid = false;
         public GetListItemsResponse(IEnumerable<UserListModel> lists, UserListModel selectedList, IEnumerable<UserItemModel> items,
-            Pagination pagination)
+            Pagination pagination, string undoAction, string redoAction)
         {
             IsValid = lists != null && items != null;
             Lists = lists;
             SelectedList = selectedList;
             Items = items;
             Pagination = pagination;
+            UndoAction = undoAction;
+            RedoAction = redoAction;
         }
 
         public bool IsValid { get; }
@@ -23,5 +25,7 @@ namespace SmallLister.Web.Handlers.RequestResponse
         public UserListModel SelectedList { get; }
         public IEnumerable<UserItemModel> Items { get; }
         public Pagination Pagination { get; }
+        public string UndoAction { get; }
+        public string RedoAction { get; }
     }
 }

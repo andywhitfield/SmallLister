@@ -20,16 +20,19 @@ namespace SmallLister.Web.Handlers
         private readonly IUserListRepository _userListRepository;
         private readonly IUserItemRepository _userItemRepository;
         private readonly IUserActionsService _userActionsService;
+        private readonly IUserActionRepository _userActionRepository;
 
         public GetListItemsRequestHandler(ILogger<GetListItemsRequestHandler> logger,
             IUserAccountRepository userAccountRepository, IUserListRepository userListRepository,
-            IUserItemRepository userItemRepository, IUserActionsService userActionsService)
+            IUserItemRepository userItemRepository, IUserActionsService userActionsService,
+            IUserActionRepository userActionRepository)
         {
             _logger = logger;
             _userAccountRepository = userAccountRepository;
             _userListRepository = userListRepository;
             _userItemRepository = userItemRepository;
             _userActionsService = userActionsService;
+            _userActionRepository = userActionRepository;
         }
 
         public static (IEnumerable<UserListModel> Lists, bool HasDueItems) GetUserListModels(List<UserList> userLists, int overdueCount, int dueCount, int totalCount, IDictionary<int, int> userListCounts)
@@ -95,7 +98,10 @@ namespace SmallLister.Web.Handlers
                     (_, items, pageNumber, pageCount) = await GetListItemsAsync(user, userLists, lists, user.LastSelectedUserListId.Value, request.Sort, request.PageNumber);
             }
 
-            return new GetListItemsResponse(lists, selectedList, items.Select(i => new UserItemModel(i)), new Pagination(pageNumber, pageCount));
+            var (undoAction, redoAction) = await _userActionRepository.GetUndoRedoActionAsync(user);
+
+            return new GetListItemsResponse(lists, selectedList, items.Select(i => new UserItemModel(i)), new Pagination(pageNumber, pageCount),
+                undoAction?.Description, redoAction?.Description);
         }
 
         private async Task<(UserListModel ListModel, IEnumerable<UserItem> Items, int PageNumber, int PageCount)> GetAllItemsAsync(UserAccount user, IEnumerable<UserListModel> lists, int? pageNumber)
