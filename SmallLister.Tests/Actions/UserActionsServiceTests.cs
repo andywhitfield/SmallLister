@@ -17,6 +17,7 @@ namespace SmallLister.Tests.Actions
         private readonly UserActionsService _sut;
         private readonly Mock<IUserActionRepository> _userActionRepository;
         private readonly Mock<IUserItemRepository> _userItemRepository;
+        private readonly Mock<IUserListRepository> _userListRepository;
         private readonly IFixture _fixture;
         private readonly UserAccount _user;
         private readonly UserItem _userItem;
@@ -30,11 +31,11 @@ namespace SmallLister.Tests.Actions
 
             _userActionRepository = new Mock<IUserActionRepository>();
             _userItemRepository = new Mock<IUserItemRepository>();
-            var userListRepository = new Mock<IUserListRepository>();
+            _userListRepository = new Mock<IUserListRepository>();
             var userActionHandlers = new IUserActionHandler<IUserAction>[] {
-                new AddItemActionHandler(Mock.Of<ILogger<AddItemActionHandler>>(), _userItemRepository.Object, _userActionRepository.Object, userListRepository.Object),
+                new AddItemActionHandler(Mock.Of<ILogger<AddItemActionHandler>>(), _userItemRepository.Object, _userActionRepository.Object, _userListRepository.Object),
                 new UpdateItemActionHandler(Mock.Of<ILogger<UpdateItemActionHandler>>(), _userItemRepository.Object),
-                new ReorderItemsActionHandler(Mock.Of<ILogger<ReorderItemsActionHandler>>(), _userItemRepository.Object, userListRepository.Object)
+                new ReorderItemsActionHandler(Mock.Of<ILogger<ReorderItemsActionHandler>>(), _userItemRepository.Object, _userListRepository.Object)
             };
             _sut = new UserActionsService(Mock.Of<ILogger<UserActionsService>>(), _userActionRepository.Object, userActionHandlers);
         }
@@ -87,6 +88,39 @@ namespace SmallLister.Tests.Actions
             undone.Should().BeTrue();
             _userItem.DeletedDateTime.Should().BeOnOrAfter(beforeUndo).And.BeOnOrBefore(DateTime.UtcNow);
             _userItem.LastUpdateDateTime.Should().BeOnOrAfter(beforeUndo).And.BeOnOrBefore(DateTime.UtcNow);
+        }
+
+        [Fact]
+        public async Task Can_redo_add_action()
+        {
+            UserAction addAction = null;
+            _userActionRepository
+                .Setup(x => x.CreateAsync(_user, It.IsAny<string>(), UserActionType.AddItem, It.IsAny<string>()))
+                .Callback((UserAccount user, string description, UserActionType type, string data) =>
+                {
+                    addAction = new UserAction
+                    {
+                        UserAccount = user,
+                        Description = description,
+                        ActionType = type,
+                        UserActionData = data
+                    };
+                });
+            await _sut.AddAsync(_user, new AddItemAction(_userItem, new List<(int, int, int)>()));
+
+            _userActionRepository.Setup(x => x.GetUndoRedoActionAsync(_user)).ReturnsAsync((addAction, (UserAction)null));
+            _userItemRepository.Setup(x => x.GetItemAsync(_user, _userItem.UserItemId, false)).ReturnsAsync(_userItem);
+
+            var undone = await _sut.UndoAsync(_user);
+            undone.Should().BeTrue();
+
+            _userActionRepository.Setup(x => x.GetUndoRedoActionAsync(_user)).ReturnsAsync(((UserAction)null, addAction));
+            _userListRepository.Setup(x => x.GetListAsync(_user, _userItem.UserListId.Value)).ReturnsAsync(_userItem.UserList);
+
+            var redone = await _sut.RedoAsync(_user);
+            redone.Should().BeTrue();
+
+            _userActionRepository.Verify(x => x.AddUserItemAsync(_user, _userItem.UserList, _userItem.Description, _userItem.Notes, _userItem.NextDueDate, _userItem.Repeat, _userItem.SortOrder, false), Times.Once);
         }
     }
 }
