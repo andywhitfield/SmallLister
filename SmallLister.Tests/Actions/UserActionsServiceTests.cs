@@ -111,16 +111,21 @@ namespace SmallLister.Tests.Actions
             _userActionRepository.Setup(x => x.GetUndoRedoActionAsync(_user)).ReturnsAsync((addAction, (UserAction)null));
             _userItemRepository.Setup(x => x.GetItemAsync(_user, _userItem.UserItemId, false)).ReturnsAsync(_userItem);
 
+            var beforeActionDate = DateTime.UtcNow;
             var undone = await _sut.UndoAsync(_user);
             undone.Should().BeTrue();
+            _userItem.DeletedDateTime.Should().BeOnOrAfter(beforeActionDate);
+            _userItem.LastUpdateDateTime.Should().BeOnOrAfter(beforeActionDate);
 
             _userActionRepository.Setup(x => x.GetUndoRedoActionAsync(_user)).ReturnsAsync(((UserAction)null, addAction));
             _userListRepository.Setup(x => x.GetListAsync(_user, _userItem.UserListId.Value)).ReturnsAsync(_userItem.UserList);
+            _userItemRepository.Setup(x => x.GetItemAsync(_user, _userItem.UserItemId, true)).ReturnsAsync(_userItem);
 
+            beforeActionDate = DateTime.UtcNow;
             var redone = await _sut.RedoAsync(_user);
             redone.Should().BeTrue();
-
-            _userActionRepository.Verify(x => x.AddUserItemAsync(_user, _userItem.UserList, _userItem.Description, _userItem.Notes, _userItem.NextDueDate, _userItem.Repeat, _userItem.SortOrder, false), Times.Once);
+            _userItem.DeletedDateTime.Should().BeNull();
+            _userItem.LastUpdateDateTime.Should().BeOnOrAfter(beforeActionDate);
         }
     }
 }

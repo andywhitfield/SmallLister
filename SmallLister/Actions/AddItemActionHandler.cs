@@ -40,7 +40,7 @@ namespace SmallLister.Actions
             var item = await _userItemRepository.GetItemAsync(user, userItemAdded.UserItemId);
             if (item == null)
             {
-                _logger.LogWarning($"Cannot find item that was added: {userItemAdded.UserAccountId}");
+                _logger.LogWarning($"Cannot find item that was added: {userItemAdded.UserItemId}");
                 return false;
             }
 
@@ -53,19 +53,17 @@ namespace SmallLister.Actions
         private async Task<bool> HandleRedoAsync(UserAccount user, UserAction userAction, AddItemAction addItemAction)
         {
             var userItemAdded = addItemAction.GetUserItemAdded();
-            UserList userList = null;
-            if (userItemAdded.UserListId != null)
+            var item = await _userItemRepository.GetItemAsync(user, userItemAdded.UserItemId, true);
+            if (item == null)
             {
-                userList = await _userListRepository.GetListAsync(user, userItemAdded.UserListId.Value);
-                if (userList == null)
-                {
-                    _logger.LogWarning($"Cannot find list {userItemAdded.UserListId} of the item to redo (action: {userAction.UserActionId}), aborting.");
-                    return false;
-                }
+                _logger.LogWarning($"Cannot find item that was added: {userItemAdded.UserItemId}");
+                return false;
             }
 
-            await _userActionRepository.AddUserItemAsync(user, userList, userItemAdded.Description, userItemAdded.Notes, userItemAdded.NextDueDate, userItemAdded.Repeat, userItemAdded.SortOrder);
-            _logger.LogInformation($"Redo previous add - added new item {userItemAdded.Description}");
+            item.LastUpdateDateTime = DateTime.UtcNow;
+            item.DeletedDateTime = null;
+
+            _logger.LogInformation($"Redo previous add - undone deleted item {userItemAdded.UserItemId}");
 
             return await UpdateSortOrdersAsync(user, userAction, addItemAction, userItemAdded, s => s.UpdatedSortOrder);
         }

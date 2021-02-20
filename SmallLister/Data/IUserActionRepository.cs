@@ -11,7 +11,5 @@ namespace SmallLister.Data
         Task<(UserAction UndoAction, UserAction RedoAction)> GetUndoRedoActionAsync(UserAccount user);
         Task SetActionUndoneAsync(UserAction undoAction);
         Task SetActionRedoneAsync(UserAction redoAction);
-
-        Task AddUserItemAsync(UserAccount user, UserList userList, string description, string notes, DateTime? dueDate, ItemRepeat? repeat, int sortOrder, bool saveChanges = false);
     }
 }

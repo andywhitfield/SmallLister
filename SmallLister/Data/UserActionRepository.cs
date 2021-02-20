@@ -79,7 +79,7 @@ namespace SmallLister.Data
                 previousAction.LastUpdateDateTime = now;
             }
 
-            _logger.LogInformation($"Marked item {undoAction.UserActionId} as undone; {previousAction.UserActionId} is now the current action.");
+            _logger.LogInformation($"Marked item {undoAction.UserActionId} as undone; {previousAction?.UserActionId} is now the current action.");
 
             await _context.SaveChangesAsync();
         }
@@ -99,21 +99,6 @@ namespace SmallLister.Data
             _logger.LogInformation($"Marked item {redoAction.UserActionId} as current action.");
 
             await _context.SaveChangesAsync();
-        }
-
-        public Task AddUserItemAsync(UserAccount user, UserList userList, string description, string notes, DateTime? dueDate, ItemRepeat? repeat, int sortOrder, bool saveChanges = false)
-        {
-            _context.UserItems.Add(new UserItem
-            {
-                UserAccount = user,
-                UserList = userList,
-                Description = description,
-                Notes = notes,
-                NextDueDate = dueDate,
-                Repeat = repeat,
-                SortOrder = sortOrder
-            });
-            return saveChanges ? _context.SaveChangesAsync() : Task.CompletedTask;
         }
     }
 }
