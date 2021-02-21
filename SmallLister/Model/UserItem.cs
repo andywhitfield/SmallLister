@@ -15,6 +15,7 @@ namespace SmallLister.Model
         public string Description { get; set; }
         public string Notes { get; set; }
         public DateTime? NextDueDate { get; set; }
+        public DateTime? PostponedUntilDate { get; set; }
         public ItemRepeat? Repeat { get; set; }
         public int SortOrder { get; set; }
         public DateTime CreatedDateTime { get; set; } = DateTime.UtcNow;
