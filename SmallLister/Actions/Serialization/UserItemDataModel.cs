@@ -14,6 +14,7 @@ namespace SmallLister.Actions.Serialization
             Description = userItem.Description;
             Notes = userItem.Notes;
             NextDueDate = userItem.NextDueDate;
+            PostponedUntilDate = userItem.PostponedUntilDate;
             Repeat = userItem.Repeat;
             SortOrder = userItem.SortOrder;
             CompletedDateTime = userItem.CompletedDateTime;
@@ -26,6 +27,7 @@ namespace SmallLister.Actions.Serialization
         public string Description { get; set; }
         public string Notes { get; set; }
         public DateTime? NextDueDate { get; set; }
+        public DateTime? PostponedUntilDate { get; set; }
         public ItemRepeat? Repeat { get; set; }
         public int SortOrder { get; set; }
         public DateTime? CompletedDateTime { get; set; }

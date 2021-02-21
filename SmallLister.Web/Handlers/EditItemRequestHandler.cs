@@ -71,6 +71,10 @@ namespace SmallLister.Web.Handlers
                     _logger.LogInformation($"Could not parse due date {request.Model.Due}");
                     return false;
                 }
+                if (item.NextDueDate != dueDate)
+                {
+                    item.PostponedUntilDate = null;
+                }
                 item.NextDueDate = dueDate;
             }
 

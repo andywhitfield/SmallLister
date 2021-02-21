@@ -45,6 +45,7 @@ namespace SmallLister.Actions
             item.Description = userItem.Description;
             item.Notes = userItem.Notes;
             item.NextDueDate = userItem.NextDueDate;
+            item.PostponedUntilDate = userItem.PostponedUntilDate;
             item.Repeat = userItem.Repeat;
             item.SortOrder = userItem.SortOrder;
             item.CompletedDateTime = userItem.CompletedDateTime;

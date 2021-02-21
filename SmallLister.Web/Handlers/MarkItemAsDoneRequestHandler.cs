@@ -43,6 +43,7 @@ namespace SmallLister.Web.Handlers
                 item.CompletedDateTime = DateTime.UtcNow;
             else
                 item.NextDueDate = CalculateNextDueDate(item.NextDueDate.Value, item.Repeat.Value);
+            item.PostponedUntilDate = null;
 
             await _userItemRepository.SaveAsync(item, list, _userActionsService);
             return true;
