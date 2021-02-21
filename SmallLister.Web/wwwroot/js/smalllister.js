@@ -76,7 +76,9 @@ function smlInitialiseNav() {
         $(this).hide();
         $('.nav-show').show();
     });
-    $('[data-href]').click(function() {
+    $('[data-href]').click(function(e) {
         window.location.href = $(this).attr('data-href');
+        e.preventDefault();
+        return false;
     });
 }

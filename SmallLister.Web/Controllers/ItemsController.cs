@@ -93,5 +93,24 @@ namespace SmallLister.Web.Controllers
 
             return Redirect("~/");
         }
+
+        [HttpPost("~/items/snooze/{userItemId}")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Snooze([FromRoute] int userItemId)
+        {
+            if (!ModelState.IsValid)
+            {
+                _logger.LogInformation("Model state is invalid, returning bad request");
+                return BadRequest();
+            }
+            
+            if (!await _mediator.Send(new SnoozeRequest(User, userItemId)))
+            {
+                _logger.LogInformation($"Could snooze {userItemId}, returning not found");
+                return NotFound();
+            }
+
+            return Redirect("~/");
+        }
     }
 }

@@ -24,6 +24,9 @@
     <div>
         <label for="sml-list-add-due">Due:</label>
         <input type="text" id="sml-list-add-due" name="due" value="@Model.ItemToEdit.DueDate?.ToString("yyyy-MM-dd")" class="sml-list-add-due" />
+        @if (Model.ItemToEdit.PostponedUntilDate != null) {
+            <text>(Postponed until @Model.ItemToEdit.PostponedUntilDate.Value.ToString("yyyy-MM-dd"))</text>
+        }
     </div>
     <div>        
         <label for="sml-list-add-repeat">Repeat:</label>
