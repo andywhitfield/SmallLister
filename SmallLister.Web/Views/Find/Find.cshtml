@@ -29,6 +29,12 @@
                         <button title="Done"><img src="/images/tick.png" height="15" width="15" /> Done</button>
                         </form>
                         <button title="Edit" data-href="/items/@item.UserItemId"><img src="/images/notes.png" height="15" width="15" /> Edit</button>
+                        @if (item.DueDate.HasValue) {
+                        <form method="post" action="/items/snooze/@item.UserItemId">
+                        @Html.AntiForgeryToken()
+                        <button title="Snooze for a day"><img src="/images/snooze.png" height="15" width="15" /> Snooze</button>
+                        </form>
+                        }
                     </div>
                     <div title="@item.Due">@item.DueSummary<br/><span>@item.RepeatSummary</span></div>
                 </li>
