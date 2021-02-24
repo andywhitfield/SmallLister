@@ -24,7 +24,7 @@ namespace SmallLister.Feed
             {
                 var entry = new XElement(ns + "entry");
 
-                var dueDate = (item.NextDueDate ?? DateTime.Today).Date;
+                var dueDate = (item.PostponedUntilDate ?? item.NextDueDate ?? DateTime.Today).Date;
                 var isOverdue = dueDate < DateTime.Today;
                 var itemUri = $"{baseUri}/items/{item.UserItemId}";
                 entry.Add(new XElement(ns + "title", userFeed.ItemDisplay == UserFeedItemDisplay.Description ? $"{(isOverdue ? "Overdue" : "Due")}: {item.Description}" : (isOverdue ? "Overdue item" : "Due item")));
