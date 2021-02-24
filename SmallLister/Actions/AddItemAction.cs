@@ -29,7 +29,7 @@ namespace SmallLister.Actions
         public IEnumerable<SortOrders> GetSortOrders() => (IEnumerable<SortOrders>)DataModel.Copy(_model).SortOrders ?? new SortOrders[0];
 
         private static string DescriptionText(string value) =>
-            (string.IsNullOrEmpty(value) || value.Length < 16) ? value : $"{value.Substring(0, 12)}...";
+            (string.IsNullOrEmpty(value) || value.Length < 24) ? value : $"{value.Substring(0, 21)}...";
 
         private class DataModel
         {
