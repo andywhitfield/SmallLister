@@ -42,20 +42,20 @@ namespace SmallLister.Data
             if (filter != null)
             {
                 var today = DateTime.Today;
-                Func<IQueryable<UserItem>, IQueryable<UserItem>> dueListOrdering = q => q.OrderBy(i => i.NextDueDate).ThenBy(i => i.UserList.SortOrder).ThenBy(i => i.SortOrder);
+                Func<IQueryable<UserItem>, IQueryable<UserItem>> dueListOrdering = q => q.OrderBy(i => i.PostponedUntilDate ?? i.NextDueDate).ThenBy(i => i.UserList.SortOrder).ThenBy(i => i.SortOrder);
                 if (filter.Overdue && filter.DueToday)
                 {
-                    query = query.Where(i => i.NextDueDate <= today);
+                    query = query.Where(i => (i.PostponedUntilDate ?? i.NextDueDate) <= today);
                     orderByClause = dueListOrdering;
                 }
                 else if (filter.Overdue)
                 {
-                    query = query.Where(i => i.NextDueDate < today);
+                    query = query.Where(i => (i.PostponedUntilDate ?? i.NextDueDate) < today);
                     orderByClause = dueListOrdering;
                 }
                 else if (filter.DueToday)
                 {
-                    query = query.Where(i => i.NextDueDate == today);
+                    query = query.Where(i => (i.PostponedUntilDate ?? i.NextDueDate) == today);
                     orderByClause = dueListOrdering;
                 }
             }
@@ -146,7 +146,7 @@ namespace SmallLister.Data
             switch (sortOrder)
             {
                 case ItemSortOrder.DueDate:
-                    items = items.OrderBy(i => i.NextDueDate ?? DateTime.MaxValue).ThenBy(i => i.SortOrder);
+                    items = items.OrderBy(i => i.PostponedUntilDate ?? i.NextDueDate ?? DateTime.MaxValue).ThenBy(i => i.SortOrder);
                     break;
                 case ItemSortOrder.Description:
                     items = items.OrderBy(i => i.Description).ThenBy(i => i.SortOrder);
