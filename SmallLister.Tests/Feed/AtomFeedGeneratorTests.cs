@@ -50,6 +50,7 @@ namespace SmallLister.Tests.Feed
             var fixture = new Fixture();
             var userFeed = fixture.Create<UserFeed>();
             var item = fixture.Create<UserItem>();
+            item.PostponedUntilDate = null;
             item.NextDueDate = DateTime.Today;
             var atomDoc = generator.GenerateFeed("https://smalllister.nosuchblogger.com", DateTime.UtcNow, new[] { item }, userFeed);
             atomDoc.Should().NotBeNull();
@@ -67,6 +68,7 @@ namespace SmallLister.Tests.Feed
             var fixture = new Fixture();
             var userFeed = fixture.Create<UserFeed>();
             var item = fixture.Create<UserItem>();
+            item.PostponedUntilDate = null;
             item.NextDueDate = DateTime.Today.AddDays(-1);
             var atomDoc = generator.GenerateFeed("https://smalllister.nosuchblogger.com", DateTime.UtcNow, new[] { item }, userFeed);
             atomDoc.Should().NotBeNull();
@@ -87,6 +89,7 @@ namespace SmallLister.Tests.Feed
             var dueDate = DateTime.Today.AddDays(-2);
             foreach (var item in items)
             {
+                item.PostponedUntilDate = null;
                 item.NextDueDate = dueDate;
                 dueDate = dueDate.AddDays(-1);
             }
@@ -115,6 +118,7 @@ namespace SmallLister.Tests.Feed
             var dueDate = DateTime.Today.AddDays(-7);
             foreach (var item in items)
             {
+                item.PostponedUntilDate = null;
                 item.NextDueDate = dueDate;
                 dueDate = dueDate.AddDays(-1);
             }

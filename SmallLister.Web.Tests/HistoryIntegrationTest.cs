@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
+using AutoFixture;
 using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
@@ -30,6 +31,9 @@ namespace SmallLister.Web.Tests
         [Fact]
         public async Task Should_add_two_items_then_mark_one_as_done_then_undo_all_then_redo_all()
         {
+            var fixture = new Fixture();
+            var firstTaskDescription = fixture.Create<string>();
+            var secondTaskDescription = fixture.Create<string>();
             using var client = _factory.CreateAuthenticatedClient();
             using var response = await client.GetAsync("/");
             response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -40,73 +44,73 @@ namespace SmallLister.Web.Tests
                 .And.NotContain("Undo")
                 .And.NotContain("Redo");
 
-            responseContent = await AddItemAsync(client, responseContent, "This is the first task");
+            responseContent = await AddItemAsync(client, responseContent, firstTaskDescription);
             responseContent.Should().Contain("All (1)")
                 .And.Contain("Test list (1)")
-                .And.Contain("This is the first task")
+                .And.Contain(firstTaskDescription)
                 .And.Contain("Undo")
                 .And.NotContain("Redo");
 
-            responseContent = await AddItemAsync(client, responseContent, "This is the second task");
+            responseContent = await AddItemAsync(client, responseContent, secondTaskDescription);
             responseContent.Should().Contain("All (2)")
                 .And.Contain("Test list (2)")
-                .And.Contain("This is the first task")
-                .And.Contain("This is the second task")
+                .And.Contain(firstTaskDescription)
+                .And.Contain(secondTaskDescription)
                 .And.Contain("Undo")
                 .And.NotContain("Redo");
 
-            responseContent = await MarkItemDoneAsync(client, responseContent, "This is the first task");
+            responseContent = await MarkItemDoneAsync(client, responseContent, firstTaskDescription);
             responseContent.Should().Contain("All (1)")
                 .And.Contain("Test list (1)")
-                .And.Contain("This is the second task")
+                .And.Contain(secondTaskDescription)
                 .And.Contain("Undo")
                 .And.NotContain("Redo");
 
             responseContent = await UndoAsync(client);
             responseContent.Should().Contain("All (2)")
                 .And.Contain("Test list (2)")
-                .And.Contain("This is the first task")
-                .And.Contain("This is the second task")
+                .And.Contain(firstTaskDescription)
+                .And.Contain(secondTaskDescription)
                 .And.Contain("Undo")
                 .And.Contain("Redo");
 
             responseContent = await UndoAsync(client);
             responseContent.Should().Contain("All (1)")
                 .And.Contain("Test list (1)")
-                .And.Contain("This is the first task")
-                .And.NotContain("This is the second task")
+                .And.Contain(firstTaskDescription)
+                .And.NotContain(secondTaskDescription)
                 .And.Contain("Undo")
                 .And.Contain("Redo");
 
             responseContent = await UndoAsync(client);
             responseContent.Should().Contain("All (0)")
                 .And.Contain("Test list (0)")
-                .And.NotContain("This is the first task")
-                .And.NotContain("This is the second task")
+                .And.NotContain(firstTaskDescription)
+                .And.NotContain(secondTaskDescription)
                 .And.NotContain("Undo")
                 .And.Contain("Redo");
 
             responseContent = await RedoAsync(client);
             responseContent.Should().Contain("All (1)")
                 .And.Contain("Test list (1)")
-                .And.Contain("This is the first task")
-                .And.NotContain("This is the second task")
+                .And.Contain(firstTaskDescription)
+                .And.NotContain(secondTaskDescription)
                 .And.Contain("Undo")
                 .And.Contain("Redo");
 
             responseContent = await RedoAsync(client);
             responseContent.Should().Contain("All (2)")
                 .And.Contain("Test list (2)")
-                .And.Contain("This is the first task")
-                .And.Contain("This is the second task")
+                .And.Contain(firstTaskDescription)
+                .And.Contain(secondTaskDescription)
                 .And.Contain("Undo")
                 .And.Contain("Redo");
 
             responseContent = await RedoAsync(client);
             responseContent.Should().Contain("All (1)")
                 .And.Contain("Test list (1)")
-                .And.NotContain("This is the first task")
-                .And.Contain("This is the second task")
+                .And.NotContain(firstTaskDescription)
+                .And.Contain(secondTaskDescription)
                 .And.Contain("Undo")
                 .And.NotContain("Redo");
         }
