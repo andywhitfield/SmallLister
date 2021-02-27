@@ -19,7 +19,8 @@ namespace SmallLister.Web.Controllers
             _mediator = mediator;
         }
 
-        [HttpGet("~/history/undo")]
+        [HttpPost("~/history/undo")]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Undo()
         {
             if (!await _mediator.Send(new UndoRedoRequest(User, -1)))
@@ -31,7 +32,8 @@ namespace SmallLister.Web.Controllers
             return Redirect("~/");
         }
 
-        [HttpGet("~/history/redo")]
+        [HttpPost("~/history/redo")]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Redo()
         {
             if (!await _mediator.Send(new UndoRedoRequest(User, 1)))

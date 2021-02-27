@@ -66,7 +66,7 @@ namespace SmallLister.Web.Tests
                 .And.Contain("Undo")
                 .And.NotContain("Redo");
 
-            responseContent = await UndoAsync(client);
+            responseContent = await UndoAsync(client, responseContent);
             responseContent.Should().Contain("All (2)")
                 .And.Contain("Test list (2)")
                 .And.Contain(firstTaskDescription)
@@ -74,7 +74,7 @@ namespace SmallLister.Web.Tests
                 .And.Contain("Undo")
                 .And.Contain("Redo");
 
-            responseContent = await UndoAsync(client);
+            responseContent = await UndoAsync(client, responseContent);
             responseContent.Should().Contain("All (1)")
                 .And.Contain("Test list (1)")
                 .And.Contain(firstTaskDescription)
@@ -82,7 +82,7 @@ namespace SmallLister.Web.Tests
                 .And.Contain("Undo")
                 .And.Contain("Redo");
 
-            responseContent = await UndoAsync(client);
+            responseContent = await UndoAsync(client, responseContent);
             responseContent.Should().Contain("All (0)")
                 .And.Contain("Test list (0)")
                 .And.NotContain(firstTaskDescription)
@@ -90,7 +90,7 @@ namespace SmallLister.Web.Tests
                 .And.NotContain("Undo")
                 .And.Contain("Redo");
 
-            responseContent = await RedoAsync(client);
+            responseContent = await RedoAsync(client, responseContent);
             responseContent.Should().Contain("All (1)")
                 .And.Contain("Test list (1)")
                 .And.Contain(firstTaskDescription)
@@ -98,7 +98,7 @@ namespace SmallLister.Web.Tests
                 .And.Contain("Undo")
                 .And.Contain("Redo");
 
-            responseContent = await RedoAsync(client);
+            responseContent = await RedoAsync(client, responseContent);
             responseContent.Should().Contain("All (2)")
                 .And.Contain("Test list (2)")
                 .And.Contain(firstTaskDescription)
@@ -106,7 +106,7 @@ namespace SmallLister.Web.Tests
                 .And.Contain("Undo")
                 .And.Contain("Redo");
 
-            responseContent = await RedoAsync(client);
+            responseContent = await RedoAsync(client, responseContent);
             responseContent.Should().Contain("All (1)")
                 .And.Contain("Test list (1)")
                 .And.NotContain(firstTaskDescription)
@@ -151,16 +151,24 @@ namespace SmallLister.Web.Tests
             return await response.Content.ReadAsStringAsync();
         }
 
-        private async Task<string> UndoAsync(HttpClient client)
+        private async Task<string> UndoAsync(HttpClient client, string page)
         {
-            using var response = await client.GetAsync("/history/undo");
+            const string undoAction = "/history/undo";
+            var validationToken = IntegrationTestWebApplicationFactory.GetFormValidationToken(page, undoAction);
+            using var response = await client.PostAsync(undoAction, new FormUrlEncodedContent(new[] {
+                KeyValuePair.Create("__RequestVerificationToken", validationToken)
+            }));
             response.StatusCode.Should().Be(HttpStatusCode.OK);
             return await response.Content.ReadAsStringAsync();
         }
 
-        private async Task<string> RedoAsync(HttpClient client)
+        private async Task<string> RedoAsync(HttpClient client, string page)
         {
-            using var response = await client.GetAsync("/history/redo");
+            const string redoAction = "/history/redo";
+            var validationToken = IntegrationTestWebApplicationFactory.GetFormValidationToken(page, redoAction);
+            using var response = await client.PostAsync(redoAction, new FormUrlEncodedContent(new[] {
+                KeyValuePair.Create("__RequestVerificationToken", validationToken)
+            }));
             response.StatusCode.Should().Be(HttpStatusCode.OK);
             return await response.Content.ReadAsStringAsync();
         }

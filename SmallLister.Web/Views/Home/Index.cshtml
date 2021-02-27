@@ -16,13 +16,19 @@
     var isUserList = !Model.IsAllListSelected && !Model.IsDueListSelected;
     }
     @if (Model.HasUndoAction) {
-        <a href="/history/undo" title="Undo @Model.UndoAction">Undo</a>
+        <form method="post" action="/history/undo">
+        @Html.AntiForgeryToken()
+        <button title="Undo @Model.UndoAction">Undo</button>
+        </form>
         @if (Model.HasRedoAction || isUserList) {
         <text> | </text>
         }
     }
     @if (Model.HasRedoAction) {
-        <a href="/history/redo" title="Redo @Model.RedoAction">Redo</a>
+        <form method="post" action="/history/redo">
+        @Html.AntiForgeryToken()
+        <button title="Redo @Model.RedoAction">Redo</button>
+        </form>
         @if (isUserList) {
         <text> | </text>
         }
