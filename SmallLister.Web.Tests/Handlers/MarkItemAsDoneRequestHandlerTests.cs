@@ -51,6 +51,7 @@ namespace SmallLister.Web.Tests.Handlers
             result.Should().BeTrue();
 
             _userItem.CompletedDateTime.Should().NotBeNull();
+            _userItem.PostponedUntilDate.Should().BeNull();
             _userItemRepository.Verify(x => x.SaveAsync(_userItem, It.IsAny<UserList>(), It.IsAny<IUserActionsService>()), Times.Once);
         }
 
@@ -87,6 +88,7 @@ namespace SmallLister.Web.Tests.Handlers
             result.Should().BeTrue();
 
             _userItem.CompletedDateTime.Should().BeNull();
+            _userItem.PostponedUntilDate.Should().BeNull();
             _userItem.NextDueDate.Should().Be(DateTime.ParseExact(expectedDueDate, "yyyy-MM-dd", null));
             _userItemRepository.Verify(x => x.SaveAsync(_userItem, It.IsAny<UserList>(), It.IsAny<IUserActionsService>()), Times.Once);
         }
