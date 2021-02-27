@@ -30,6 +30,7 @@ namespace SmallLister.Web.Tests.Handlers
             _user = _fixture.Create<ClaimsPrincipal>();
             var userAccount = _fixture.Create<UserAccount>();
             _userItem = _fixture.Create<UserItem>();
+            _userItem.NextDueDate = _userItem.NextDueDate?.Date;
             _updatedUserItemInfo = _fixture.Create<UserItem>();
 
             var userAccountRepository = new Mock<IUserAccountRepository>();
@@ -62,6 +63,50 @@ namespace SmallLister.Web.Tests.Handlers
             _userItemRepository.Verify(x => x.SaveAsync(It.Is<UserItem>(x =>
                 x.Description == _updatedUserItemInfo.Description &&
                 x.NextDueDate == _updatedUserItemInfo.NextDueDate.Value.Date &&
+                x.Notes == _updatedUserItemInfo.Notes &&
+                x.Repeat == _updatedUserItemInfo.Repeat), _updatedUserItemInfo.UserList,
+                It.IsAny<IUserActionsService>()), Times.Once);
+        }
+
+        [Fact]
+        public async Task When_editing_item_Should_reset_postponed_date()
+        {
+            var result = await _handler.Handle(new EditItemRequest(_user, _userItem.UserItemId, new AddOrUpdateItemRequest
+            {
+                Description = _updatedUserItemInfo.Description,
+                Due = _updatedUserItemInfo.NextDueDate.Value.ToString("yyyy-MM-dd"),
+                List = _updatedUserItemInfo.UserListId.ToString(),
+                Notes = _updatedUserItemInfo.Notes,
+                Repeat = _updatedUserItemInfo.Repeat
+            }), CancellationToken.None);
+
+            result.Should().BeTrue();
+            _userItemRepository.Verify(x => x.SaveAsync(It.Is<UserItem>(x =>
+                x.Description == _updatedUserItemInfo.Description &&
+                x.NextDueDate == _updatedUserItemInfo.NextDueDate.Value.Date &&
+                x.PostponedUntilDate == null &&
+                x.Notes == _updatedUserItemInfo.Notes &&
+                x.Repeat == _updatedUserItemInfo.Repeat), _updatedUserItemInfo.UserList,
+                It.IsAny<IUserActionsService>()), Times.Once);
+        }
+
+        [Fact]
+        public async Task Given_editing_an_item_When_not_changing_due_date_Should_not_reset_postponed_date()
+        {
+            var result = await _handler.Handle(new EditItemRequest(_user, _userItem.UserItemId, new AddOrUpdateItemRequest
+            {
+                Description = _updatedUserItemInfo.Description,
+                Due = _userItem.NextDueDate.Value.ToString("yyyy-MM-dd"),
+                List = _updatedUserItemInfo.UserListId.ToString(),
+                Notes = _updatedUserItemInfo.Notes,
+                Repeat = _updatedUserItemInfo.Repeat
+            }), CancellationToken.None);
+
+            result.Should().BeTrue();
+            _userItemRepository.Verify(x => x.SaveAsync(It.Is<UserItem>(x =>
+                x.Description == _updatedUserItemInfo.Description &&
+                x.NextDueDate == _userItem.NextDueDate.Value.Date &&
+                x.PostponedUntilDate == _userItem.PostponedUntilDate &&
                 x.Notes == _updatedUserItemInfo.Notes &&
                 x.Repeat == _updatedUserItemInfo.Repeat), _updatedUserItemInfo.UserList,
                 It.IsAny<IUserActionsService>()), Times.Once);

@@ -80,6 +80,24 @@ namespace SmallLister.Tests.Feed
         }
 
         [Fact]
+        public void Create_description_for_item_postponed_until_yesterday()
+        {
+            var generator = new AtomFeedGenerator();
+            var fixture = new Fixture();
+            var userFeed = fixture.Create<UserFeed>();
+            var item = fixture.Create<UserItem>();
+            item.PostponedUntilDate = DateTime.Today.AddDays(-1);
+            item.NextDueDate = DateTime.Today.AddDays(-10);
+            var atomDoc = generator.GenerateFeed("https://smalllister.nosuchblogger.com", DateTime.UtcNow, new[] { item }, userFeed);
+            atomDoc.Should().NotBeNull();
+
+            var atomXmlString = atomDoc.ToXmlString();
+            Console.WriteLine(atomXmlString);
+            atomXmlString.Should().Contain($"<id>https://smalllister.nosuchblogger.com/feed/{userFeed.UserFeedIdentifier}</id>");
+            atomXmlString.Should().Contain("You have an overdue item! It was due yesterday");
+        }
+
+        [Fact]
         public void Create_description_for_item_due_in_the_last_week()
         {
             var generator = new AtomFeedGenerator();
