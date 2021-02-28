@@ -45,5 +45,22 @@ namespace SmallLister.Web.Tests.Handlers
             response.Items.Select(i => i.UserItemId).Should().BeEquivalentTo(userItems.Select(i => i.UserItemId));
             response.Items.Select(i => i.Description).Should().BeEquivalentTo(userItems.Select(i => i.Description));
         }
+
+        [Fact]
+        public async Task Should_trim_search_string()
+        {
+            var fixture = new Fixture();
+            var searchQuery = fixture.Create<string>();
+            var userItemRepository = new Mock<IUserItemRepository>();
+            userItemRepository.Setup(x => x.FindItemsByQueryAsync(It.IsAny<UserAccount>(), searchQuery)).ReturnsAsync(new List<UserItem>());
+            var userListRepository = new Mock<IUserListRepository>();
+            userListRepository.Setup(x => x.GetListsAsync(It.IsAny<UserAccount>())).ReturnsAsync(new List<UserList>());
+            var handler = new FindItemRequestHandler(Mock.Of<ILogger<FindItemRequestHandler>>(),
+                Mock.Of<IUserAccountRepository>(), userListRepository.Object, userItemRepository.Object);
+            var response = await handler.Handle(new FindItemRequest(fixture.Create<ClaimsPrincipal>(), $"     {searchQuery} "), CancellationToken.None);
+
+            response.Should().NotBeNull();
+            userItemRepository.Verify(x => x.FindItemsByQueryAsync(It.IsAny<UserAccount>(), searchQuery), Times.Once);
+        }
     }
 }

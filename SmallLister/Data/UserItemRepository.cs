@@ -201,7 +201,7 @@ namespace SmallLister.Data
         }
 
         public Task<List<UserItem>> FindItemsByQueryAsync(UserAccount user, string searchQuery) => _context.UserItems
-                .Where(i => i.UserAccount == user && i.CompletedDateTime == null && i.DeletedDateTime == null && EF.Functions.Like(i.Description, $"%{searchQuery}%"))
+                .Where(i => i.UserAccount == user && i.CompletedDateTime == null && i.DeletedDateTime == null && (EF.Functions.Like(i.Description, $"%{searchQuery}%") || EF.Functions.Like(i.Notes, $"%{searchQuery}%")))
                 .OrderByDescending(i => i.LastUpdateDateTime ?? i.CreatedDateTime)
                 .ToListAsync();
 

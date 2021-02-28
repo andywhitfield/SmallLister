@@ -35,7 +35,7 @@ namespace SmallLister.Web.Handlers
             var (overdueCount, dueCount, totalCount, userListCounts) = await _userListRepository.GetListCountsAsync(user);
             var (lists, _) = GetListItemsRequestHandler.GetUserListModels(userLists, overdueCount, dueCount, totalCount, userListCounts);
 
-            var items = string.IsNullOrWhiteSpace(request.SearchQuery) ? new List<UserItem>() : await _userItemRepository.FindItemsByQueryAsync(user, request.SearchQuery);
+            var items = string.IsNullOrWhiteSpace(request.SearchQuery) ? new List<UserItem>() : await _userItemRepository.FindItemsByQueryAsync(user, request.SearchQuery.Trim());
             return new FindItemResponse(lists, items.Select(i => new UserItemModel(i)));
         }
     }
