@@ -27,6 +27,9 @@
         @if (Model.ItemToEdit.PostponedUntilDate != null) {
             <text>(Postponed until @Model.ItemToEdit.PostponedUntilDate.Value.ToString("yyyy-MM-dd"))</text>
         }
+        @if (Model.ItemToEdit.DueDate.HasValue) {
+        <button type="submit" name="snooze" value="true" title="Snooze for a day" data-depends="input.sml-list-add-due">Snooze</button>
+        }
     </div>
     <div>        
         <label for="sml-list-add-repeat">Repeat:</label>

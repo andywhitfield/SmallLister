@@ -71,11 +71,19 @@ namespace SmallLister.Web.Handlers
                     _logger.LogInformation($"Could not parse due date {request.Model.Due}");
                     return false;
                 }
-                if (item.NextDueDate != dueDate)
+
+                if ((request.Model.Snooze ?? false) && item.NextDueDate.HasValue)
                 {
-                    item.PostponedUntilDate = null;
+                    item.PostponedUntilDate = (item.PostponedUntilDate ?? item.NextDueDate)?.Date.AddDays(1);
                 }
-                item.NextDueDate = dueDate;
+                else
+                {
+                    if (item.NextDueDate != dueDate)
+                    {
+                        item.PostponedUntilDate = null;
+                    }
+                    item.NextDueDate = dueDate;
+                }
             }
 
             await _userItemRepository.SaveAsync(item, list, _userActionsService);

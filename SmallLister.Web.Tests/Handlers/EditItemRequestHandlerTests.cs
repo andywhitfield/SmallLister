@@ -91,6 +91,54 @@ namespace SmallLister.Web.Tests.Handlers
         }
 
         [Fact]
+        public async Task When_snoozing_item_Should_update_other_properties_Except_due_date()
+        {
+            _userItem.PostponedUntilDate = null;
+            var result = await _handler.Handle(new EditItemRequest(_user, _userItem.UserItemId, new AddOrUpdateItemRequest
+            {
+                Description = _updatedUserItemInfo.Description,
+                Due = _updatedUserItemInfo.NextDueDate.Value.ToString("yyyy-MM-dd"),
+                List = _updatedUserItemInfo.UserListId.ToString(),
+                Notes = _updatedUserItemInfo.Notes,
+                Repeat = _updatedUserItemInfo.Repeat,
+                Snooze = true
+            }), CancellationToken.None);
+
+            result.Should().BeTrue();
+            _userItemRepository.Verify(x => x.SaveAsync(It.Is<UserItem>(x =>
+                x.Description == _updatedUserItemInfo.Description &&
+                x.NextDueDate == _userItem.NextDueDate.Value.Date &&
+                x.PostponedUntilDate == _userItem.NextDueDate.Value.Date.AddDays(1) &&
+                x.Notes == _updatedUserItemInfo.Notes &&
+                x.Repeat == _updatedUserItemInfo.Repeat), _updatedUserItemInfo.UserList,
+                It.IsAny<IUserActionsService>()), Times.Once);
+        }
+
+        [Fact]
+        public async Task When_snoozing_item_Should_add_a_day_from_the_current_postponed_date()
+        {
+            var expectedSnoozeDate = _userItem.PostponedUntilDate.Value.Date.AddDays(1);
+            var result = await _handler.Handle(new EditItemRequest(_user, _userItem.UserItemId, new AddOrUpdateItemRequest
+            {
+                Description = _updatedUserItemInfo.Description,
+                Due = _updatedUserItemInfo.NextDueDate.Value.ToString("yyyy-MM-dd"),
+                List = _updatedUserItemInfo.UserListId.ToString(),
+                Notes = _updatedUserItemInfo.Notes,
+                Repeat = _updatedUserItemInfo.Repeat,
+                Snooze = true
+            }), CancellationToken.None);
+
+            result.Should().BeTrue();
+            _userItemRepository.Verify(x => x.SaveAsync(It.Is<UserItem>(x =>
+                x.Description == _updatedUserItemInfo.Description &&
+                x.NextDueDate == _userItem.NextDueDate.Value.Date &&
+                x.PostponedUntilDate == expectedSnoozeDate &&
+                x.Notes == _updatedUserItemInfo.Notes &&
+                x.Repeat == _updatedUserItemInfo.Repeat), _updatedUserItemInfo.UserList,
+                It.IsAny<IUserActionsService>()), Times.Once);
+        }
+
+        [Fact]
         public async Task Given_editing_an_item_When_not_changing_due_date_Should_not_reset_postponed_date()
         {
             var result = await _handler.Handle(new EditItemRequest(_user, _userItem.UserItemId, new AddOrUpdateItemRequest

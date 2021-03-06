@@ -13,5 +13,6 @@ namespace SmallLister.Web.Model.Request
         public string Notes { get; set; }
         public bool? Delete { get; set; }
         public bool? Done { get; set; }
+        public bool? Snooze { get; set; }
     }
 }
