@@ -133,6 +133,10 @@ ul.sml-list-item {
     list-style: none;
 }
 
+ul.sml-list {
+    margin-top: 15px;
+}
+
 li.sml-list {
     border-top: 2px solid #23dbdd;
     display: flex;
