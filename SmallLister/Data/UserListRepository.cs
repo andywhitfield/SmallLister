@@ -25,18 +25,19 @@ namespace SmallLister.Data
         public Task<List<UserList>> GetListsAsync(UserAccount user) =>
             _context.UserLists.Where(l => l.UserAccount == user && l.DeletedDateTime == null).OrderBy(l => l.SortOrder).ToListAsync();
 
-        public async Task<(int OverdueCount, int DueCount, int TotalCount, IDictionary<int, int> ListCounts)> GetListCountsAsync(UserAccount user)
+        public async Task<(int OverdueCount, int DueCount, int TotalCount, int TotalWithDueDateCount, IDictionary<int, int> ListCounts)> GetListCountsAsync(UserAccount user)
         {
             var today = DateTime.Today;
             var overdue = await _context.UserItems.CountAsync(i => i.UserAccount == user && i.CompletedDateTime == null && i.DeletedDateTime == null && i.NextDueDate != null && ((i.PostponedUntilDate == null && i.NextDueDate.Value.Date < today) || (i.PostponedUntilDate != null && i.PostponedUntilDate.Value < today)));
             var due = await _context.UserItems.CountAsync(i => i.UserAccount == user && i.CompletedDateTime == null && i.DeletedDateTime == null && i.NextDueDate != null && ((i.PostponedUntilDate == null && i.NextDueDate.Value.Date == today) || (i.PostponedUntilDate != null && i.PostponedUntilDate.Value == today)));
             var total = await _context.UserItems.CountAsync(i => i.UserAccount == user && i.CompletedDateTime == null && i.DeletedDateTime == null);
+            var totalWithDueDate = await _context.UserItems.CountAsync(i => i.UserAccount == user && i.CompletedDateTime == null && i.DeletedDateTime == null && i.NextDueDate != null);
             var countByListId = await _context.UserItems
                 .Where(i => i.UserAccount == user && i.CompletedDateTime == null && i.DeletedDateTime == null && i.UserListId != null)
                 .GroupBy(i => i.UserListId)
                 .Select(g => new { UserListId = g.Key.Value, Count = g.Count() })
                 .ToDictionaryAsync(s => s.UserListId, s => s.Count);
-            return (overdue, due, total, countByListId);
+            return (overdue, due, total, totalWithDueDate, countByListId);
         }
 
         public async Task AddListAsync(UserAccount user, string name)

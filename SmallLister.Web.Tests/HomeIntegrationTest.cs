@@ -38,6 +38,7 @@ namespace SmallLister.Web.Tests
             responseContent.Should().Contain("Logout")
                 .And.Contain("1 overdue and 1 due today (2)")
                 .And.Contain("All (3)")
+                .And.Contain("All upcoming (2)")
                 .And.Contain("Test list (1)")
                 .And.Contain("Test item 1")
                 .And.Contain("Test item 2")

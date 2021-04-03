@@ -13,7 +13,7 @@
 <article>
     <span class="sml-toolbar">
     @{
-    var isUserList = !Model.IsAllListSelected && !Model.IsDueListSelected;
+    var isUserList = Model.IsUserListSelected;
     }
     @if (Model.HasUndoAction) {
         <form method="post" action="/history/undo">
@@ -57,7 +57,7 @@
             @foreach (var item in Model.Items) {
                 <li class="@item.AppendDueCssClass("sml-list-item")" data-listitem="@item.UserItemId">
                     <div>
-                        @if (!Model.IsAllListSelected && !Model.IsDueListSelected) {
+                        @if (Model.IsUserListSelected) {
                         <img class="sml-list-item-drag-handle" src="/images/drag.png" height="26" width="22" title="Move" />
                         }
                     </div>

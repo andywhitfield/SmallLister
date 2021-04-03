@@ -6,7 +6,24 @@ namespace SmallLister.Web.Model.Home
     public class IndexViewModel : BaseViewModel
     {
         public const string AllList = "all";
+        public const string AllWithDueDateList = "alldue";
         public const string DueList = "due";
+
+        public static void SetListCssClass(IEnumerable<UserListModel> lists, UserListModel selectedList)
+        {
+            foreach (var list in lists)
+            {
+                list.CssClass = list.UserListId switch
+                {
+                    AllList => "sml-list-all ",
+                    AllWithDueDateList => "sml-list-all ",
+                    DueList => "sml-list-due ",
+                    _ => ""
+                };
+
+                list.CssClass += list.UserListId == selectedList?.UserListId ? "sml-selected" : "";
+            }
+        }
 
         public IndexViewModel(HttpContext context, int dueAndOverdueCount, IEnumerable<UserListModel> lists, UserListModel selectedList,
             IEnumerable<UserItemModel> items, Pagination pagination, string undoAction, string redoAction)
@@ -18,18 +35,7 @@ namespace SmallLister.Web.Model.Home
             Pagination = pagination;
             UndoAction = undoAction;
             RedoAction = redoAction;
-
-            foreach (var list in Lists)
-            {
-                if (list.UserListId == AllList)
-                    list.CssClass = "sml-list-all ";
-                else if (list.UserListId == DueList)
-                    list.CssClass = "sml-list-due ";
-                else
-                    list.CssClass = "";
-
-                list.CssClass += list.UserListId == SelectedList.UserListId ? "sml-selected" : "";
-            }
+            SetListCssClass(lists, selectedList);
         }
 
         public UserListModel SelectedList { get; }
@@ -37,6 +43,8 @@ namespace SmallLister.Web.Model.Home
         public IEnumerable<UserItemModel> Items { get; }
         public bool IsDueListSelected => SelectedList.UserListId == DueList;
         public bool IsAllListSelected => SelectedList.UserListId == AllList;
+        public bool IsAllWithDueDateListSelected => SelectedList.UserListId == AllWithDueDateList;
+        public bool IsUserListSelected => !IsAllListSelected && !IsDueListSelected && !IsAllWithDueDateListSelected;
         public Pagination Pagination { get; }
         public string UndoAction { get; }
         public bool HasUndoAction => !string.IsNullOrEmpty(UndoAction);

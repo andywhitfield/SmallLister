@@ -11,6 +11,7 @@ namespace SmallLister.Web.Model.Find
             FindText = findText;
             Lists = lists;
             Items = items;
+            Home.IndexViewModel.SetListCssClass(lists, null);
         }
         public string FindText { get; }
         public IEnumerable<UserListModel> Lists { get; }

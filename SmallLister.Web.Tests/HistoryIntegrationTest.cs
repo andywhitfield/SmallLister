@@ -40,12 +40,14 @@ namespace SmallLister.Web.Tests
             var responseContent = await response.Content.ReadAsStringAsync();
             responseContent.Should().Contain("Logout")
                 .And.Contain("All (0)")
+                .And.Contain("All upcoming (0)")
                 .And.Contain("Test list (0)")
                 .And.NotContain("Undo")
                 .And.NotContain("Redo");
 
             responseContent = await AddItemAsync(client, responseContent, firstTaskDescription);
             responseContent.Should().Contain("All (1)")
+                .And.Contain("All upcoming (0)")
                 .And.Contain("Test list (1)")
                 .And.Contain(firstTaskDescription)
                 .And.Contain("Undo")
@@ -53,6 +55,7 @@ namespace SmallLister.Web.Tests
 
             responseContent = await AddItemAsync(client, responseContent, secondTaskDescription);
             responseContent.Should().Contain("All (2)")
+                .And.Contain("All upcoming (0)")
                 .And.Contain("Test list (2)")
                 .And.Contain(firstTaskDescription)
                 .And.Contain(secondTaskDescription)
@@ -61,6 +64,7 @@ namespace SmallLister.Web.Tests
 
             responseContent = await MarkItemDoneAsync(client, responseContent, firstTaskDescription);
             responseContent.Should().Contain("All (1)")
+                .And.Contain("All upcoming (0)")
                 .And.Contain("Test list (1)")
                 .And.Contain(secondTaskDescription)
                 .And.Contain("Undo")
@@ -68,6 +72,7 @@ namespace SmallLister.Web.Tests
 
             responseContent = await UndoAsync(client, responseContent);
             responseContent.Should().Contain("All (2)")
+                .And.Contain("All upcoming (0)")
                 .And.Contain("Test list (2)")
                 .And.Contain(firstTaskDescription)
                 .And.Contain(secondTaskDescription)
@@ -76,6 +81,7 @@ namespace SmallLister.Web.Tests
 
             responseContent = await UndoAsync(client, responseContent);
             responseContent.Should().Contain("All (1)")
+                .And.Contain("All upcoming (0)")
                 .And.Contain("Test list (1)")
                 .And.Contain(firstTaskDescription)
                 .And.NotContain(secondTaskDescription)
@@ -84,6 +90,7 @@ namespace SmallLister.Web.Tests
 
             responseContent = await UndoAsync(client, responseContent);
             responseContent.Should().Contain("All (0)")
+                .And.Contain("All upcoming (0)")
                 .And.Contain("Test list (0)")
                 .And.NotContain(firstTaskDescription)
                 .And.NotContain(secondTaskDescription)
@@ -92,6 +99,7 @@ namespace SmallLister.Web.Tests
 
             responseContent = await RedoAsync(client, responseContent);
             responseContent.Should().Contain("All (1)")
+                .And.Contain("All upcoming (0)")
                 .And.Contain("Test list (1)")
                 .And.Contain(firstTaskDescription)
                 .And.NotContain(secondTaskDescription)
@@ -100,6 +108,7 @@ namespace SmallLister.Web.Tests
 
             responseContent = await RedoAsync(client, responseContent);
             responseContent.Should().Contain("All (2)")
+                .And.Contain("All upcoming (0)")
                 .And.Contain("Test list (2)")
                 .And.Contain(firstTaskDescription)
                 .And.Contain(secondTaskDescription)
@@ -108,6 +117,7 @@ namespace SmallLister.Web.Tests
 
             responseContent = await RedoAsync(client, responseContent);
             responseContent.Should().Contain("All (1)")
+                .And.Contain("All upcoming (0)")
                 .And.Contain("Test list (1)")
                 .And.NotContain(firstTaskDescription)
                 .And.Contain(secondTaskDescription)

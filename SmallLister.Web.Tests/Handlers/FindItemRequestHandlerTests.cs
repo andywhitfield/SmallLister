@@ -32,7 +32,7 @@ namespace SmallLister.Web.Tests.Handlers
             userAccountRepository.Setup(x => x.GetUserAccountAsync(user)).ReturnsAsync(userAccount);
             var userListRepository = new Mock<IUserListRepository>();
             userListRepository.Setup(x => x.GetListsAsync(userAccount)).ReturnsAsync(userLists);
-            userListRepository.Setup(x => x.GetListCountsAsync(userAccount)).ReturnsAsync((0, 0, 0, new Dictionary<int, int>()));
+            userListRepository.Setup(x => x.GetListCountsAsync(userAccount)).ReturnsAsync((0, 0, 0, 0, new Dictionary<int, int>()));
             var userItemRepository = new Mock<IUserItemRepository>();
             userItemRepository.Setup(x => x.FindItemsByQueryAsync(userAccount, searchQuery)).ReturnsAsync(userItems);
 

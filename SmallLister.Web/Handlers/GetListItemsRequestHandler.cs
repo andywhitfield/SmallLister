@@ -35,10 +35,11 @@ namespace SmallLister.Web.Handlers
             _userActionRepository = userActionRepository;
         }
 
-        public static (IEnumerable<UserListModel> Lists, bool HasDueItems) GetUserListModels(List<UserList> userLists, int overdueCount, int dueCount, int totalCount, IDictionary<int, int> userListCounts)
+        public static (IEnumerable<UserListModel> Lists, bool HasDueItems) GetUserListModels(List<UserList> userLists, int overdueCount, int dueCount, int totalCount, int totalWithDueDateCount, IDictionary<int, int> userListCounts)
         {
             var lists = userLists
                 .Select(l => new UserListModel(l.UserListId.ToString(), l.Name, true, userListCounts.TryGetValue(l.UserListId, out var listCount) ? listCount : 0, l.ItemSortOrder))
+                .Prepend(new UserListModel(IndexViewModel.AllWithDueDateList, "All upcoming", true, totalWithDueDateCount))
                 .Prepend(new UserListModel(IndexViewModel.AllList, "All", true, totalCount));
             var hasDueItems = overdueCount > 0 || dueCount > 0;
             if (hasDueItems)
@@ -55,8 +56,8 @@ namespace SmallLister.Web.Handlers
         {
             var user = await _userAccountRepository.GetUserAccountAsync(request.User);
             var userLists = await _userListRepository.GetListsAsync(user);
-            var (overdueCount, dueCount, totalCount, userListCounts) = await _userListRepository.GetListCountsAsync(user);
-            var (lists, hasDueItems) = GetUserListModels(userLists, overdueCount, dueCount, totalCount, userListCounts);
+            var (overdueCount, dueCount, totalCount, totalWithDueDateCount, userListCounts) = await _userListRepository.GetListCountsAsync(user);
+            var (lists, hasDueItems) = GetUserListModels(userLists, overdueCount, dueCount, totalCount, totalWithDueDateCount, userListCounts);
 
             IEnumerable<UserItem> items;
             UserListModel selectedList;
@@ -67,6 +68,11 @@ namespace SmallLister.Web.Handlers
                 {
                     (selectedList, items, pageNumber, pageCount) = await GetAllItemsAsync(user, lists, request.PageNumber);
                     await _userAccountRepository.SetLastSelectedUserListIdAsync(user, null);
+                }
+                else if (request.List == IndexViewModel.AllWithDueDateList)
+                {
+                    (selectedList, items, pageNumber, pageCount) = await GetAllItemsWithDueDateAsync(user, lists, request.PageNumber);
+                    await _userAccountRepository.SetLastSelectedUserListIdAsync(user, -2);
                 }
                 else if (request.List == IndexViewModel.DueList && hasDueItems)
                 {
@@ -92,6 +98,8 @@ namespace SmallLister.Web.Handlers
                 if (selectedList == null)
                     if (user.LastSelectedUserListId == -1 && hasDueItems)
                         (selectedList, items, pageNumber, pageCount) = await GetDueItemsAsync(user, lists, request.PageNumber);
+                    else if (user.LastSelectedUserListId == -2)
+                        (selectedList, items, pageNumber, pageCount) = await GetAllItemsWithDueDateAsync(user, lists, request.PageNumber);
                     else
                         (selectedList, items, pageNumber, pageCount) = await GetAllItemsAsync(user, lists, request.PageNumber);
                 else
@@ -108,6 +116,12 @@ namespace SmallLister.Web.Handlers
         {
             var (userItems, resultPageNumber, pageCount) = await _userItemRepository.GetItemsAsync(user, null, pageNumber: pageNumber);
             return (lists.Single(l => l.UserListId == IndexViewModel.AllList), userItems, resultPageNumber, pageCount);
+        }
+
+        private async Task<(UserListModel ListModel, IEnumerable<UserItem> Items, int PageNumber, int PageCount)> GetAllItemsWithDueDateAsync(UserAccount user, IEnumerable<UserListModel> lists, int? pageNumber)
+        {
+            var (userItems, resultPageNumber, pageCount) = await _userItemRepository.GetItemsAsync(user, null, new UserItemFilter { WithDueDate = true }, pageNumber);
+            return (lists.Single(l => l.UserListId == IndexViewModel.AllWithDueDateList), userItems, resultPageNumber, pageCount);
         }
 
         private async Task<(UserListModel, IEnumerable<UserItem>, int PageNumber, int PageCount)> GetDueItemsAsync(UserAccount user, IEnumerable<UserListModel> lists, int? pageNumber)

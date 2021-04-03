@@ -41,6 +41,7 @@ namespace SmallLister.Web.Tests
             responseContent.Should().Contain("Logout")
                 .And.Contain("1 overdue and 1 due today (2)")
                 .And.Contain("All (3)")
+                .And.Contain("All upcoming (2)")
                 .And.Contain("Due yesterday", Exactly.Once())
                 .And.Contain("Due today", Exactly.Once());
 
@@ -57,6 +58,7 @@ namespace SmallLister.Web.Tests
             responseContent.Should().Contain("Logout")
                 .And.Contain("2 due today (2)")
                 .And.Contain("All (3)")
+                .And.Contain("All upcoming (2)")
                 .And.Contain("Due today", Exactly.Twice());
             item = await GetUserItemWithDescriptionAsync("Test item 3");
             item.NextDueDate.Should().Be(DateTime.Today);
@@ -73,6 +75,7 @@ namespace SmallLister.Web.Tests
             responseContent.Should().Contain("Logout")
                 .And.Contain("1 overdue and 1 due today (2)")
                 .And.Contain("All (3)")
+                .And.Contain("All upcoming (2)")
                 .And.Contain("Due yesterday", Exactly.Once())
                 .And.Contain("Due today", Exactly.Once());
 
@@ -89,6 +92,7 @@ namespace SmallLister.Web.Tests
             responseContent.Should().Contain("Logout")
                 .And.Contain("1 overdue (1)")
                 .And.Contain("All (2)")
+                .And.Contain("All upcoming (1)")
                 .And.Contain("Due yesterday", Exactly.Once());
             item = await GetUserItemWithDescriptionAsync("Test item 2");
             item.NextDueDate.Should().Be(DateTime.Today);
