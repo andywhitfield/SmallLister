@@ -41,13 +41,13 @@ namespace SmallLister.Data
 
             if (filter != null)
             {
+                var today = DateTime.Today;
+                Func<IQueryable<UserItem>, IQueryable<UserItem>> dueListOrdering = q => q.OrderBy(i => i.PostponedUntilDate ?? i.NextDueDate).ThenBy(i => i.UserList.SortOrder).ThenBy(i => i.SortOrder);
                 if (filter.WithDueDate)
                 {
                     query = query.Where(i => i.NextDueDate != null);
+                    orderByClause = dueListOrdering;
                 }
-
-                var today = DateTime.Today;
-                Func<IQueryable<UserItem>, IQueryable<UserItem>> dueListOrdering = q => q.OrderBy(i => i.PostponedUntilDate ?? i.NextDueDate).ThenBy(i => i.UserList.SortOrder).ThenBy(i => i.SortOrder);
                 if (filter.Overdue && filter.DueToday)
                 {
                     query = query.Where(i => (i.PostponedUntilDate ?? i.NextDueDate) <= today);
