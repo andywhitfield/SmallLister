@@ -39,7 +39,7 @@ namespace SmallLister.Web.Handlers
         {
             var lists = userLists
                 .Select(l => new UserListModel(l.UserListId.ToString(), l.Name, true, userListCounts.TryGetValue(l.UserListId, out var listCount) ? listCount : 0, l.ItemSortOrder))
-                .Prepend(new UserListModel(IndexViewModel.AllWithDueDateList, "All upcoming", true, totalWithDueDateCount))
+                .Prepend(new UserListModel(IndexViewModel.AllWithDueDateList, "All upcoming", false, totalWithDueDateCount))
                 .Prepend(new UserListModel(IndexViewModel.AllList, "All", true, totalCount));
             var hasDueItems = overdueCount > 0 || dueCount > 0;
             if (hasDueItems)
