@@ -48,7 +48,7 @@ namespace SmallLister.Web.Handlers
 
             var (items, _, _) = await _userItemRepository.GetItemsAsync(user, null, new UserItemFilter
             {
-                DueToday = userFeed.FeedType == UserFeedType.Due,
+                DueToday = userFeed.FeedType == UserFeedType.Due || userFeed.FeedType == UserFeedType.Daily,
                 Overdue = true
             });
             var itemHash = GenerateHash(items.Select(i => i.UserItemId).Append(DateTime.Today.GetHashCode()));
