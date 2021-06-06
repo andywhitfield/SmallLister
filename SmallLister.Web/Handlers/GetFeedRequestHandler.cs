@@ -51,7 +51,7 @@ namespace SmallLister.Web.Handlers
                 DueToday = userFeed.FeedType == UserFeedType.Due || userFeed.FeedType == UserFeedType.Daily,
                 Overdue = true
             });
-            var itemHash = GenerateHash(items.Select(i => i.UserItemId).Append(DateTime.Today.GetHashCode()));
+            var itemHash = GenerateHash(userFeed.FeedType == UserFeedType.Daily ? new[] { DateTime.Today.GetHashCode() } : items.Select(i => i.UserItemId).Append(DateTime.Today.GetHashCode()));
             if (userFeed.ItemHash != itemHash)
             {
                 userFeed.ItemHash = itemHash;
