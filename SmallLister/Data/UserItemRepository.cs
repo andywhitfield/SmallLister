@@ -122,20 +122,25 @@ namespace SmallLister.Data
                     UpdateItemSortOrder(item, sortOrder++, now, savedItemSortOrders);
             }
 
-            var savedListSortOrder = ((int?)null, (ItemSortOrder?)null, (ItemSortOrder?)null);
-            var list = item.UserListId == null ? null : await _context.UserLists.SingleOrDefaultAsync(l => l.UserListId == item.UserListId && l.DeletedDateTime == null);
-            if (list != null)
+            if (savedItemSortOrders.Any())
             {
-                savedListSortOrder = (list.UserListId, list.ItemSortOrder, null);
-                list.ItemSortOrder = null;
-                list.LastUpdateDateTime = now;
+                var savedListSortOrder = ((int?)null, (ItemSortOrder?)null, (ItemSortOrder?)null);
+                var list = item.UserListId == null ? null : await _context.UserLists.SingleOrDefaultAsync(l => l.UserListId == item.UserListId && l.DeletedDateTime == null);
+                if (list != null)
+                {
+                    savedListSortOrder = (list.UserListId, list.ItemSortOrder, null);
+                    list.ItemSortOrder = null;
+                    list.LastUpdateDateTime = now;
+                }
+
+                await _context.SaveChangesAsync();
+
+                await userActions.AddAsync(user, new ReorderItemsAction(savedItemSortOrders, savedListSortOrder));
             }
+            else
+                _logger.LogInformation("Sort order not changed, nothing to do.");
 
-            await _context.SaveChangesAsync();
-
-            await userActions.AddAsync(user, new ReorderItemsAction(savedItemSortOrders, savedListSortOrder));
-
-            void UpdateItemSortOrder(UserItem itemToUpdate, int newSortOrder, DateTime lastUpdateDateTime, IList<(int UserItemId, int OriginalSortOrder, int UpdatedSortOrder)> collectItemChanges)
+            static void UpdateItemSortOrder(UserItem itemToUpdate, int newSortOrder, DateTime lastUpdateDateTime, IList<(int UserItemId, int OriginalSortOrder, int UpdatedSortOrder)> collectItemChanges)
             {
                 if (itemToUpdate.SortOrder == newSortOrder)
                     return;

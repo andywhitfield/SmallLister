@@ -57,7 +57,7 @@ namespace SmallLister.Web.Handlers
                 }
             }
 
-            _logger.LogInformation($"Updating order of item {item.UserItemId} [{item.Description}] to come after item {precedingItem?.UserItemId} [{precedingItem?.Description}]");
+            _logger.LogInformation($"Updating order of item {item.UserItemId} [{item.SortOrder}/{item.Description}] to come after item {precedingItem?.UserItemId} [{precedingItem?.SortOrder}/{precedingItem?.Description}]");
             await _userItemRepository.UpdateOrderAsync(user, item, precedingItem, _userActionsService);
             return true;
         }
