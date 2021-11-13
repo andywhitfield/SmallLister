@@ -153,7 +153,7 @@ namespace SmallLister.Web
                 .AddScoped<IUserActionRepository, UserActionRepository>();
 
             services.AddMediatR(typeof(Startup));
-            services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_3_0).AddSessionStateTempDataProvider();
+            services.AddMvc().AddSessionStateTempDataProvider();
             services.AddApiVersioning();
             services.AddVersionedApiExplorer(options => options.GroupNameFormat = "'v'VVV");
             services.AddTransient<IConfigureOptions<SwaggerGenOptions>, ConfigureSwaggerOptions>();
