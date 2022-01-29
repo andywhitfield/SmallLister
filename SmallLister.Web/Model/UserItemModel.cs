@@ -50,7 +50,7 @@ namespace SmallLister.Web.Model
             ItemRepeat.DailyExcludingWeekend => "Repeats every day, except Saturday and Sunday",
             ItemRepeat.Weekends => "Repeats every Saturday and Sunday",
             ItemRepeat.Biweekly => "Repeats every 2 weeks",
-            ItemRepeat.Triweekly => "Repeats every 3 weekes",
+            ItemRepeat.Triweekly => "Repeats every 3 weeks",
             ItemRepeat.LastDayMonthly => "Repeats on the last day of every month",
             ItemRepeat.BiMonthly => "Repeats every 2 months",
             ItemRepeat.Quarterly => "Repeats every 3 months",
