@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
 using SmallLister.Model;
 
 namespace SmallLister.Data
@@ -11,13 +10,8 @@ namespace SmallLister.Data
     public class UserAccountTokenRepository : IUserAccountTokenRepository
     {
         private readonly SqliteDataContext _context;
-        private readonly ILogger<UserAccountTokenRepository> _logger;
 
-        public UserAccountTokenRepository(SqliteDataContext context, ILogger<UserAccountTokenRepository> logger)
-        {
-            _context = context;
-            _logger = logger;
-        }
+        public UserAccountTokenRepository(SqliteDataContext context) => _context = context;
 
         public async Task<List<UserAccountToken>> GetAsync(UserAccountApiAccess userAccountApiAccess)
         {

@@ -26,8 +26,12 @@ bld/
 
 publish/
 
+.vscode/
 .keys/
 .DS_Store
+
+appsettings.Development.json
+appsettings.Production.json
 
 smalllister.db
 smalllister.db-shm

@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
 using SmallLister.Model;
 
 namespace SmallLister.Data
@@ -11,13 +10,8 @@ namespace SmallLister.Data
     public class UserListRepository : IUserListRepository
     {
         private readonly SqliteDataContext _context;
-        private readonly ILogger<UserListRepository> _logger;
 
-        public UserListRepository(SqliteDataContext context, ILogger<UserListRepository> logger)
-        {
-            _context = context;
-            _logger = logger;
-        }
+        public UserListRepository(SqliteDataContext context) => _context = context;
 
         public Task<UserList> GetListAsync(UserAccount user, int userListId) =>
             _context.UserLists.SingleOrDefaultAsync(l => l.UserListId == userListId && l.UserAccount == user && l.DeletedDateTime == null);
@@ -77,7 +71,7 @@ namespace SmallLister.Data
             }
             await _context.SaveChangesAsync();
 
-            void UpdateListSortOrder(UserList listToUpdate, int newSortOrder, DateTime lastUpdateDateTime)
+            static void UpdateListSortOrder(UserList listToUpdate, int newSortOrder, DateTime lastUpdateDateTime)
             {
                 if (listToUpdate.SortOrder == newSortOrder)
                     return;

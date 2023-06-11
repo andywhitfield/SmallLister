@@ -15,6 +15,7 @@ namespace SmallLister.Data
         public DbSet<UserAccountApiAccess> UserAccountApiAccesses { get; set; }
         public DbSet<UserFeed> UserFeeds { get; set; }
         public DbSet<UserAction> UserActions { get; set; }
+        public DbSet<UserWebhook> UserWebhooks { get; set; }
         public void Migrate() => Database.Migrate();
     }
 }

@@ -11,7 +11,6 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ApiExplorer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -150,7 +149,8 @@ namespace SmallLister.Web
                 .AddScoped<IUserActionHandler<IUserAction>, AddItemActionHandler>()
                 .AddScoped<IUserActionHandler<IUserAction>, UpdateItemActionHandler>()
                 .AddScoped<IUserActionHandler<IUserAction>, ReorderItemsActionHandler>()
-                .AddScoped<IUserActionRepository, UserActionRepository>();
+                .AddScoped<IUserActionRepository, UserActionRepository>()
+                .AddScoped<IUserWebhookRepository, UserWebhookRepository>();
 
             services.AddMediatR(typeof(Startup));
             services.AddMvc().AddSessionStateTempDataProvider();
@@ -168,7 +168,7 @@ namespace SmallLister.Web
             services.AddSession(options => options.IdleTimeout = TimeSpan.FromMinutes(5));
         }
 
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, ILoggerFactory loggerFactory, IApiVersionDescriptionProvider provider)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, IApiVersionDescriptionProvider provider)
         {
             if (env.IsDevelopment())
                 app.UseDeveloperExceptionPage();
