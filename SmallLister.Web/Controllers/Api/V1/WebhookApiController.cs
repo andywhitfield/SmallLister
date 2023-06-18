@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using SmallLister.Model;
 using SmallLister.Security;
 using SmallLister.Web.Handlers.RequestResponse.Api;
 using SmallLister.Web.Model.Api;
@@ -49,6 +50,26 @@ public class WebhookApiController : ControllerBase
         if (!await _mediator.Send(new AddWebhookRequest(user, model)))
             return Conflict();
 
+        return Ok();
+    }
+
+    [HttpDelete("~/api/v{version:apiVersion}/webhook/{webhookType}")]
+    public async Task<IActionResult> DeleteWebhook([Required] WebhookType webhookType)
+    {
+        if (!ModelState.IsValid)
+        {
+            _logger.LogInformation("Model state is invalid, returning bad request");
+            return BadRequest();
+        }
+
+        var user = await _jwtService.GetUserAccountAsync(User);
+        if (user == null)
+        {
+            _logger.LogInformation($"Could not get user account from token {User.Identity.Name}, returning unauthorized");
+            return Unauthorized();
+        }
+
+        await _mediator.Send(new DeleteWebhookRequest(user, webhookType));
         return Ok();
     }
 }

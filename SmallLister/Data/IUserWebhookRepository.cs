@@ -8,4 +8,5 @@ public interface IUserWebhookRepository
 {
     Task<UserWebhook> GetWebhookAsync(UserAccount user, WebhookType webhookType);
     Task AddWebhookAsync(UserAccount user, WebhookType webhookType, Uri webhookUri);
+    Task DeleteWebhookAsync(UserAccount user, WebhookType webhookType);
 }

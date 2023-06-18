@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using SmallLister.Model;
@@ -25,6 +26,20 @@ public class UserWebhookRepository : IUserWebhookRepository
             WebhookType = webhookType,
             Webhook = webhookUri
         });
+        await _context.SaveChangesAsync();
+    }
+
+    public async Task DeleteWebhookAsync(UserAccount user, WebhookType webhookType)
+    {
+        DateTime now = DateTime.UtcNow;
+        await foreach (var wh in _context.UserWebhooks.Where(x =>
+            x.UserAccountId == user.UserAccountId &&
+            x.WebhookType == webhookType &&
+            x.DeletedDateTime == null).AsAsyncEnumerable())
+        {
+            wh.DeletedDateTime = now;
+        }
+        
         await _context.SaveChangesAsync();
     }
 }
