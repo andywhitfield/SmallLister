@@ -49,6 +49,7 @@ namespace SmallLister.Web
             services.AddSingleton<IConfiguration>(Configuration);
 
             services
+                .ConfigureApplicationCookie(c => c.Cookie.Name = "smalllister")
                 .AddAuthentication(o =>
                 {
                     o.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
@@ -57,6 +58,7 @@ namespace SmallLister.Web
                 {
                     o.LoginPath = "/signin";
                     o.LogoutPath = "/signout";
+                    o.Cookie.Name = "smalllister";
                     o.Cookie.HttpOnly = true;
                     o.Cookie.MaxAge = TimeSpan.FromDays(1);
                     o.ExpireTimeSpan = TimeSpan.FromDays(1);
