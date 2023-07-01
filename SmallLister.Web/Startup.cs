@@ -152,7 +152,8 @@ namespace SmallLister.Web
                 .AddScoped<IUserActionHandler<IUserAction>, UpdateItemActionHandler>()
                 .AddScoped<IUserActionHandler<IUserAction>, ReorderItemsActionHandler>()
                 .AddScoped<IUserActionRepository, UserActionRepository>()
-                .AddScoped<IUserWebhookRepository, UserWebhookRepository>();
+                .AddScoped<IUserWebhookRepository, UserWebhookRepository>()
+                .AddScoped<IWebhookQueueRepository, WebhookQueueRepository>();
 
             services.AddMediatR(typeof(Startup));
             services.AddMvc().AddSessionStateTempDataProvider();

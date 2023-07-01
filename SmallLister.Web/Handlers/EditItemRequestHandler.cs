@@ -8,86 +8,90 @@ using SmallLister.Data;
 using SmallLister.Model;
 using SmallLister.Web.Handlers.RequestResponse;
 
-namespace SmallLister.Web.Handlers
+namespace SmallLister.Web.Handlers;
+
+public class EditItemRequestHandler : IRequestHandler<EditItemRequest, bool>
 {
-    public class EditItemRequestHandler : IRequestHandler<EditItemRequest, bool>
+    private readonly ILogger<EditItemRequestHandler> _logger;
+    private readonly IUserAccountRepository _userAccountRepository;
+    private readonly IUserItemRepository _userItemRepository;
+    private readonly IUserListRepository _userListRepository;
+    private readonly IUserActionsService _userActionsService;
+    private readonly IWebhookQueueRepository _webhookQueueRepository;
+
+    public EditItemRequestHandler(ILogger<EditItemRequestHandler> logger, IUserAccountRepository userAccountRepository,
+        IUserItemRepository userItemRepository, IUserListRepository userListRepository, IUserActionsService userActionsService,
+        IWebhookQueueRepository webhookQueueRepository)
     {
-        private readonly ILogger<EditItemRequestHandler> _logger;
-        private readonly IUserAccountRepository _userAccountRepository;
-        private readonly IUserItemRepository _userItemRepository;
-        private readonly IUserListRepository _userListRepository;
-        private readonly IUserActionsService _userActionsService;
-        public EditItemRequestHandler(ILogger<EditItemRequestHandler> logger, IUserAccountRepository userAccountRepository,
-            IUserItemRepository userItemRepository, IUserListRepository userListRepository, IUserActionsService userActionsService)
+        _logger = logger;
+        _userAccountRepository = userAccountRepository;
+        _userItemRepository = userItemRepository;
+        _userListRepository = userListRepository;
+        _userActionsService = userActionsService;
+        _webhookQueueRepository = webhookQueueRepository;
+    }
+
+    public async Task<bool> Handle(EditItemRequest request, CancellationToken cancellationToken)
+    {
+        var user = await _userAccountRepository.GetUserAccountAsync(request.User);
+        var item = await _userItemRepository.GetItemAsync(user, request.UserItemId);
+        if (item == null)
         {
-            _logger = logger;
-            _userAccountRepository = userAccountRepository;
-            _userItemRepository = userItemRepository;
-            _userListRepository = userListRepository;
-            _userActionsService = userActionsService;
+            _logger.LogInformation($"Could not find item {request.UserItemId}");
+            return false;
         }
 
-        public async Task<bool> Handle(EditItemRequest request, CancellationToken cancellationToken)
+        _logger.LogInformation($"Updating item {item.UserItemId}:" +
+            $" Description[{item.Description}=>{request.Model.Description}]" +
+            $" List[{item.UserListId}=>{request.Model.List}]" +
+            $" Repeat[{item.Repeat}=>{request.Model.Repeat}]" +
+            $" Notes[{item.Notes}=>{request.Model.Notes}]" +
+            $" NextDueDate[{item.NextDueDate}=>{request.Model.Due}]");
+
+        UserList list = null;
+        if (request.Model.Delete ?? false)
         {
-            var user = await _userAccountRepository.GetUserAccountAsync(request.User);
-            var item = await _userItemRepository.GetItemAsync(user, request.UserItemId);
-            if (item == null)
+            item.DeletedDateTime = DateTime.UtcNow;
+        }
+        else
+        {
+            item.UserAccount = user;
+            item.Description = request.Model.Description;
+            item.Notes = request.Model.Notes;
+            item.Repeat = request.Model.Repeat;
+
+            if (!string.IsNullOrEmpty(request.Model.List) && int.TryParse(request.Model.List, out var listId))
             {
-                _logger.LogInformation($"Could not find item {request.UserItemId}");
+                list = await _userListRepository.GetListAsync(user, listId);
+                if (list == null)
+                {
+                    _logger.LogInformation($"Could not find list {request.Model.List}");
+                    return false;
+                }
+            }
+
+            if (!AddItemRequestHandler.TryGetDueDate(request.Model.Due, out var dueDate))
+            {
+                _logger.LogInformation($"Could not parse due date {request.Model.Due}");
                 return false;
             }
 
-            _logger.LogInformation($"Updating item {item.UserItemId}:" +
-                $" Description[{item.Description}=>{request.Model.Description}]" +
-                $" List[{item.UserListId}=>{request.Model.List}]" +
-                $" Repeat[{item.Repeat}=>{request.Model.Repeat}]" +
-                $" Notes[{item.Notes}=>{request.Model.Notes}]" +
-                $" NextDueDate[{item.NextDueDate}=>{request.Model.Due}]");
-
-            UserList list = null;
-            if (request.Model.Delete ?? false)
+            if ((request.Model.Snooze ?? false) && item.NextDueDate.HasValue)
             {
-                item.DeletedDateTime = DateTime.UtcNow;
+                item.PostponedUntilDate = (item.PostponedUntilDate ?? item.NextDueDate)?.Date.AddDays(1);
             }
             else
             {
-                item.UserAccount = user;
-                item.Description = request.Model.Description;
-                item.Notes = request.Model.Notes;
-                item.Repeat = request.Model.Repeat;
-
-                if (!string.IsNullOrEmpty(request.Model.List) && int.TryParse(request.Model.List, out var listId))
+                if (item.NextDueDate != dueDate)
                 {
-                    list = await _userListRepository.GetListAsync(user, listId);
-                    if (list == null)
-                    {
-                        _logger.LogInformation($"Could not find list {request.Model.List}");
-                        return false;
-                    }
+                    item.PostponedUntilDate = null;
                 }
-
-                if (!AddItemRequestHandler.TryGetDueDate(request.Model.Due, out var dueDate))
-                {
-                    _logger.LogInformation($"Could not parse due date {request.Model.Due}");
-                    return false;
-                }
-
-                if ((request.Model.Snooze ?? false) && item.NextDueDate.HasValue)
-                {
-                    item.PostponedUntilDate = (item.PostponedUntilDate ?? item.NextDueDate)?.Date.AddDays(1);
-                }
-                else
-                {
-                    if (item.NextDueDate != dueDate)
-                    {
-                        item.PostponedUntilDate = null;
-                    }
-                    item.NextDueDate = dueDate;
-                }
+                item.NextDueDate = dueDate;
             }
-
-            await _userItemRepository.SaveAsync(item, list, _userActionsService);
-            return true;
         }
+
+        await _userItemRepository.SaveAsync(item, list, _userActionsService);
+        await _webhookQueueRepository.OnListItemChangeAsync(user, item, item.DeletedDateTime.HasValue ? WebhookEventType.Delete : WebhookEventType.Modify);
+        return true;
     }
 }
