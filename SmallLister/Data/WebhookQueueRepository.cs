@@ -2,6 +2,7 @@ using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using SmallLister.Model;
+using SmallLister.Webhook;
 
 namespace SmallLister.Data;
 
@@ -9,11 +10,14 @@ public class WebhookQueueRepository : IWebhookQueueRepository
 {
     private readonly ILogger<WebhookQueueRepository> _logger;
     private readonly SqliteDataContext _context;
+    private readonly IWebhookNotification _webhookNotification;
 
-    public WebhookQueueRepository(ILogger<WebhookQueueRepository> logger, SqliteDataContext context)
+    public WebhookQueueRepository(ILogger<WebhookQueueRepository> logger, SqliteDataContext context,
+        IWebhookNotification webhookNotification)
     {
         _logger = logger;
         _context = context;
+        _webhookNotification = webhookNotification;
     }
 
     public async Task OnListChangeAsync(UserAccount user, UserList list, WebhookEventType eventType)
@@ -30,6 +34,8 @@ public class WebhookQueueRepository : IWebhookQueueRepository
                 EventType = eventType
             });
             await _context.SaveChangesAsync();
+
+            _webhookNotification.Notify();
         }
     }
 
@@ -47,6 +53,8 @@ public class WebhookQueueRepository : IWebhookQueueRepository
                 EventType = eventType
             });
             await _context.SaveChangesAsync();
+
+            _webhookNotification.Notify();
         }
     }
 }

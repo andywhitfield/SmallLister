@@ -24,6 +24,7 @@ using SmallLister.Actions;
 using SmallLister.Data;
 using SmallLister.Feed;
 using SmallLister.Security;
+using SmallLister.Webhook;
 using Swashbuckle.AspNetCore.SwaggerGen;
 
 namespace SmallLister.Web
@@ -119,7 +120,7 @@ namespace SmallLister.Web
 
             services.AddLogging(logging =>
             {
-                logging.AddConsole();
+                logging.AddSimpleConsole(o => o.TimestampFormat = "[yyyy-MM-dd HH:mm:ss.fff] ");
                 logging.AddDebug();
                 logging.SetMinimumLevel(LogLevel.Trace);
             });
@@ -153,7 +154,9 @@ namespace SmallLister.Web
                 .AddScoped<IUserActionHandler<IUserAction>, ReorderItemsActionHandler>()
                 .AddScoped<IUserActionRepository, UserActionRepository>()
                 .AddScoped<IUserWebhookRepository, UserWebhookRepository>()
-                .AddScoped<IWebhookQueueRepository, WebhookQueueRepository>();
+                .AddScoped<IWebhookQueueRepository, WebhookQueueRepository>()
+                .AddSingleton<IWebhookNotification, WebhookNotification>()
+                .AddHostedService<WebhookBackgroundService>();
 
             services.AddMediatR(typeof(Startup));
             services.AddMvc().AddSessionStateTempDataProvider();
