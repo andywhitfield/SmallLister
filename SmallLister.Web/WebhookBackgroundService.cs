@@ -14,7 +14,8 @@ public class WebhookBackgroundService : BackgroundService
     private readonly ILogger<WebhookBackgroundService> _logger;
     private readonly IConfiguration _config;
     private readonly IServiceScopeFactory _serviceScopeFactory;
-    private readonly TimeSpan _defaultPollPeriod = TimeSpan.FromMinutes(10);
+    private readonly TimeSpan _defaultPollPeriod = TimeSpan.FromMinutes(30);
+    private readonly TimeSpan _defaultChangeGracePeriod = TimeSpan.FromSeconds(20);
 
     public WebhookBackgroundService(ILogger<WebhookBackgroundService> logger, IConfiguration config, IServiceScopeFactory serviceScopeFactory)
     {
@@ -37,7 +38,9 @@ public class WebhookBackgroundService : BackgroundService
                 stoppingToken.ThrowIfCancellationRequested();
 
                 _logger.LogInformation("Checking if there are any webhooks to send");
-                _logger.LogInformation("No webhooks need sending, done.");
+                await serviceScope.ServiceProvider.GetRequiredService<IWebhookChecker>().CheckAsync(stoppingToken);
+
+                _logger.LogInformation("Webhook check completed.");
             }
             catch (OperationCanceledException)
             {
@@ -55,9 +58,10 @@ public class WebhookBackgroundService : BackgroundService
     private async Task WaitForPollPeriodOrWebhookNotificationAsync(IWebhookNotification webhookNotification, CancellationToken stoppingToken)
     {
         var pollPeriod = _config.GetSection("Webhooks")?.GetValue("CheckPollPeriod", _defaultPollPeriod) ?? _defaultPollPeriod;
+        var changeGracePeriod = _config.GetSection("Webhooks")?.GetValue("ChangeGracePeriod", _defaultChangeGracePeriod) ?? _defaultChangeGracePeriod;
         _logger.LogDebug($"Waiting {pollPeriod} before checking for webhooks to send");
 
-        var notificationToken = webhookNotification.NotificationToken;
+        var notificationToken = webhookNotification.GetNewNotificationToken();
         try
         {
             using var cts = CancellationTokenSource.CreateLinkedTokenSource(stoppingToken, notificationToken);
@@ -65,7 +69,16 @@ public class WebhookBackgroundService : BackgroundService
         }
         catch (OperationCanceledException) when (notificationToken.IsCancellationRequested)
         {
-            _logger.LogDebug("Notification token signalled");
+            _logger.LogDebug($"Notification token signalled, waiting {changeGracePeriod} before checking webhooks to send");
+            try
+            {
+                // let's pause for a short period in case there are a number of changes being made
+                await Task.Delay(changeGracePeriod, stoppingToken);
+            }
+            catch (OperationCanceledException) { }
+        }
+        catch (OperationCanceledException)
+        {
         }
     }
 }

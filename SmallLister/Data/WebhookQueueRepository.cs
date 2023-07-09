@@ -1,3 +1,6 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -19,6 +22,18 @@ public class WebhookQueueRepository : IWebhookQueueRepository
         _context = context;
         _webhookNotification = webhookNotification;
     }
+
+    public IAsyncEnumerable<UserListWebhookQueue> GetUnsentUserListWebhookQueuesAsync() =>
+        _context.UserListWebhookQueue
+            .Where(x => x.DeletedDateTime == null && x.SentDateTime == null)
+            .OrderBy(x => x.CreatedDateTime)
+            .AsAsyncEnumerable();
+
+    public IAsyncEnumerable<UserItemWebhookQueue> GetUnsentUserItemWebhookQueuesAsync() =>
+        _context.UserItemWebhookQueue
+            .Where(x => x.DeletedDateTime == null && x.SentDateTime == null)
+            .OrderBy(x => x.CreatedDateTime)
+            .AsAsyncEnumerable();
 
     public async Task OnListChangeAsync(UserAccount user, UserList list, WebhookEventType eventType)
     {
@@ -56,5 +71,21 @@ public class WebhookQueueRepository : IWebhookQueueRepository
 
             _webhookNotification.Notify();
         }
+    }
+
+    public Task SentAsync(UserListWebhookQueue userListWebhookQueue, string payload, DateTime? sentTime = null)
+    {
+        userListWebhookQueue.LastUpdateDateTime = DateTime.UtcNow;
+        userListWebhookQueue.SentPayload = payload;
+        userListWebhookQueue.SentDateTime = sentTime ?? DateTime.UtcNow;
+        return _context.SaveChangesAsync();
+    }
+
+    public Task SentAsync(UserItemWebhookQueue userItemWebhookQueue, string payload, DateTime? sentTime = null)
+    {
+        userItemWebhookQueue.LastUpdateDateTime = DateTime.UtcNow;
+        userItemWebhookQueue.SentPayload = payload;
+        userItemWebhookQueue.SentDateTime = sentTime ?? DateTime.UtcNow;
+        return _context.SaveChangesAsync();
     }
 }

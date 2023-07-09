@@ -155,6 +155,7 @@ namespace SmallLister.Web
                 .AddScoped<IUserActionRepository, UserActionRepository>()
                 .AddScoped<IUserWebhookRepository, UserWebhookRepository>()
                 .AddScoped<IWebhookQueueRepository, WebhookQueueRepository>()
+                .AddScoped<IWebhookChecker, WebhookChecker>()
                 .AddSingleton<IWebhookNotification, WebhookNotification>()
                 .AddHostedService<WebhookBackgroundService>();
 

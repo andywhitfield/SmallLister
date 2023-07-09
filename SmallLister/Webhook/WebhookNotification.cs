@@ -5,6 +5,8 @@ namespace SmallLister.Webhook;
 
 public class WebhookNotification : IWebhookNotification
 {
+    private readonly List<CancellationTokenSource> _cancellationTokenSources = new();
+
     public void Notify()
     {
         List<CancellationTokenSource> toRemove = new();
@@ -25,15 +27,10 @@ public class WebhookNotification : IWebhookNotification
             _cancellationTokenSources.Remove(cts);
     }
 
-    private readonly List<CancellationTokenSource> _cancellationTokenSources = new();
-
-    public CancellationToken NotificationToken
+    public CancellationToken GetNewNotificationToken()
     {
-        get
-        {
-            CancellationTokenSource cts = new();
-            _cancellationTokenSources.Add(cts);
-            return cts.Token;
-        }
+        CancellationTokenSource cts = new();
+        _cancellationTokenSources.Add(cts);
+        return cts.Token;
     }
 }

@@ -5,5 +5,5 @@ namespace SmallLister.Webhook;
 public interface IWebhookNotification
 {
     void Notify();
-    CancellationToken NotificationToken { get; }
+    CancellationToken GetNewNotificationToken();
 }
