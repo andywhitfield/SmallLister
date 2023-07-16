@@ -30,15 +30,26 @@ public class WebhookChecker : IWebhookChecker
         _logger.LogDebug("Checking for any UserList webhooks to send");
         var userListWebhookQueueByUserListId = await GroupBy(_webhookQueueRepository.GetUnsentUserListWebhookQueuesAsync(), x => x.UserListId);
 
-        _logger.LogInformation($"Got {userListWebhookQueueByUserListId.Count} UserLists in the webhook queue, sending...");
-        var webhooksToSend = userListWebhookQueueByUserListId.SelectMany(kv =>
-            GetWebhookEvents(kv.Key, kv.Value, wh => wh.EventType).Select(e => new ListChange { ListId = e.Key.ToString(), Event = e.EventType.ToString() }));
-        var webhooksSent = (await _webhookSender.SendAsync(webhooksToSend)).ToLookup(s => s.WebhookToSend.ListId);
-
-        foreach (var item in userListWebhookQueueByUserListId.SelectMany(x => x.Value))
+        if (userListWebhookQueueByUserListId.Count > 0)
         {
-            var payloadSent = webhooksSent[item.UserListId.ToString()].FirstOrDefault().PayloadSent;
-            await _webhookQueueRepository.SentAsync(item, payloadSent);
+            _logger.LogInformation($"Got {userListWebhookQueueByUserListId.Count} UserLists in the webhook queue, sending...");
+
+            var webhooksToSend = userListWebhookQueueByUserListId.SelectMany(kv =>
+                GetWebhookEvents(kv.Key, kv.Value, wh => wh.EventType).Select(e => new ListChange { ListId = e.Key.ToString(), Event = e.EventType.ToString() }));
+            var webhooksSent = (await _webhookSender.SendAsync(webhooksToSend)).ToLookup(s => s.WebhookToSend.ListId);
+
+            _logger.LogDebug($"Sent {webhooksSent.Count} webhooks, updating queue with payload details");
+            foreach (var item in userListWebhookQueueByUserListId.SelectMany(x => x.Value))
+            {
+                var payloadSent = webhooksSent[item.UserListId.ToString()].FirstOrDefault().PayloadSent;
+                await _webhookQueueRepository.SentAsync(item, payloadSent);
+            }
+
+            _logger.LogInformation($"Sent all webhooks successfully");
+        }
+        else
+        {
+            _logger.LogInformation($"Got no UserLists in the webhook queue, nothing to do");
         }
 
         // TODO: and then UserItems...
