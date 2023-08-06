@@ -157,6 +157,7 @@ namespace SmallLister.Web
                 .AddScoped<IWebhookQueueRepository, WebhookQueueRepository>()
                 .AddScoped<IWebhookChecker, WebhookChecker>()
                 .AddScoped<IWebhookSender, WebhookSender>()
+                .AddHttpClient(WebhookSender.WebhookSenderHttpClient).ConfigureHttpClient(c => c.Timeout = TimeSpan.FromSeconds(120)).Services
                 .AddSingleton<IWebhookNotification, WebhookNotification>()
                 .AddHostedService<WebhookBackgroundService>();
 

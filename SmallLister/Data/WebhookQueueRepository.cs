@@ -25,12 +25,16 @@ public class WebhookQueueRepository : IWebhookQueueRepository
 
     public IAsyncEnumerable<UserListWebhookQueue> GetUnsentUserListWebhookQueuesAsync() =>
         _context.UserListWebhookQueue
+            .Include(x => x.UserList)
+            .ThenInclude(x => x.UserAccount)
             .Where(x => x.DeletedDateTime == null && x.SentDateTime == null)
             .OrderBy(x => x.CreatedDateTime)
             .AsAsyncEnumerable();
 
     public IAsyncEnumerable<UserItemWebhookQueue> GetUnsentUserItemWebhookQueuesAsync() =>
         _context.UserItemWebhookQueue
+            .Include(x => x.UserItem)
+            .ThenInclude(x => x.UserAccount)
             .Where(x => x.DeletedDateTime == null && x.SentDateTime == null)
             .OrderBy(x => x.CreatedDateTime)
             .AsAsyncEnumerable();
