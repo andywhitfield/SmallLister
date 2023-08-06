@@ -10,11 +10,14 @@ namespace SmallLister.Actions
     {
         private readonly ILogger<UpdateItemActionHandler> _logger;
         private readonly IUserItemRepository _userItemRepository;
+        private readonly IWebhookQueueRepository _webhookQueueRepository;
 
-        public UpdateItemActionHandler(ILogger<UpdateItemActionHandler> logger, IUserItemRepository userItemRepository)
+        public UpdateItemActionHandler(ILogger<UpdateItemActionHandler> logger, IUserItemRepository userItemRepository,
+            IWebhookQueueRepository webhookQueueRepository)
         {
             _logger = logger;
             _userItemRepository = userItemRepository;
+            _webhookQueueRepository = webhookQueueRepository;
         }
 
         public UpdateItemAction GetUserAction(UserAction userAction) => UpdateItemAction.Create(userAction.UserActionData);
@@ -52,6 +55,7 @@ namespace SmallLister.Actions
             item.DeletedDateTime = userItem.DeletedDateTime;
 
             _logger.LogInformation($"Undo previous item update: {item.UserItemId}");
+            await _webhookQueueRepository.OnListItemChangeAsync(user, item, WebhookEventType.Modify);
 
             return await UpdateSortOrdersAsync(user, userAction, updateItemAction, userItem, itemSortOrder);
         }

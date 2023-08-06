@@ -22,6 +22,8 @@ public sealed class WebhookCheckerTests : IDisposable
             .AddScoped<IWebhookQueueRepository, WebhookQueueRepository>()
             .AddScoped<IWebhookNotification, WebhookNotification>()
             .AddScoped<IWebhookSender, WebhookSender>()
+            .AddScoped<IUserWebhookRepository, UserWebhookRepository>()
+            .AddHttpClient()
             .AddTransient<WebhookChecker>()
             .BuildServiceProvider();
         

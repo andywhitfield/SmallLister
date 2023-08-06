@@ -10,11 +10,14 @@ public class AddItemActionHandler : IUserActionHandler<AddItemAction>
 {
     private readonly ILogger<AddItemActionHandler> _logger;
     private readonly IUserItemRepository _userItemRepository;
+    private readonly IWebhookQueueRepository _webhookQueueRepository;
 
-    public AddItemActionHandler(ILogger<AddItemActionHandler> logger, IUserItemRepository userItemRepository)
+    public AddItemActionHandler(ILogger<AddItemActionHandler> logger, IUserItemRepository userItemRepository,
+        IWebhookQueueRepository webhookQueueRepository)
     {
         _logger = logger;
         _userItemRepository = userItemRepository;
+        _webhookQueueRepository = webhookQueueRepository;
     }
 
     public AddItemAction GetUserAction(UserAction userAction) => AddItemAction.Create(userAction.UserActionData);
@@ -41,6 +44,7 @@ public class AddItemActionHandler : IUserActionHandler<AddItemAction>
 
         item.DeletedDateTime = item.LastUpdateDateTime = DateTime.UtcNow;
         _logger.LogInformation($"Undo previous add - deleted item {item.UserItemId}");
+        await _webhookQueueRepository.OnListItemChangeAsync(user, item, WebhookEventType.Delete);
 
         return await UpdateSortOrdersAsync(user, userAction, addItemAction, userItemAdded, s => s.OriginalSortOrder);
     }
@@ -59,6 +63,7 @@ public class AddItemActionHandler : IUserActionHandler<AddItemAction>
         item.DeletedDateTime = null;
 
         _logger.LogInformation($"Redo previous add - undone deleted item {userItemAdded.UserItemId}");
+        await _webhookQueueRepository.OnListItemChangeAsync(user, item, WebhookEventType.New);
 
         return await UpdateSortOrdersAsync(user, userAction, addItemAction, userItemAdded, s => s.UpdatedSortOrder);
     }

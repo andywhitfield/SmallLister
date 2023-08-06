@@ -33,8 +33,8 @@ namespace SmallLister.Tests.Actions
             _userItemRepository = new Mock<IUserItemRepository>();
             _userListRepository = new Mock<IUserListRepository>();
             var userActionHandlers = new IUserActionHandler<IUserAction>[] {
-                new AddItemActionHandler(Mock.Of<ILogger<AddItemActionHandler>>(), _userItemRepository.Object),
-                new UpdateItemActionHandler(Mock.Of<ILogger<UpdateItemActionHandler>>(), _userItemRepository.Object),
+                new AddItemActionHandler(Mock.Of<ILogger<AddItemActionHandler>>(), _userItemRepository.Object, Mock.Of<IWebhookQueueRepository>()),
+                new UpdateItemActionHandler(Mock.Of<ILogger<UpdateItemActionHandler>>(), _userItemRepository.Object, Mock.Of<IWebhookQueueRepository>()),
                 new ReorderItemsActionHandler(Mock.Of<ILogger<ReorderItemsActionHandler>>(), _userItemRepository.Object, _userListRepository.Object)
             };
             _sut = new UserActionsService(Mock.Of<ILogger<UserActionsService>>(), _userActionRepository.Object, userActionHandlers);
