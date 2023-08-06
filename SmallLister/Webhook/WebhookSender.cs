@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net.Http;
 using System.Text;
 using System.Text.Json;
@@ -35,23 +36,22 @@ public class WebhookSender : IWebhookSender
             );
     }
 
-    public async Task<IEnumerable<(T WebhookToSend, string PayloadSent)>> SendAsync<T>(IEnumerable<(UserAccount UserAccount, T WebhookToSend)> webhooksToSend, Func<T, WebhookType> webhookType)
+    public async Task<IEnumerable<(T WebhookToSend, string PayloadSent)>> SendAsync<T>(IEnumerable<(UserAccount UserAccount, T WebhookToSend)> webhooksToSend, WebhookType webhookType)
     {
         List<(T WebhookToSend, string PayloadSent)> sent = new();
-        foreach (var (userAccount, webhookToSend) in webhooksToSend)
+        foreach (var webhooksByUser in webhooksToSend.GroupBy(wh => wh.UserAccount))
         {
-            _logger.LogDebug($"Sending webhook for user {userAccount.UserAccountId}");
-            var webhookTypeForWebhook = webhookType(webhookToSend);
-            var userWebhookForType = await _userWebhookRepository.GetWebhookAsync(userAccount, webhookTypeForWebhook);
+            _logger.LogDebug($"Sending webhooks for user {webhooksByUser.Key.UserAccountId}");
+            var userWebhookForType = await _userWebhookRepository.GetWebhookAsync(webhooksByUser.Key, webhookType);
             if (userWebhookForType == null)
             {
-                _logger.LogInformation($"No webhooks for user {userAccount.UserAccountId} and type {webhookTypeForWebhook}, nothing sent");
+                _logger.LogInformation($"No webhooks for user {webhooksByUser.Key.UserAccountId} and type {webhookType}, nothing sent");
                 continue;
             }
 
-            var sentPayload = await SendAsync(userWebhookForType, webhookToSend);
+            var sentPayload = await SendAsync(userWebhookForType, webhooksByUser.Select(wh => wh.WebhookToSend));
             if (sentPayload != null)
-                sent.Add((webhookToSend, sentPayload));
+                sent.AddRange(webhooksByUser.Select(wh => (wh.WebhookToSend, sentPayload)));
         }
 
         return sent;

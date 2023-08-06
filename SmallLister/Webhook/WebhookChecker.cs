@@ -37,7 +37,7 @@ public class WebhookChecker : IWebhookChecker
             var webhooksToSend = userListWebhookQueueByUserListId.SelectMany(kv =>
                 GetWebhookEvents(kv.Key, kv.Value, wh => wh.EventType).Select(e => (kv.Value.First().UserList.UserAccount, Event: new ListChange { ListId = e.Key.ToString(), Event = e.EventType.ToString() })));
             var webhooksToIgnore = userListWebhookQueueByUserListId.Keys.Select(userListId => userListId.ToString()).Except(webhooksToSend.Select(wh => wh.Event.ListId)).ToHashSet();
-            var webhooksSent = (await _webhookSender.SendAsync(webhooksToSend, _ => WebhookType.ListChange)).ToLookup(s => s.WebhookToSend.ListId);
+            var webhooksSent = (await _webhookSender.SendAsync(webhooksToSend, WebhookType.ListChange)).ToLookup(s => s.WebhookToSend.ListId);
 
             _logger.LogDebug($"Sent {webhooksSent.Count} webhooks, updating queue with payload details");
             foreach (var item in userListWebhookQueueByUserListId.SelectMany(x => x.Value))
@@ -69,7 +69,7 @@ public class WebhookChecker : IWebhookChecker
             var webhooksToSend = userItemWebhookQueueByUserItemId.SelectMany(kv =>
                 GetWebhookEvents(kv.Key, kv.Value, wh => wh.EventType).Select(e => (kv.Value.First().UserItem.UserAccount, Event: new ListItemChange { ListItemId = e.Key.ToString(), ListId = kv.Value.First().UserItem.UserListId.ToString(), Event = e.EventType.ToString() })));
             var webhooksToIgnore = userItemWebhookQueueByUserItemId.Keys.Select(userItemId => userItemId.ToString()).Except(webhooksToSend.Select(wh => wh.Event.ListItemId)).ToHashSet();
-            var webhooksSent = (await _webhookSender.SendAsync(webhooksToSend, _ => WebhookType.ListItemChange)).ToLookup(s => s.WebhookToSend.ListItemId);
+            var webhooksSent = (await _webhookSender.SendAsync(webhooksToSend, WebhookType.ListItemChange)).ToLookup(s => s.WebhookToSend.ListItemId);
 
             _logger.LogDebug($"Sent {webhooksSent.Count} webhooks, updating queue with payload details");
             foreach (var item in userItemWebhookQueueByUserItemId.SelectMany(x => x.Value))
