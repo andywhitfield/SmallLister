@@ -52,5 +52,31 @@ namespace SmallLister.Web.Controllers.Api.V1
 
             return Ok();
         }
+
+        [HttpDelete("~/api/v{version:apiVersion}/item")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        public async Task<IActionResult> DeleteItem([Required] AddItemRequestModel model)
+        {
+            if (!ModelState.IsValid)
+            {
+                _logger.LogInformation("Model state is invalid, returning bad request");
+                return BadRequest();
+            }
+
+            var user = await _jwtService.GetUserAccountAsync(User);
+            if (user == null)
+            {
+                _logger.LogInformation($"Could not get user account from token {User.Identity.Name}, returning unauthorized");
+                return Unauthorized();
+            }
+
+            var deleted = await _mediator.Send(new DeleteItemApiRequest(user, model));
+            if (!deleted)
+                return BadRequest();
+
+            return Ok();
+        }
     }
 }
