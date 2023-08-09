@@ -1,9 +1,13 @@
 using System;
+using System.Net;
+using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Moq;
+using Moq.Protected;
 using SmallLister.Data;
 using SmallLister.Webhook;
 using Xunit;
@@ -16,6 +20,13 @@ public sealed class WebhookCheckerTests : IDisposable
 
     public WebhookCheckerTests()
     {
+        Mock<HttpMessageHandler> mockMessageHandler = new();
+        mockMessageHandler.Protected()
+            .Setup<Task<HttpResponseMessage>>("SendAsync", ItExpr.IsAny<HttpRequestMessage>(), ItExpr.IsAny<CancellationToken>())
+            .ReturnsAsync(new HttpResponseMessage { StatusCode = HttpStatusCode.OK });
+        Mock<IHttpClientFactory> mockHttpClientFactory = new();
+        mockHttpClientFactory.Setup(x => x.CreateClient(It.IsAny<string>())).Returns(new HttpClient(mockMessageHandler.Object));
+
         _services = new ServiceCollection()
             .AddLogging(lb => lb.AddSimpleConsole().SetMinimumLevel(LogLevel.Trace))
             .AddDbContext<SqliteDataContext>(o => o.UseSqlite("DataSource=file::memory:?cache=shared"))
@@ -23,10 +34,10 @@ public sealed class WebhookCheckerTests : IDisposable
             .AddScoped<IWebhookNotification, WebhookNotification>()
             .AddScoped<IWebhookSender, WebhookSender>()
             .AddScoped<IUserWebhookRepository, UserWebhookRepository>()
-            .AddHttpClient()
+            .AddSingleton(_ => mockHttpClientFactory.Object)
             .AddTransient<WebhookChecker>()
             .BuildServiceProvider();
-        
+
         var dbContext = _services.GetRequiredService<SqliteDataContext>();
         dbContext.Migrate();
     }
@@ -39,11 +50,13 @@ public sealed class WebhookCheckerTests : IDisposable
         await using (_services.CreateAsyncScope())
         {
             var dbContext = _services.GetRequiredService<SqliteDataContext>();
-            var userList = dbContext.UserLists.Add(new() { Name = "New list", UserAccount = new() { AuthenticationUri = "user1/" } });
+            var userAccount = dbContext.UserAccounts.Add(new() { AuthenticationUri = "user1/" });
+            var userList = dbContext.UserLists.Add(new() { Name = "New list", UserAccount = userAccount.Entity });
             dbContext.UserListWebhookQueue.AddRange(
                 new() { EventType = Model.WebhookEventType.New, UserList = userList.Entity },
                 new() { EventType = Model.WebhookEventType.Modify, UserList = userList.Entity },
                 new() { EventType = Model.WebhookEventType.Modify, UserList = userList.Entity });
+            dbContext.UserWebhooks.Add(new() { UserAccount = userAccount.Entity, WebhookType = Model.WebhookType.ListChange, Webhook = new("http://uri/") });
             await dbContext.SaveChangesAsync();
         }
 
