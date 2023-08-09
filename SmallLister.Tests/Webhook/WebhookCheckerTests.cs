@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Net;
 using System.Net.Http;
 using System.Threading;
@@ -17,19 +18,21 @@ namespace SmallLister.Tests.Webhook;
 public sealed class WebhookCheckerTests : IDisposable
 {
     private readonly ServiceProvider _services;
+    private readonly List<string> _sentWebhooks = new();
 
     public WebhookCheckerTests()
     {
         Mock<HttpMessageHandler> mockMessageHandler = new();
         mockMessageHandler.Protected()
             .Setup<Task<HttpResponseMessage>>("SendAsync", ItExpr.IsAny<HttpRequestMessage>(), ItExpr.IsAny<CancellationToken>())
+            .Callback<HttpRequestMessage, CancellationToken>(async (requestMessage, token) => _sentWebhooks.Add(await requestMessage.Content.ReadAsStringAsync(CancellationToken.None)))
             .ReturnsAsync(new HttpResponseMessage { StatusCode = HttpStatusCode.OK });
         Mock<IHttpClientFactory> mockHttpClientFactory = new();
         mockHttpClientFactory.Setup(x => x.CreateClient(It.IsAny<string>())).Returns(new HttpClient(mockMessageHandler.Object));
 
         _services = new ServiceCollection()
             .AddLogging(lb => lb.AddSimpleConsole().SetMinimumLevel(LogLevel.Trace))
-            .AddDbContext<SqliteDataContext>(o => o.UseSqlite("DataSource=file::memory:?cache=shared"))
+            .AddDbContext<SqliteDataContext>(o => o.UseSqlite($"DataSource=file:mem{DateTime.UtcNow:HHmmssfff}?mode=memory&cache=shared"))
             .AddScoped<IWebhookQueueRepository, WebhookQueueRepository>()
             .AddScoped<IWebhookNotification, WebhookNotification>()
             .AddScoped<IWebhookSender, WebhookSender>()
@@ -82,6 +85,105 @@ public sealed class WebhookCheckerTests : IDisposable
                 Assert.NotNull(x.SentDateTime);
                 Assert.InRange(x.SentDateTime.Value, DateTime.UtcNow.AddSeconds(-1), DateTime.UtcNow);
                 Assert.NotNull(x.SentPayload);
+                Assert.Equal("""[{"ListId":"1","Event":"New"}]""", x.SentPayload);
+                Assert.Single(_sentWebhooks);
+                Assert.Equal("""[{"ListId":"1","Event":"New"}]""", _sentWebhooks[0]);
+            });
+        }
+    }
+
+    [Fact]
+    public async Task Modified_user_list_should_send_webhook()
+    {
+        await using (_services.CreateAsyncScope())
+        {
+            var dbContext = _services.GetRequiredService<SqliteDataContext>();
+            var userAccount = dbContext.UserAccounts.Add(new() { AuthenticationUri = "user1/" });
+            var userList = dbContext.UserLists.Add(new() { Name = "list 1", UserAccount = userAccount.Entity });
+            dbContext.UserListWebhookQueue.AddRange(
+                new() { EventType = Model.WebhookEventType.Modify, UserList = userList.Entity },
+                new() { EventType = Model.WebhookEventType.Modify, UserList = userList.Entity });
+            dbContext.UserWebhooks.Add(new() { UserAccount = userAccount.Entity, WebhookType = Model.WebhookType.ListChange, Webhook = new("http://uri/") });
+            await dbContext.SaveChangesAsync();
+        }
+
+        var webhookChecker = _services.GetRequiredService<WebhookChecker>();
+        await webhookChecker.CheckAsync(CancellationToken.None);
+
+        await using (_services.CreateAsyncScope())
+        {
+            var dbContext = _services.GetRequiredService<SqliteDataContext>();
+            await dbContext.UserListWebhookQueue.ForEachAsync(x =>
+            {
+                Assert.NotNull(x.SentDateTime);
+                Assert.InRange(x.SentDateTime.Value, DateTime.UtcNow.AddSeconds(-1), DateTime.UtcNow);
+                Assert.NotNull(x.SentPayload);
+                Assert.Equal("""[{"ListId":"1","Event":"Modify"}]""", x.SentPayload);
+                Assert.Single(_sentWebhooks);
+                Assert.Equal("""[{"ListId":"1","Event":"Modify"}]""", _sentWebhooks[0]);
+            });
+        }
+    }
+
+    [Fact]
+    public async Task Deleted_user_list_should_send_webhook()
+    {
+        await using (_services.CreateAsyncScope())
+        {
+            var dbContext = _services.GetRequiredService<SqliteDataContext>();
+            var userAccount = dbContext.UserAccounts.Add(new() { AuthenticationUri = "user1/" });
+            var userList = dbContext.UserLists.Add(new() { Name = "list 1", DeletedDateTime = DateTime.UtcNow, UserAccount = userAccount.Entity });
+            dbContext.UserListWebhookQueue.Add(new() { EventType = Model.WebhookEventType.Delete, UserList = userList.Entity });
+            dbContext.UserWebhooks.Add(new() { UserAccount = userAccount.Entity, WebhookType = Model.WebhookType.ListChange, Webhook = new("http://uri/") });
+            await dbContext.SaveChangesAsync();
+        }
+
+        var webhookChecker = _services.GetRequiredService<WebhookChecker>();
+        await webhookChecker.CheckAsync(CancellationToken.None);
+
+        await using (_services.CreateAsyncScope())
+        {
+            var dbContext = _services.GetRequiredService<SqliteDataContext>();
+            await dbContext.UserListWebhookQueue.ForEachAsync(x =>
+            {
+                Assert.NotNull(x.SentDateTime);
+                Assert.InRange(x.SentDateTime.Value, DateTime.UtcNow.AddSeconds(-1), DateTime.UtcNow);
+                Assert.NotNull(x.SentPayload);
+                Assert.Equal("""[{"ListId":"1","Event":"Delete"}]""", x.SentPayload);
+                Assert.Single(_sentWebhooks);
+                Assert.Equal("""[{"ListId":"1","Event":"Delete"}]""", _sentWebhooks[0]);
+            });
+        }
+    }
+
+    [Fact]
+    public async Task New_then_deleted_user_list_should_not_send_webhook()
+    {
+        await using (_services.CreateAsyncScope())
+        {
+            var dbContext = _services.GetRequiredService<SqliteDataContext>();
+            var userAccount = dbContext.UserAccounts.Add(new() { AuthenticationUri = "user1/" });
+            var userList = dbContext.UserLists.Add(new() { Name = "list 1", DeletedDateTime = DateTime.UtcNow, UserAccount = userAccount.Entity });
+            dbContext.UserListWebhookQueue.AddRange(
+                new() { EventType = Model.WebhookEventType.New, UserList = userList.Entity },
+                new() { EventType = Model.WebhookEventType.Delete, UserList = userList.Entity });
+            dbContext.UserWebhooks.Add(new() { UserAccount = userAccount.Entity, WebhookType = Model.WebhookType.ListChange, Webhook = new("http://uri/") });
+            await dbContext.SaveChangesAsync();
+        }
+
+        var webhookChecker = _services.GetRequiredService<WebhookChecker>();
+        await webhookChecker.CheckAsync(CancellationToken.None);
+
+        await using (_services.CreateAsyncScope())
+        {
+            var dbContext = _services.GetRequiredService<SqliteDataContext>();
+            await dbContext.UserListWebhookQueue.ForEachAsync(x =>
+            {
+                // the sent date time should be set, but the payload will be null indicating nothing sent
+                Assert.NotNull(x.SentDateTime);
+                Assert.InRange(x.SentDateTime.Value, DateTime.UtcNow.AddSeconds(-1), DateTime.UtcNow);
+                Assert.Null(x.SentPayload);
+                Assert.Empty(_sentWebhooks);
             });
         }
     }
