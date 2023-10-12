@@ -63,12 +63,12 @@ public class WebhookNotificationTests
         // our main thread then waits for the waiting thread to start,
         // waits another 100ms, then notifies
         var waitTaskStarted = new ManualResetEventSlim (false);
-        var waitTask = new Thread(() =>
+        var waitTask = new Thread(async () =>
         {
             try
             {
                 waitTaskStarted.Set();
-                Task.Delay(TimeSpan.FromSeconds(2), token).GetAwaiter().GetResult();
+                await Task.Delay(TimeSpan.FromSeconds(2), token);
                 failed = true;
             }
             catch (OperationCanceledException)
