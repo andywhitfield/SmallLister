@@ -7,17 +7,12 @@ using Microsoft.Extensions.Options;
 
 namespace SmallLister.Web.Tests
 {
-    public class TestStubAuthHandler : AuthenticationHandler<AuthenticationSchemeOptions>
+    public class TestStubAuthHandler(IOptionsMonitor<AuthenticationSchemeOptions> options,
+        ILoggerFactory logger, UrlEncoder encoder) : AuthenticationHandler<AuthenticationSchemeOptions>(options, logger, encoder)
     {
-        public TestStubAuthHandler(IOptionsMonitor<AuthenticationSchemeOptions> options,
-            ILoggerFactory logger, UrlEncoder encoder, ISystemClock clock)
-        : base(options, logger, encoder, clock)
-        {
-        }
-
         protected override Task<AuthenticateResult> HandleAuthenticateAsync()
         {
-            var claims = new[] { new Claim(ClaimTypes.Name, "Test user"), new Claim("sub", "http://test/user/1") };
+            var claims = new[] { new Claim(ClaimTypes.Name, "Test user"), new Claim("name", "http://test/user/1") };
             var identity = new ClaimsIdentity(claims, "Test");
             var principal = new ClaimsPrincipal(identity);
             var ticket = new AuthenticationTicket(principal, "Test");

@@ -30,7 +30,7 @@ namespace SmallLister.Data
             return _context.SaveChangesAsync();
         }
 
-        private string GetIdentifierFromPrincipal(ClaimsPrincipal user) => user?.FindFirstValue("sub");
+        private string GetIdentifierFromPrincipal(ClaimsPrincipal user) => user?.FindFirstValue("name");
 
         public Task<UserAccount> GetUserAccountAsync(ClaimsPrincipal user) => GetUserAccountOrNullAsync(user) ?? throw new ArgumentException($"No UserAccount for the user: {GetIdentifierFromPrincipal(user)}");
 
