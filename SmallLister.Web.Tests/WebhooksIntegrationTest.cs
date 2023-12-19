@@ -23,7 +23,7 @@ public class WebhooksIntegrationTest : IAsyncLifetime
         using var serviceScope = _factory.Services.CreateScope();
         using var context = serviceScope.ServiceProvider.GetRequiredService<SqliteDataContext>();
         context.Migrate();
-        var userAccount = context.UserAccounts.Add(new() { AuthenticationUri = "http://test/user/1" });
+        var userAccount = context.UserAccounts.Add(new() { Email = "test-user-1" });
         var userList = context.UserLists.Add(new() { Name = "Test list", UserAccount = userAccount.Entity });
         context.UserWebhooks.Add(new() { UserAccount = userAccount.Entity, WebhookType = WebhookType.ListItemChange, Webhook = new("http://localhost/webhook") });
         await context.SaveChangesAsync();
@@ -105,7 +105,7 @@ public class WebhooksIntegrationTest : IAsyncLifetime
         var userItem = await context.UserItems.FirstOrDefaultAsync(u => u.Description == description);
         userItem.Should().NotBeNull();
 
-        var userAccount = context.UserAccounts.Add(new() { AuthenticationUri = "http://test/user/1" });
+        var userAccount = context.UserAccounts.Add(new() { Email = "test-user-1" });
         var userList = context.UserLists.Add(new() { Name = "Test list", UserAccount = userAccount.Entity });
         await context.SaveChangesAsync();
         _userList = userList.Entity;

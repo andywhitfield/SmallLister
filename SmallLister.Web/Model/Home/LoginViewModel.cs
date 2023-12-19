@@ -1,10 +1,8 @@
 using Microsoft.AspNetCore.Http;
 
-namespace SmallLister.Web.Model.Home
+namespace SmallLister.Web.Model.Home;
+
+public class LoginViewModel(HttpContext context, string? returnUrl) : BaseViewModel(context)
 {
-    public class LoginViewModel : BaseViewModel
-    {
-        public string ReturnUrl { get; }
-        public LoginViewModel(HttpContext context, string returnUrl) : base(context) => ReturnUrl = returnUrl;
-    }
+    public string? ReturnUrl { get; } = returnUrl;
 }

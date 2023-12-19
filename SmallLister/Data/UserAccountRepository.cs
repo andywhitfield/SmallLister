@@ -1,53 +1,65 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using SmallLister.Model;
 
-namespace SmallLister.Data
+namespace SmallLister.Data;
+
+public class UserAccountRepository(SqliteDataContext context, ILogger<UserAccountRepository> logger)
+    : IUserAccountRepository
 {
-    public class UserAccountRepository : IUserAccountRepository
+    public Task<UserAccount> GetAsync(int userAccountId) =>
+        context.UserAccounts.SingleOrDefaultAsync(a => a.UserAccountId == userAccountId && a.DeletedDateTime == null);
+
+    public async Task<UserAccount> CreateNewUserAsync(string email, byte[] credentialId, byte[] publicKey, byte[] userHandle)
     {
-        private readonly SqliteDataContext _context;
-        private readonly ILogger<UserAccountRepository> _logger;
+        var newUserAccount = context.UserAccounts.Add(new UserAccount { Email = email });
+        context.UserAccountCredentials!.Add(new() { UserAccount = newUserAccount.Entity,
+            CredentialId = credentialId, PublicKey = publicKey, UserHandle = userHandle });
+        await context.SaveChangesAsync();
+        return newUserAccount.Entity;
+    }
 
-        public UserAccountRepository(SqliteDataContext context, ILogger<UserAccountRepository> logger)
-        {
-            _context = context;
-            _logger = logger;
-        }
+    private string? GetEmailFromPrincipal(ClaimsPrincipal user)
+    {
+        logger.LogTrace($"Getting email from user: {user?.Identity?.Name}: [{string.Join(',', user?.Claims.Select(c => $"{c.Type}={c.Value}") ?? Enumerable.Empty<string>())}]");
+        return user?.FindFirstValue(ClaimTypes.Name);
+    }
 
-        public Task<UserAccount> GetAsync(int userAccountId) =>
-            _context.UserAccounts.SingleOrDefaultAsync(a => a.UserAccountId == userAccountId && a.DeletedDateTime == null);
+    public Task<UserAccount> GetUserAccountAsync(ClaimsPrincipal user) => GetUserAccountOrNullAsync(user) ?? throw new ArgumentException($"No UserAccount for the user: {GetEmailFromPrincipal(user)}");
 
-        public Task CreateNewUserAsync(ClaimsPrincipal user)
-        {
-            var authenticationUri = GetIdentifierFromPrincipal(user);
-            var newUser = new UserAccount { AuthenticationUri = authenticationUri };
+    public Task<UserAccount> GetUserAccountOrNullAsync(ClaimsPrincipal user)
+    {
+        var email = GetEmailFromPrincipal(user);
+        if (string.IsNullOrWhiteSpace(email))
+            return null;
 
-            _context.UserAccounts.Add(newUser);
-            return _context.SaveChangesAsync();
-        }
+        return context.UserAccounts.FirstOrDefaultAsync(ua => ua.Email == email && ua.DeletedDateTime == null);
+    }
 
-        private string GetIdentifierFromPrincipal(ClaimsPrincipal user) => user?.FindFirstValue("name");
+    public Task<UserAccount?> GetUserAccountByEmailAsync(string email)
+        => context.UserAccounts!.FirstOrDefaultAsync(a => a.DeletedDateTime == null && a.Email == email);
 
-        public Task<UserAccount> GetUserAccountAsync(ClaimsPrincipal user) => GetUserAccountOrNullAsync(user) ?? throw new ArgumentException($"No UserAccount for the user: {GetIdentifierFromPrincipal(user)}");
+    public Task SetLastSelectedUserListIdAsync(UserAccount user, int? lastSelectedUserListId)
+    {
+        user.LastSelectedUserListId = lastSelectedUserListId;
+        user.LastUpdateDateTime = DateTime.UtcNow;
+        return context.SaveChangesAsync();
+    }
 
-        public Task<UserAccount> GetUserAccountOrNullAsync(ClaimsPrincipal user)
-        {
-            var authenticationUri = GetIdentifierFromPrincipal(user);
-            if (string.IsNullOrWhiteSpace(authenticationUri))
-                return null;
+    public IAsyncEnumerable<UserAccountCredential> GetUserAccountCredentialsAsync(UserAccount user)
+        => context.UserAccountCredentials!.Where(uac => uac.DeletedDateTime == null && uac.UserAccountId == user.UserAccountId).AsAsyncEnumerable();
 
-            return _context.UserAccounts.FirstOrDefaultAsync(ua => ua.AuthenticationUri == authenticationUri && ua.DeletedDateTime == null);
-        }
+    public Task<UserAccountCredential?> GetUserAccountCredentialsByUserHandleAsync(byte[] userHandle)
+        => context.UserAccountCredentials!.FirstOrDefaultAsync(uac => uac.DeletedDateTime == null && uac.UserHandle.SequenceEqual(userHandle));
 
-        public Task SetLastSelectedUserListIdAsync(UserAccount user, int? lastSelectedUserListId)
-        {
-            user.LastSelectedUserListId = lastSelectedUserListId;
-            user.LastUpdateDateTime = DateTime.UtcNow;
-            return _context.SaveChangesAsync();
-        }
+    public Task SetSignatureCountAsync(UserAccountCredential userAccountCredential, uint signatureCount)
+    {
+        userAccountCredential.SignatureCount = signatureCount;
+        return context.SaveChangesAsync();
     }
 }

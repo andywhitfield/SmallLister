@@ -53,7 +53,7 @@ public sealed class WebhookCheckerUserItemTests : IDisposable
         await using (_services.CreateAsyncScope())
         {
             var dbContext = _services.GetRequiredService<SqliteDataContext>();
-            var userAccount = dbContext.UserAccounts.Add(new() { AuthenticationUri = "user1/" });
+            var userAccount = dbContext.UserAccounts.Add(new() { Email = "user1/" });
             var userList = dbContext.UserLists.Add(new() { Name = "New list", UserAccount = userAccount.Entity });
             var userItem = dbContext.UserItems.Add(new() { Description = "Item 1", UserList = userList.Entity, UserAccount = userAccount.Entity });
             dbContext.UserItemWebhookQueue.AddRange(
@@ -88,7 +88,7 @@ public sealed class WebhookCheckerUserItemTests : IDisposable
         await using (_services.CreateAsyncScope())
         {
             var dbContext = _services.GetRequiredService<SqliteDataContext>();
-            var userAccount = dbContext.UserAccounts.Add(new() { AuthenticationUri = "user1/" });
+            var userAccount = dbContext.UserAccounts.Add(new() { Email = "user1/" });
             var userList = dbContext.UserLists.Add(new() { Name = "New list", UserAccount = userAccount.Entity });
             var userItem = dbContext.UserItems.Add(new() { Description = "Item 1", DeletedDateTime = DateTime.UtcNow, UserList = userList.Entity, UserAccount = userAccount.Entity });
             dbContext.UserItemWebhookQueue.AddRange(
@@ -122,7 +122,7 @@ public sealed class WebhookCheckerUserItemTests : IDisposable
         await using (_services.CreateAsyncScope())
         {
             var dbContext = _services.GetRequiredService<SqliteDataContext>();
-            var userAccount = dbContext.UserAccounts.Add(new() { AuthenticationUri = "user1/" });
+            var userAccount = dbContext.UserAccounts.Add(new() { Email = "user1/" });
             var userList = dbContext.UserLists.Add(new() { Name = "New list", UserAccount = userAccount.Entity });
             var userItem = dbContext.UserItems.Add(new() { Description = "Item 1", UserList = userList.Entity, UserAccount = userAccount.Entity });
             dbContext.UserItemWebhookQueue.AddRange(
@@ -156,7 +156,7 @@ public sealed class WebhookCheckerUserItemTests : IDisposable
         await using (_services.CreateAsyncScope())
         {
             var dbContext = _services.GetRequiredService<SqliteDataContext>();
-            var userAccount = dbContext.UserAccounts.Add(new() { AuthenticationUri = "user1/" });
+            var userAccount = dbContext.UserAccounts.Add(new() { Email = "user1/" });
             var userList = dbContext.UserLists.Add(new() { Name = "New list", UserAccount = userAccount.Entity });
             var userItem = dbContext.UserItems.Add(new() { Description = "Item 1", DeletedDateTime = DateTime.UtcNow, UserList = userList.Entity, UserAccount = userAccount.Entity });
             dbContext.UserItemWebhookQueue.AddRange(

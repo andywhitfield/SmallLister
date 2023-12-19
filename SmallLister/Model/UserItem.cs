@@ -12,8 +12,8 @@ namespace SmallLister.Model
         public int? UserListId { get; set; }
         public UserList UserList { get; set; }
         [Required]
-        public string Description { get; set; }
-        public string Notes { get; set; }
+        public string? Description { get; set; }
+        public string? Notes { get; set; }
         public DateTime? NextDueDate { get; set; }
         public DateTime? PostponedUntilDate { get; set; }
         public ItemRepeat? Repeat { get; set; }

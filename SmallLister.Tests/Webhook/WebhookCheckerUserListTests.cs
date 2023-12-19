@@ -53,7 +53,7 @@ public sealed class WebhookCheckerUserListTests : IDisposable
         await using (_services.CreateAsyncScope())
         {
             var dbContext = _services.GetRequiredService<SqliteDataContext>();
-            var userAccount = dbContext.UserAccounts.Add(new() { AuthenticationUri = "user1/" });
+            var userAccount = dbContext.UserAccounts.Add(new() { Email = "user1/" });
             var userList = dbContext.UserLists.Add(new() { Name = "New list", UserAccount = userAccount.Entity });
             dbContext.UserListWebhookQueue.AddRange(
                 new() { EventType = Model.WebhookEventType.New, UserList = userList.Entity },
@@ -98,7 +98,7 @@ public sealed class WebhookCheckerUserListTests : IDisposable
         await using (_services.CreateAsyncScope())
         {
             var dbContext = _services.GetRequiredService<SqliteDataContext>();
-            var userAccount = dbContext.UserAccounts.Add(new() { AuthenticationUri = "user1/" });
+            var userAccount = dbContext.UserAccounts.Add(new() { Email = "user1/" });
             var userList = dbContext.UserLists.Add(new() { Name = "list 1", UserAccount = userAccount.Entity });
             dbContext.UserListWebhookQueue.AddRange(
                 new() { EventType = Model.WebhookEventType.Modify, UserList = userList.Entity },
@@ -131,7 +131,7 @@ public sealed class WebhookCheckerUserListTests : IDisposable
         await using (_services.CreateAsyncScope())
         {
             var dbContext = _services.GetRequiredService<SqliteDataContext>();
-            var userAccount = dbContext.UserAccounts.Add(new() { AuthenticationUri = "user1/" });
+            var userAccount = dbContext.UserAccounts.Add(new() { Email = "user1/" });
             var userList = dbContext.UserLists.Add(new() { Name = "list 1", DeletedDateTime = DateTime.UtcNow, UserAccount = userAccount.Entity });
             dbContext.UserListWebhookQueue.Add(new() { EventType = Model.WebhookEventType.Delete, UserList = userList.Entity });
             dbContext.UserWebhooks.Add(new() { UserAccount = userAccount.Entity, WebhookType = Model.WebhookType.ListChange, Webhook = new("http://uri/") });
@@ -162,7 +162,7 @@ public sealed class WebhookCheckerUserListTests : IDisposable
         await using (_services.CreateAsyncScope())
         {
             var dbContext = _services.GetRequiredService<SqliteDataContext>();
-            var userAccount = dbContext.UserAccounts.Add(new() { AuthenticationUri = "user1/" });
+            var userAccount = dbContext.UserAccounts.Add(new() { Email = "user1/" });
             var userList = dbContext.UserLists.Add(new() { Name = "list 1", DeletedDateTime = DateTime.UtcNow, UserAccount = userAccount.Entity });
             dbContext.UserListWebhookQueue.AddRange(
                 new() { EventType = Model.WebhookEventType.New, UserList = userList.Entity },

@@ -1,11 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.IdentityModel.Tokens.Jwt;
 using System.IO;
 using System.Text;
 using MediatR;
 using Microsoft.AspNetCore.Authentication.Cookies;
-using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.DataProtection;
@@ -18,7 +15,6 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using Microsoft.IdentityModel.Tokens;
 using SmallLister.Actions;
 using SmallLister.Data;
@@ -42,12 +38,12 @@ namespace SmallLister.Web
             Environment = env;
         }
 
-        public IConfigurationRoot Configuration { get; }
+        public IConfiguration Configuration { get; }
         public IWebHostEnvironment Environment { get; }
 
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddSingleton<IConfiguration>(Configuration);
+            services.AddSingleton(Configuration);
 
             services
                 .ConfigureApplicationCookie(c => c.Cookie.Name = "smalllister")
@@ -62,27 +58,10 @@ namespace SmallLister.Web
                     o.Cookie.Name = "smalllister";
                     o.Cookie.HttpOnly = true;
                     o.Cookie.MaxAge = TimeSpan.FromDays(1);
+                    o.Cookie.SecurePolicy = CookieSecurePolicy.Always;
+                    o.Cookie.IsEssential = true;
                     o.ExpireTimeSpan = TimeSpan.FromDays(1);
                     o.SlidingExpiration = true;
-                })
-                .AddOpenIdConnect(options =>
-                {
-                    var openIdOptions = Configuration.GetSection("SmallListerOpenId");
-                    options.ClientId = openIdOptions.GetValue("ClientId", "");
-                    options.ClientSecret = openIdOptions.GetValue("ClientSecret", "");
-
-                    options.GetClaimsFromUserInfoEndpoint = true;
-                    options.SaveTokens = true;
-                    options.ResponseType = OpenIdConnectResponseType.Code;
-                    options.AuthenticationMethod = OpenIdConnectRedirectBehavior.RedirectGet;
-                    options.Authority = "https://smallauth.nosuchblogger.com/";
-                    options.Scope.Add("roles");
-                    options.TokenHandler = new JwtSecurityTokenHandler { InboundClaimTypeMap = new Dictionary<string, string>() };
-                    options.UseSecurityTokenValidator = true;
-                    options.TokenValidationParameters.NameClaimType = "name";
-                    options.TokenValidationParameters.RoleClaimType = "role";
-
-                    options.AccessDeniedPath = "/";
                 })
                 .AddJwtBearer("ApiJwt", options =>
                 {
@@ -170,7 +149,14 @@ namespace SmallLister.Web
 #endif
             services.AddCors();
             services.AddDistributedMemoryCache();
-            services.AddSession(options => options.IdleTimeout = TimeSpan.FromMinutes(5));
+            services
+                .AddSession(options => options.IdleTimeout = TimeSpan.FromMinutes(5))
+                .AddFido2(options =>
+                {
+                    options.ServerName = "Small:Lister";
+                    options.ServerDomain = Configuration.GetValue<string>("FidoDomain");
+                    options.Origins = [Configuration.GetValue<string>("FidoOrigins")];
+                });
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env, IApiVersionDescriptionProvider provider)

@@ -22,7 +22,7 @@ namespace SmallLister.Web.Tests
             using var serviceScope = _factory.Services.CreateScope();
             using var context = serviceScope.ServiceProvider.GetRequiredService<SqliteDataContext>();
             context.Migrate();
-            var userAccount = await context.UserAccounts.AddAsync(new UserAccount { AuthenticationUri = "http://test/user/1" });
+            var userAccount = await context.UserAccounts.AddAsync(new UserAccount { Email = "test-user-1" });
             var userList = await context.UserLists.AddAsync(new UserList { Name = "Test list", UserAccount = userAccount.Entity });
             await context.SaveChangesAsync();
             _userList = userList.Entity;
@@ -146,7 +146,7 @@ namespace SmallLister.Web.Tests
             var userItem = await context.UserItems.FirstOrDefaultAsync(u => u.Description == description);
             userItem.Should().NotBeNull();
 
-            var userAccount = await context.UserAccounts.AddAsync(new UserAccount { AuthenticationUri = "http://test/user/1" });
+            var userAccount = await context.UserAccounts.AddAsync(new UserAccount { Email = "test-user-1" });
             var userList = await context.UserLists.AddAsync(new UserList { Name = "Test list", UserAccount = userAccount.Entity });
             await context.SaveChangesAsync();
             _userList = userList.Entity;
