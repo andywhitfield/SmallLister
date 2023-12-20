@@ -48,7 +48,10 @@ namespace SmallLister.Web.Controllers.Api.V1
 
             var created = await _mediator.Send(new AddItemApiRequest(user, model));
             if (!created)
+            {
+                _logger.LogWarning($"Item [{model.Description}] could not be added to list [{model.ListId}]");
                 return BadRequest();
+            }
 
             return Ok();
         }

@@ -1,22 +1,14 @@
 using System;
 using System.ComponentModel.DataAnnotations;
 
-namespace SmallLister.Web.Model.Api
+namespace SmallLister.Web.Model.Api;
+
+public class AddItemRequestModel(string listId, string description, DateTime? dueDate, string? notes)
 {
-    public class AddItemRequestModel
-    {
-        public AddItemRequestModel(string listId, string description, DateTime? dueDate, string notes)
-        {
-            ListId = listId;
-            Description = description;
-            DueDate = dueDate;
-            Notes = notes;
-        }
-        [Required]
-        public string ListId { get; }
-        [Required]
-        public string Description { get; }
-        public DateTime? DueDate { get; }
-        public string Notes { get; }
-    }
+    [Required]
+    public string ListId { get; } = listId;
+    [Required]
+    public string Description { get; } = description;
+    public DateTime? DueDate { get; } = dueDate;
+    public string? Notes { get; } = notes;
 }

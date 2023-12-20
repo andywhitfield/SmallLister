@@ -135,7 +135,7 @@ namespace SmallLister.Web.Tests
                 KeyValuePair.Create("list", _userList.UserListId.ToString()),
                 KeyValuePair.Create("description", description)
             }));
-            response.StatusCode.Should().Be(HttpStatusCode.OK);
+            response.StatusCode.Should().Be(HttpStatusCode.OK, $"Response: {await response.Content.ReadAsStringAsync()}");
             return await response.Content.ReadAsStringAsync();
         }
 

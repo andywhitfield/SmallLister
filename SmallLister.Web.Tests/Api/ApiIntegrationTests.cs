@@ -391,7 +391,7 @@ namespace SmallLister.Web.Tests.Api
             client.DefaultRequestHeaders.Remove("Authorization");
             client.DefaultRequestHeaders.Add("Authorization", $"Bearer {tokenResponse.AccessToken}");
             var response = await client.PostAsJsonAsync("/api/v1/item", new { listId, description });
-            response.StatusCode.Should().Be(HttpStatusCode.OK);
+            response.StatusCode.Should().Be(HttpStatusCode.OK, await response.Content.ReadAsStringAsync());
         }
 
         private async Task RevokeApiAccessAsync()
