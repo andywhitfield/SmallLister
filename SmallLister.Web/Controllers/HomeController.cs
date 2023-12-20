@@ -29,7 +29,7 @@ public class HomeController(IMediator mediator) : Controller
     public IActionResult Error() => View(new ErrorViewModel(HttpContext));
 
     [HttpGet("~/signin")]
-    public IActionResult Signin([FromQuery] string returnUrl) => View("Login", new LoginViewModel(HttpContext, returnUrl));
+    public IActionResult Signin([FromQuery] string? returnUrl) => View("Login", new LoginViewModel(HttpContext, returnUrl));
 
     [HttpPost("~/signin")]
     [ValidateAntiForgeryToken]
