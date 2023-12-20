@@ -2,10 +2,9 @@ using System.Security.Claims;
 using System.Threading.Tasks;
 using SmallLister.Model;
 
-namespace SmallLister.Security
+namespace SmallLister.Security;
+
+public interface IJwtService
 {
-    public interface IJwtService
-    {
-         Task<UserAccount> GetUserAccountAsync(ClaimsPrincipal user);
-    }
+     Task<UserAccount?> GetUserAccountAsync(ClaimsPrincipal user);
 }

@@ -6,7 +6,7 @@ namespace SmallLister.Data;
 
 public interface IUserListRepository
 {
-    Task<UserList> GetListAsync(UserAccount user, int userListId);
+    Task<UserList?> GetListAsync(UserAccount user, int userListId);
     Task<List<UserList>> GetListsAsync(UserAccount user);
     Task<(int OverdueCount, int DueCount, int TotalCount, int TotalWithDueDateCount, IDictionary<int, int> ListCounts)> GetListCountsAsync(UserAccount user);
     Task<UserList> AddListAsync(UserAccount user, string name);

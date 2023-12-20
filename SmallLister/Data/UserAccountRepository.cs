@@ -12,14 +12,19 @@ namespace SmallLister.Data;
 public class UserAccountRepository(SqliteDataContext context, ILogger<UserAccountRepository> logger)
     : IUserAccountRepository
 {
-    public Task<UserAccount> GetAsync(int userAccountId) =>
+    public Task<UserAccount?> GetAsync(int userAccountId) =>
         context.UserAccounts.SingleOrDefaultAsync(a => a.UserAccountId == userAccountId && a.DeletedDateTime == null);
 
     public async Task<UserAccount> CreateNewUserAsync(string email, byte[] credentialId, byte[] publicKey, byte[] userHandle)
     {
         var newUserAccount = context.UserAccounts.Add(new UserAccount { Email = email });
-        context.UserAccountCredentials!.Add(new() { UserAccount = newUserAccount.Entity,
-            CredentialId = credentialId, PublicKey = publicKey, UserHandle = userHandle });
+        context.UserAccountCredentials!.Add(new()
+        {
+            UserAccount = newUserAccount.Entity,
+            CredentialId = credentialId,
+            PublicKey = publicKey,
+            UserHandle = userHandle
+        });
         await context.SaveChangesAsync();
         return newUserAccount.Entity;
     }
@@ -30,13 +35,13 @@ public class UserAccountRepository(SqliteDataContext context, ILogger<UserAccoun
         return user?.FindFirstValue(ClaimTypes.Name);
     }
 
-    public Task<UserAccount> GetUserAccountAsync(ClaimsPrincipal user) => GetUserAccountOrNullAsync(user) ?? throw new ArgumentException($"No UserAccount for the user: {GetEmailFromPrincipal(user)}");
+    public async Task<UserAccount> GetUserAccountAsync(ClaimsPrincipal user) => (await GetUserAccountOrNullAsync(user)) ?? throw new ArgumentException($"No UserAccount for the user: {GetEmailFromPrincipal(user)}");
 
-    public Task<UserAccount> GetUserAccountOrNullAsync(ClaimsPrincipal user)
+    public Task<UserAccount?> GetUserAccountOrNullAsync(ClaimsPrincipal user)
     {
         var email = GetEmailFromPrincipal(user);
         if (string.IsNullOrWhiteSpace(email))
-            return null;
+            return Task.FromResult((UserAccount?)null);
 
         return context.UserAccounts.FirstOrDefaultAsync(ua => ua.Email == email && ua.DeletedDateTime == null);
     }

@@ -2,14 +2,13 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using SmallLister.Model;
 
-namespace SmallLister.Data
+namespace SmallLister.Data;
+
+public interface IApiClientRepository
 {
-    public interface IApiClientRepository
-    {
-        Task<List<ApiClient>> GetAsync(UserAccount createdBy);
-        Task<ApiClient> GetAsync(int apiClientId);
-        Task<ApiClient> GetAsync(string appKey);
-        Task CreateAsync(string displayName, string redirectUri, string appKey, string appSecretHash, string appSecretSalt, UserAccount createdBy);
-        Task UpdateAsync(ApiClient apiClient);
-    }
+    Task<List<ApiClient>> GetAsync(UserAccount createdBy);
+    Task<ApiClient?> GetAsync(int apiClientId);
+    Task<ApiClient?> GetAsync(string appKey);
+    Task CreateAsync(string displayName, string redirectUri, string appKey, string appSecretHash, string appSecretSalt, UserAccount createdBy);
+    Task UpdateAsync(ApiClient apiClient);
 }

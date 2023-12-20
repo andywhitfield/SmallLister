@@ -8,9 +8,9 @@ namespace SmallLister.Data;
 public interface IUserAccountRepository
 {
     Task<UserAccount> CreateNewUserAsync(string email, byte[] credentialId, byte[] publicKey, byte[] userHandle);
-    Task<UserAccount> GetAsync(int userAccountId);
+    Task<UserAccount?> GetAsync(int userAccountId);
     Task<UserAccount> GetUserAccountAsync(ClaimsPrincipal user);
-    Task<UserAccount> GetUserAccountOrNullAsync(ClaimsPrincipal user);
+    Task<UserAccount?> GetUserAccountOrNullAsync(ClaimsPrincipal user);
     Task<UserAccount?> GetUserAccountByEmailAsync(string email);
     Task SetLastSelectedUserListIdAsync(UserAccount user, int? lastSelectedUserListId);
     IAsyncEnumerable<UserAccountCredential> GetUserAccountCredentialsAsync(UserAccount user);

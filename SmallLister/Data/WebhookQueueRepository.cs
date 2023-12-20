@@ -9,22 +9,11 @@ using SmallLister.Webhook;
 
 namespace SmallLister.Data;
 
-public class WebhookQueueRepository : IWebhookQueueRepository
+public class WebhookQueueRepository(ILogger<WebhookQueueRepository> logger, SqliteDataContext context,
+    IWebhookNotification webhookNotification) : IWebhookQueueRepository
 {
-    private readonly ILogger<WebhookQueueRepository> _logger;
-    private readonly SqliteDataContext _context;
-    private readonly IWebhookNotification _webhookNotification;
-
-    public WebhookQueueRepository(ILogger<WebhookQueueRepository> logger, SqliteDataContext context,
-        IWebhookNotification webhookNotification)
-    {
-        _logger = logger;
-        _context = context;
-        _webhookNotification = webhookNotification;
-    }
-
     public IAsyncEnumerable<UserListWebhookQueue> GetUnsentUserListWebhookQueuesAsync() =>
-        _context.UserListWebhookQueue
+        context.UserListWebhookQueue
             .Include(x => x.UserList)
             .ThenInclude(x => x.UserAccount)
             .Where(x => x.DeletedDateTime == null && x.SentDateTime == null)
@@ -32,7 +21,7 @@ public class WebhookQueueRepository : IWebhookQueueRepository
             .AsAsyncEnumerable();
 
     public IAsyncEnumerable<UserItemWebhookQueue> GetUnsentUserItemWebhookQueuesAsync() =>
-        _context.UserItemWebhookQueue
+        context.UserItemWebhookQueue
             .Include(x => x.UserItem)
             .ThenInclude(x => x.UserAccount)
             .Where(x => x.DeletedDateTime == null && x.SentDateTime == null)
@@ -41,39 +30,41 @@ public class WebhookQueueRepository : IWebhookQueueRepository
 
     public async Task OnListChangeAsync(UserAccount user, UserList list, WebhookEventType eventType)
     {
-        if (await _context.UserWebhooks.AnyAsync(wh =>
+        if (await context.UserWebhooks.AnyAsync(wh =>
             wh.UserAccountId == user.UserAccountId &&
             wh.WebhookType == WebhookType.ListChange &&
             wh.DeletedDateTime == null))
         {
-            _logger.LogInformation($"ListChange webhook exists for this user {user.UserAccountId}, adding list change {list.UserListId} to queue");
-            _context.UserListWebhookQueue.Add(new()
+            logger.LogInformation($"ListChange webhook exists for this user {user.UserAccountId}, adding list change {list.UserListId} to queue");
+            context.UserListWebhookQueue.Add(new()
             {
                 UserListId = list.UserListId,
+                UserList = list,
                 EventType = eventType
             });
-            await _context.SaveChangesAsync();
+            await context.SaveChangesAsync();
 
-            _webhookNotification.Notify();
+            webhookNotification.Notify();
         }
     }
 
     public async Task OnListItemChangeAsync(UserAccount user, UserItem userItem, WebhookEventType eventType)
     {
-        if (await _context.UserWebhooks.AnyAsync(wh =>
+        if (await context.UserWebhooks.AnyAsync(wh =>
             wh.UserAccountId == user.UserAccountId &&
             wh.WebhookType == WebhookType.ListItemChange &&
             wh.DeletedDateTime == null))
         {
-            _logger.LogInformation($"ListItemChange webhook exists for this user {user.UserAccountId}, adding user item change {userItem.UserItemId} to queue");
-            _context.UserItemWebhookQueue.Add(new()
+            logger.LogInformation($"ListItemChange webhook exists for this user {user.UserAccountId}, adding user item change {userItem.UserItemId} to queue");
+            context.UserItemWebhookQueue.Add(new()
             {
                 UserItemId = userItem.UserItemId,
+                UserItem = userItem,
                 EventType = eventType
             });
-            await _context.SaveChangesAsync();
+            await context.SaveChangesAsync();
 
-            _webhookNotification.Notify();
+            webhookNotification.Notify();
         }
     }
 
@@ -82,7 +73,7 @@ public class WebhookQueueRepository : IWebhookQueueRepository
         userListWebhookQueue.LastUpdateDateTime = DateTime.UtcNow;
         userListWebhookQueue.SentPayload = payload;
         userListWebhookQueue.SentDateTime = sentTime ?? DateTime.UtcNow;
-        return _context.SaveChangesAsync();
+        return context.SaveChangesAsync();
     }
 
     public Task SentAsync(UserItemWebhookQueue userItemWebhookQueue, string payload, DateTime? sentTime = null)
@@ -90,6 +81,6 @@ public class WebhookQueueRepository : IWebhookQueueRepository
         userItemWebhookQueue.LastUpdateDateTime = DateTime.UtcNow;
         userItemWebhookQueue.SentPayload = payload;
         userItemWebhookQueue.SentDateTime = sentTime ?? DateTime.UtcNow;
-        return _context.SaveChangesAsync();
+        return context.SaveChangesAsync();
     }
 }

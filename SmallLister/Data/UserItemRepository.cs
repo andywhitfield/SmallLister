@@ -22,10 +22,10 @@ public class UserItemRepository : IUserItemRepository
         _logger = logger;
     }
 
-    public Task<UserItem> GetItemAsync(UserAccount user, int userItemId, bool getCompletedOrDeletedItem = false) =>
+    public Task<UserItem?> GetItemAsync(UserAccount user, int userItemId, bool getCompletedOrDeletedItem = false) =>
         _context.UserItems.SingleOrDefaultAsync(i => i.UserItemId == userItemId && i.UserAccount == user && (getCompletedOrDeletedItem || (i.CompletedDateTime == null && i.DeletedDateTime == null)));
 
-    public async Task<(List<UserItem> UserItems, int PageNumber, int PageCount)> GetItemsAsync(UserAccount user, UserList list, UserItemFilter filter = null, int? pageNumber = null, int? pageSize = null)
+    public async Task<(List<UserItem> UserItems, int PageNumber, int PageCount)> GetItemsAsync(UserAccount user, UserList? list, UserItemFilter? filter = null, int? pageNumber = null, int? pageSize = null)
     {
         var query = _context.UserItems.Where(i => i.UserAccount == user && i.CompletedDateTime == null && i.DeletedDateTime == null);
         Func<IQueryable<UserItem>, IQueryable<UserItem>> orderByClause;
@@ -36,7 +36,7 @@ public class UserItemRepository : IUserItemRepository
         }
         else
         {
-            orderByClause = q => q.OrderBy(i => i.UserList.SortOrder).ThenBy(i => i.SortOrder);
+            orderByClause = q => q.OrderBy(i => i.UserList == null ? 0 : i.UserList.SortOrder).ThenBy(i => i.SortOrder);
         }
 
         if (filter != null)
@@ -63,7 +63,7 @@ public class UserItemRepository : IUserItemRepository
                 orderByClause = DueListOrdering;
             }
 
-            static IQueryable<UserItem> DueListOrdering(IQueryable<UserItem> q) => q.OrderBy(i => i.PostponedUntilDate ?? i.NextDueDate).ThenBy(i => i.UserList.SortOrder).ThenBy(i => i.SortOrder);
+            static IQueryable<UserItem> DueListOrdering(IQueryable<UserItem> q) => q.OrderBy(i => i.PostponedUntilDate ?? i.NextDueDate).ThenBy(i => i.UserList == null ? 0 : i.UserList.SortOrder).ThenBy(i => i.SortOrder);
         }
 
         var total = await query.CountAsync();

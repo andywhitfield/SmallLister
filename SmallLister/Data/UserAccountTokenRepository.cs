@@ -5,56 +5,53 @@ using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using SmallLister.Model;
 
-namespace SmallLister.Data
+namespace SmallLister.Data;
+
+public class UserAccountTokenRepository(SqliteDataContext context) : IUserAccountTokenRepository
 {
-    public class UserAccountTokenRepository : IUserAccountTokenRepository
+    private readonly SqliteDataContext _context = context;
+
+    public async Task<List<UserAccountToken>> GetAsync(UserAccountApiAccess userAccountApiAccess)
     {
-        private readonly SqliteDataContext _context;
+        await DeleteExpiredTokensAsync();
+        return await _context.UserAccountTokens.Where(t => t.UserAccountApiAccess == userAccountApiAccess && t.DeletedDateTime == null).ToListAsync();
+    }
 
-        public UserAccountTokenRepository(SqliteDataContext context) => _context = context;
+    public async Task<UserAccountToken?> GetAsync(string tokenData)
+    {
+        await DeleteExpiredTokensAsync();
+        return await _context.UserAccountTokens.SingleOrDefaultAsync(t => t.TokenData == tokenData && t.DeletedDateTime == null);
+    }
 
-        public async Task<List<UserAccountToken>> GetAsync(UserAccountApiAccess userAccountApiAccess)
+    public async Task CreateAsync(UserAccountApiAccess userAccountApiAccess, string tokenData, DateTime expires)
+    {
+        await DeleteExpiredTokensAsync();
+        await _context.UserAccountTokens.AddAsync(new UserAccountToken
         {
-            await DeleteExpiredTokensAsync();
-            return await _context.UserAccountTokens.Where(t => t.UserAccountApiAccess == userAccountApiAccess && t.DeletedDateTime == null).ToListAsync();
-        }
+            UserAccountApiAccess = userAccountApiAccess,
+            ExpiryDateTime = expires,
+            TokenData = tokenData
+        });
+        await _context.SaveChangesAsync();
+    }
 
-        public async Task<UserAccountToken> GetAsync(string tokenData)
-        {
-            await DeleteExpiredTokensAsync();
-            return await _context.UserAccountTokens.SingleOrDefaultAsync(t => t.TokenData == tokenData && t.DeletedDateTime == null);
-        }
+    public async Task<UserAccountToken?> GetLatestAsync(UserAccountApiAccess userAccountApiAccess)
+    {
+        await DeleteExpiredTokensAsync();
+        return await _context.UserAccountTokens
+            .Where(t => t.UserAccountApiAccess == userAccountApiAccess)
+            .OrderByDescending(t => t.CreatedDateTime)
+            .FirstOrDefaultAsync();
+    }
 
-        public async Task CreateAsync(UserAccountApiAccess userAccountApiAccess, string tokenData, DateTime expires)
+    private async Task DeleteExpiredTokensAsync()
+    {
+        var now = DateTime.UtcNow;
+        await foreach (var token in _context.UserAccountTokens.Where(t => t.DeletedDateTime == null && t.ExpiryDateTime < now).AsAsyncEnumerable())
         {
-            await DeleteExpiredTokensAsync();
-            await _context.UserAccountTokens.AddAsync(new UserAccountToken
-            {
-                UserAccountApiAccess = userAccountApiAccess,
-                ExpiryDateTime = expires,
-                TokenData = tokenData
-            });
-            await _context.SaveChangesAsync();
+            token.DeletedDateTime = now;
+            token.LastUpdateDateTime = now;
         }
-
-        public async Task<UserAccountToken> GetLatestAsync(UserAccountApiAccess userAccountApiAccess)
-        {
-            await DeleteExpiredTokensAsync();
-            return await _context.UserAccountTokens
-                .Where(t => t.UserAccountApiAccess == userAccountApiAccess)
-                .OrderByDescending(t => t.CreatedDateTime)
-                .FirstOrDefaultAsync();
-        }
-
-        private async Task DeleteExpiredTokensAsync()
-        {
-            var now = DateTime.UtcNow;
-            await foreach (var token in _context.UserAccountTokens.Where(t => t.DeletedDateTime == null && t.ExpiryDateTime < now).AsAsyncEnumerable())
-            {
-                token.DeletedDateTime = now;
-                token.LastUpdateDateTime = now;
-            }
-            await _context.SaveChangesAsync();
-        }
+        await _context.SaveChangesAsync();
     }
 }

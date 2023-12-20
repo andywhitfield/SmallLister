@@ -6,99 +6,90 @@ using Microsoft.Extensions.Logging;
 using SmallLister.Actions;
 using SmallLister.Model;
 
-namespace SmallLister.Data
+namespace SmallLister.Data;
+
+public class UserActionRepository(ILogger<UserActionRepository> logger, SqliteDataContext context)
+    : IUserActionRepository
 {
-    public class UserActionRepository : IUserActionRepository
+    public async Task CreateAsync(UserAccount user, string description, UserActionType actionType, string data)
     {
-        private readonly ILogger<UserActionRepository> _logger;
-        private readonly SqliteDataContext _context;
-
-        public UserActionRepository(ILogger<UserActionRepository> logger, SqliteDataContext context)
+        var now = DateTime.UtcNow;
+        var nextActionNumber = 1;
+        await foreach (var currentAction in context.UserActions.Where(a => a.UserAccount == user && a.DeletedDateTime == null && a.IsCurrent).OrderBy(a => a.ActionNumber).AsAsyncEnumerable())
         {
-            _logger = logger;
-            _context = context;
+            currentAction.IsCurrent = false;
+            currentAction.LastUpdateDateTime = now;
+            nextActionNumber = currentAction.ActionNumber + 1;
         }
 
-        public async Task CreateAsync(UserAccount user, string description, UserActionType actionType, string data)
+        await foreach (var redoAction in context.UserActions.Where(a => a.UserAccount == user && a.DeletedDateTime == null && a.ActionNumber >= nextActionNumber).AsAsyncEnumerable())
         {
-            var now = DateTime.UtcNow;
-            var nextActionNumber = 1;
-            await foreach (var currentAction in _context.UserActions.Where(a => a.UserAccount == user && a.DeletedDateTime == null && a.IsCurrent).OrderBy(a => a.ActionNumber).AsAsyncEnumerable())
-            {
-                currentAction.IsCurrent = false;
-                currentAction.LastUpdateDateTime = now;
-                nextActionNumber = currentAction.ActionNumber + 1;
-            }
-
-            await foreach (var redoAction in _context.UserActions.Where(a => a.UserAccount == user && a.DeletedDateTime == null && a.ActionNumber >= nextActionNumber).AsAsyncEnumerable())
-            {
-                redoAction.DeletedDateTime = now;
-                redoAction.LastUpdateDateTime = now;
-            }
-
-            await _context.UserActions.AddAsync(new UserAction
-            {
-                UserAccount = user,
-                Description = description,
-                ActionType = actionType,
-                UserActionData = data,
-                IsCurrent = true,
-                ActionNumber = nextActionNumber,
-                CreatedDateTime = now
-            });
-
-            await _context.SaveChangesAsync();
-        }
-
-        public async Task<(UserAction UndoAction, UserAction RedoAction)> GetUndoRedoActionAsync(UserAccount user)
-        {
-            var currentAction = await _context.UserActions.FirstOrDefaultAsync(ua => ua.UserAccount == user && ua.DeletedDateTime == null && ua.IsCurrent);
-
-            var redoActionQuery = _context.UserActions.Where(ua => ua.UserAccount == user && ua.DeletedDateTime == null);
-            if (currentAction != null)
-                redoActionQuery = redoActionQuery.Where(ua => ua.ActionNumber > currentAction.ActionNumber);
-
-            var redoAction = await redoActionQuery.OrderBy(ua => ua.ActionNumber).FirstOrDefaultAsync();
-
-            return (currentAction, redoAction);
-        }
-
-        public async Task SetActionUndoneAsync(UserAction undoAction)
-        {
-            var now = DateTime.UtcNow;
-            undoAction.IsCurrent = false;
-            undoAction.LastUpdateDateTime = now;
-
-            var previousAction = await _context.UserActions
-                .Where(ua => ua.UserAccountId == undoAction.UserAccountId && ua.ActionNumber < undoAction.ActionNumber && ua.DeletedDateTime == null)
-                .OrderByDescending(ua => ua.ActionNumber)
-                .FirstOrDefaultAsync();
-            if (previousAction != null)
-            {
-                previousAction.IsCurrent = true;
-                previousAction.LastUpdateDateTime = now;
-            }
-
-            _logger.LogInformation($"Marked item {undoAction.UserActionId} as undone; {previousAction?.UserActionId} is now the current action.");
-
-            await _context.SaveChangesAsync();
-        }
-
-        public async Task SetActionRedoneAsync(UserAction redoAction)
-        {
-            var now = DateTime.UtcNow;
-            await foreach (var previousCurrentItem in _context.UserActions.Where(ua => ua.UserAccountId == redoAction.UserAccountId && ua.IsCurrent && ua.DeletedDateTime == null).AsAsyncEnumerable())
-            {
-                previousCurrentItem.IsCurrent = false;
-                previousCurrentItem.LastUpdateDateTime = now;
-            }
-
-            redoAction.IsCurrent = true;
+            redoAction.DeletedDateTime = now;
             redoAction.LastUpdateDateTime = now;
-
-            _logger.LogInformation($"Marked item {redoAction.UserActionId} as current action.");
-
-            await _context.SaveChangesAsync();
         }
+
+        await context.UserActions.AddAsync(new UserAction
+        {
+            UserAccount = user,
+            Description = description,
+            ActionType = actionType,
+            UserActionData = data,
+            IsCurrent = true,
+            ActionNumber = nextActionNumber,
+            CreatedDateTime = now
+        });
+
+        await context.SaveChangesAsync();
+    }
+
+    public async Task<(UserAction? UndoAction, UserAction? RedoAction)> GetUndoRedoActionAsync(UserAccount user)
+    {
+        var currentAction = await context.UserActions.FirstOrDefaultAsync(ua => ua.UserAccount == user && ua.DeletedDateTime == null && ua.IsCurrent);
+
+        var redoActionQuery = context.UserActions.Where(ua => ua.UserAccount == user && ua.DeletedDateTime == null);
+        if (currentAction != null)
+            redoActionQuery = redoActionQuery.Where(ua => ua.ActionNumber > currentAction.ActionNumber);
+
+        var redoAction = await redoActionQuery.OrderBy(ua => ua.ActionNumber).FirstOrDefaultAsync();
+
+        return (currentAction, redoAction);
+    }
+
+    public async Task SetActionUndoneAsync(UserAction undoAction)
+    {
+        var now = DateTime.UtcNow;
+        undoAction.IsCurrent = false;
+        undoAction.LastUpdateDateTime = now;
+
+        var previousAction = await context.UserActions
+            .Where(ua => ua.UserAccountId == undoAction.UserAccountId && ua.ActionNumber < undoAction.ActionNumber && ua.DeletedDateTime == null)
+            .OrderByDescending(ua => ua.ActionNumber)
+            .FirstOrDefaultAsync();
+        if (previousAction != null)
+        {
+            previousAction.IsCurrent = true;
+            previousAction.LastUpdateDateTime = now;
+        }
+
+        logger.LogInformation($"Marked item {undoAction.UserActionId} as undone; {previousAction?.UserActionId} is now the current action.");
+
+        await context.SaveChangesAsync();
+    }
+
+    public async Task SetActionRedoneAsync(UserAction redoAction)
+    {
+        var now = DateTime.UtcNow;
+        await foreach (var previousCurrentItem in context.UserActions.Where(ua => ua.UserAccountId == redoAction.UserAccountId && ua.IsCurrent && ua.DeletedDateTime == null).AsAsyncEnumerable())
+        {
+            previousCurrentItem.IsCurrent = false;
+            previousCurrentItem.LastUpdateDateTime = now;
+        }
+
+        redoAction.IsCurrent = true;
+        redoAction.LastUpdateDateTime = now;
+
+        logger.LogInformation($"Marked item {redoAction.UserActionId} as current action.");
+
+        await context.SaveChangesAsync();
     }
 }

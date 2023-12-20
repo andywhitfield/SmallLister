@@ -57,7 +57,7 @@ public class WebhookSender : IWebhookSender
         return sent;
     }
 
-    private async Task<string> SendAsync<T>(UserWebhook userWebhook, T webhookToSend)
+    private async Task<string?> SendAsync<T>(UserWebhook userWebhook, T webhookToSend)
     {
         var payload = JsonSerializer.Serialize(webhookToSend);
         _logger.LogInformation($"Sending webhook [{userWebhook.Webhook}] for user {userWebhook.UserAccountId}: {payload}");

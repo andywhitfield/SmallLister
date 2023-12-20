@@ -20,7 +20,8 @@ namespace SmallLister.Tests.Feed
             var atomDoc = generator.GenerateFeed("https://smalllister.nosuchblogger.com", DateTime.UtcNow, new List<UserItem>(), new UserFeed
             {
                 UserFeedIdentifier = "mytestfeed",
-                FeedType = userFeedType
+                FeedType = userFeedType,
+                UserAccount = new()
             });
             atomDoc.Should().NotBeNull();
 

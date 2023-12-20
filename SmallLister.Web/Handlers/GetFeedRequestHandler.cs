@@ -10,63 +10,48 @@ using SmallLister.Feed;
 using SmallLister.Model;
 using SmallLister.Web.Handlers.RequestResponse;
 
-namespace SmallLister.Web.Handlers
+namespace SmallLister.Web.Handlers;
+
+public class GetFeedRequestHandler(ILogger<GetFeedRequestHandler> logger, IUserFeedRepository userFeedRepository,
+    IUserAccountRepository userAccountRepository, IUserItemRepository userItemRepository, IFeedGenerator feedGenerator)
+    : IRequestHandler<GetFeedRequest, string?>
 {
-    public class GetFeedRequestHandler : IRequestHandler<GetFeedRequest, string>
+    public async Task<string?> Handle(GetFeedRequest request, CancellationToken cancellationToken)
     {
-        private readonly ILogger<GetFeedRequestHandler> _logger;
-        private readonly IUserFeedRepository _userFeedRepository;
-        private readonly IUserAccountRepository _userAccountRepository;
-        private readonly IUserItemRepository _userItemRepository;
-        private readonly IFeedGenerator _feedGenerator;
-
-        public GetFeedRequestHandler(ILogger<GetFeedRequestHandler> logger, IUserFeedRepository userFeedRepository,
-            IUserAccountRepository userAccountRepository, IUserItemRepository userItemRepository, IFeedGenerator feedGenerator)
+        var userFeed = await userFeedRepository.FindByIdentifierAsync(request.FeedIdentifier);
+        if (userFeed == null)
         {
-            _logger = logger;
-            _userFeedRepository = userFeedRepository;
-            _userAccountRepository = userAccountRepository;
-            _userItemRepository = userItemRepository;
-            _feedGenerator = feedGenerator;
+            logger.LogInformation($"No user feed found with identifier: {request.FeedIdentifier}");
+            return null;
         }
 
-        public async Task<string> Handle(GetFeedRequest request, CancellationToken cancellationToken)
+        var user = await userAccountRepository.GetAsync(userFeed.UserAccountId);
+        if (user == null)
         {
-            var userFeed = await _userFeedRepository.FindByIdentifierAsync(request.FeedIdentifier);
-            if (userFeed == null)
-            {
-                _logger.LogInformation($"No user feed found with identifier: {request.FeedIdentifier}");
-                return null;
-            }
-
-            var user = await _userAccountRepository.GetAsync(userFeed.UserAccountId);
-            if (user == null)
-            {
-                _logger.LogInformation($"No user account found, associated with feed identifier: {request.FeedIdentifier}");
-                return null;
-            }
-
-            var (items, _, _) = await _userItemRepository.GetItemsAsync(user, null, new UserItemFilter
-            {
-                DueToday = userFeed.FeedType == UserFeedType.Due || userFeed.FeedType == UserFeedType.Daily,
-                Overdue = true
-            });
-            var itemHash = GenerateHash(userFeed.FeedType == UserFeedType.Daily ? new[] { DateTime.Today.GetHashCode() } : items.Select(i => i.UserItemId).Append(DateTime.Today.GetHashCode()));
-            if (userFeed.ItemHash != itemHash)
-            {
-                userFeed.ItemHash = itemHash;
-                await _userFeedRepository.SaveAsync(userFeed);
-            }
-
-            return _feedGenerator.GenerateFeed(request.BaseUri, userFeed.LastUpdateDateTime ?? userFeed.CreatedDateTime, items, userFeed).ToXmlString();
+            logger.LogInformation($"No user account found, associated with feed identifier: {request.FeedIdentifier}");
+            return null;
         }
 
-        private int GenerateHash(IEnumerable<int> ids)
+        var (items, _, _) = await userItemRepository.GetItemsAsync(user, null, new UserItemFilter
         {
-            var hash = 23;
-            foreach (var id in ids)
-                hash = hash * 31 + id;
-            return hash;
+            DueToday = userFeed.FeedType == UserFeedType.Due || userFeed.FeedType == UserFeedType.Daily,
+            Overdue = true
+        });
+        var itemHash = GenerateHash(userFeed.FeedType == UserFeedType.Daily ? new[] { DateTime.Today.GetHashCode() } : items.Select(i => i.UserItemId).Append(DateTime.Today.GetHashCode()));
+        if (userFeed.ItemHash != itemHash)
+        {
+            userFeed.ItemHash = itemHash;
+            await userFeedRepository.SaveAsync(userFeed);
         }
+
+        return feedGenerator.GenerateFeed(request.BaseUri, userFeed.LastUpdateDateTime ?? userFeed.CreatedDateTime, items, userFeed).ToXmlString();
+    }
+
+    private static int GenerateHash(IEnumerable<int> ids)
+    {
+        var hash = 23;
+        foreach (var id in ids)
+            hash = hash * 31 + id;
+        return hash;
     }
 }

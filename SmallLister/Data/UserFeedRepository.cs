@@ -6,46 +6,37 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using SmallLister.Model;
 
-namespace SmallLister.Data
+namespace SmallLister.Data;
+
+public class UserFeedRepository(SqliteDataContext context, ILogger<UserFeedRepository> logger)
+    : IUserFeedRepository
 {
-    public class UserFeedRepository : IUserFeedRepository
+    public Task CreateAsync(UserAccount user, string uniqueFeedIdentifier, UserFeedType type, UserFeedItemDisplay display)
     {
-        private readonly SqliteDataContext _context;
-        private readonly ILogger<UserFeedRepository> _logger;
+        logger.LogInformation($"Creating new feed for user {user.UserAccountId}: {uniqueFeedIdentifier}; {type}; {display}");
 
-        public UserFeedRepository(SqliteDataContext context, ILogger<UserFeedRepository> logger)
+        context.UserFeeds.Add(new UserFeed
         {
-            _context = context;
-            _logger = logger;
-        }
+            UserAccount = user,
+            UserFeedIdentifier = uniqueFeedIdentifier,
+            FeedType = type,
+            ItemDisplay = display
+        });
+        return context.SaveChangesAsync();
+    }
 
-        public Task CreateAsync(UserAccount user, string uniqueFeedIdentifier, UserFeedType type, UserFeedItemDisplay display)
-        {
-            _logger.LogInformation($"Creating new feed for user {user.UserAccountId}: {uniqueFeedIdentifier}; {type}; {display}");
+    public Task<UserFeed?> GetAsync(int userFeedId) =>
+        context.UserFeeds.SingleOrDefaultAsync(f => f.UserFeedId == userFeedId && f.DeletedDateTime == null);
 
-            _context.UserFeeds.Add(new UserFeed
-            {
-                UserAccount = user,
-                UserFeedIdentifier = uniqueFeedIdentifier,
-                FeedType = type,
-                ItemDisplay = display
-            });
-            return _context.SaveChangesAsync();
-        }
+    public Task<UserFeed?> FindByIdentifierAsync(string feedIdentifier) =>
+        context.UserFeeds.SingleOrDefaultAsync(f => f.UserFeedIdentifier == feedIdentifier && f.DeletedDateTime == null);
 
-        public Task<UserFeed> GetAsync(int userFeedId) =>
-            _context.UserFeeds.SingleOrDefaultAsync(f => f.UserFeedId == userFeedId && f.DeletedDateTime == null);
+    public Task<List<UserFeed>> GetAsync(UserAccount user) =>
+        context.UserFeeds.Where(f => f.UserAccount == user && f.DeletedDateTime == null).OrderByDescending(f => f.CreatedDateTime).ToListAsync();
 
-        public Task<UserFeed> FindByIdentifierAsync(string feedIdentifier) =>
-            _context.UserFeeds.SingleOrDefaultAsync(f => f.UserFeedIdentifier == feedIdentifier && f.DeletedDateTime == null);
-
-        public Task<List<UserFeed>> GetAsync(UserAccount user) =>
-            _context.UserFeeds.Where(f => f.UserAccount == user && f.DeletedDateTime == null).OrderByDescending(f => f.CreatedDateTime).ToListAsync();
-
-        public Task SaveAsync(UserFeed userFeed)
-        {
-            userFeed.LastUpdateDateTime = DateTime.UtcNow;
-            return _context.SaveChangesAsync();
-        }
+    public Task SaveAsync(UserFeed userFeed)
+    {
+        userFeed.LastUpdateDateTime = DateTime.UtcNow;
+        return context.SaveChangesAsync();
     }
 }
