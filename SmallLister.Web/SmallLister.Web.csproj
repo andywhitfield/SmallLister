@@ -7,7 +7,7 @@
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="BuildBundlerMinifier" Version="*" />
-    <PackageReference Include="Fido2.AspNet" Version="3.0.1" />
+    <PackageReference Include="Fido2.AspNet" Version="3.0.*" />
     <PackageReference Include="MediatR.Extensions.Microsoft.DependencyInjection" Version="11.1.*" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.*" />
     <PackageReference Include="Microsoft.AspNetCore.DataProtection.Abstractions" Version="8.0.*" />
@@ -18,7 +18,7 @@
     <PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="8.0.*" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.5.*" />
     <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="7.0.*" />
-    <PackageReference Include="System.Linq.Async" Version="6.0.1" />
+    <PackageReference Include="System.Linq.Async" Version="6.0.*" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\SmallLister\SmallLister.csproj" />

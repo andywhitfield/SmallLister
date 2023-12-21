@@ -47,10 +47,7 @@ namespace SmallLister.Web
 
             services
                 .ConfigureApplicationCookie(c => c.Cookie.Name = "smalllister")
-                .AddAuthentication(o =>
-                {
-                    o.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
-                })
+                .AddAuthentication(o => o.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme)
                 .AddCookie(o =>
                 {
                     o.LoginPath = "/signin";
