@@ -2,20 +2,13 @@ using System.Security.Claims;
 using MediatR;
 using SmallLister.Model;
 
-namespace SmallLister.Web.Handlers.RequestResponse
+namespace SmallLister.Web.Handlers.RequestResponse;
+
+public class GetListItemsRequest(ClaimsPrincipal user, string? list, ItemSortOrder? sort, int? pageNumber)
+    : IRequest<GetListItemsResponse>
 {
-    public class GetListItemsRequest : IRequest<GetListItemsResponse>
-    {
-        public ClaimsPrincipal User { get; }
-        public string List { get; }
-        public ItemSortOrder? Sort { get; }
-        public int? PageNumber { get; }
-        public GetListItemsRequest(ClaimsPrincipal user, string list, ItemSortOrder? sort, int? pageNumber)
-        {
-            User = user;
-            List = list;
-            Sort = sort;
-            PageNumber = pageNumber;
-        }
-    }
+    public ClaimsPrincipal User { get; } = user;
+    public string? List { get; } = list;
+    public ItemSortOrder? Sort { get; } = sort;
+    public int? PageNumber { get; } = pageNumber;
 }

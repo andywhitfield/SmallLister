@@ -39,7 +39,7 @@ public class EditItemRequestHandlerTests
 
         userAccountRepository.Setup(x => x.GetUserAccountAsync(_user)).ReturnsAsync(userAccount);
         _userItemRepository.Setup(x => x.GetItemAsync(userAccount, _userItem.UserItemId, false)).ReturnsAsync(_userItem);
-        userListRepository.Setup(x => x.GetListAsync(userAccount, _updatedUserItemInfo.UserListId.Value)).ReturnsAsync(_updatedUserItemInfo.UserList);
+        userListRepository.Setup(x => x.GetListAsync(userAccount, _updatedUserItemInfo.UserListId ?? 0)).ReturnsAsync(_updatedUserItemInfo.UserList);
 
         _handler = new EditItemRequestHandler(Mock.Of<ILogger<EditItemRequestHandler>>(),
             userAccountRepository.Object, _userItemRepository.Object, userListRepository.Object,
@@ -52,8 +52,8 @@ public class EditItemRequestHandlerTests
     {
         var result = await _handler.Handle(new EditItemRequest(_user, _userItem.UserItemId, new AddOrUpdateItemRequest
         {
-            Description = _updatedUserItemInfo.Description,
-            Due = _updatedUserItemInfo.NextDueDate.Value.ToString("yyyy-MM-dd"),
+            Description = _updatedUserItemInfo.Description ?? "",
+            Due = _updatedUserItemInfo.NextDueDate.GetValueOrDefault().ToString("yyyy-MM-dd"),
             List = _updatedUserItemInfo.UserListId.ToString(),
             Notes = _updatedUserItemInfo.Notes,
             Repeat = _updatedUserItemInfo.Repeat
@@ -62,7 +62,7 @@ public class EditItemRequestHandlerTests
         result.Should().BeTrue();
         _userItemRepository.Verify(x => x.SaveAsync(It.Is<UserItem>(x =>
             x.Description == _updatedUserItemInfo.Description &&
-            x.NextDueDate == _updatedUserItemInfo.NextDueDate.Value.Date &&
+            x.NextDueDate == _updatedUserItemInfo.NextDueDate.GetValueOrDefault().Date &&
             x.Notes == _updatedUserItemInfo.Notes &&
             x.Repeat == _updatedUserItemInfo.Repeat), _updatedUserItemInfo.UserList,
             It.IsAny<IUserActionsService>()), Times.Once);
@@ -73,8 +73,8 @@ public class EditItemRequestHandlerTests
     {
         var result = await _handler.Handle(new EditItemRequest(_user, _userItem.UserItemId, new AddOrUpdateItemRequest
         {
-            Description = _updatedUserItemInfo.Description,
-            Due = _updatedUserItemInfo.NextDueDate.Value.ToString("yyyy-MM-dd"),
+            Description = _updatedUserItemInfo.Description ?? "",
+            Due = _updatedUserItemInfo.NextDueDate.GetValueOrDefault().ToString("yyyy-MM-dd"),
             List = _updatedUserItemInfo.UserListId.ToString(),
             Notes = _updatedUserItemInfo.Notes,
             Repeat = _updatedUserItemInfo.Repeat
@@ -83,7 +83,7 @@ public class EditItemRequestHandlerTests
         result.Should().BeTrue();
         _userItemRepository.Verify(x => x.SaveAsync(It.Is<UserItem>(x =>
             x.Description == _updatedUserItemInfo.Description &&
-            x.NextDueDate == _updatedUserItemInfo.NextDueDate.Value.Date &&
+            x.NextDueDate == _updatedUserItemInfo.NextDueDate.GetValueOrDefault().Date &&
             x.PostponedUntilDate == null &&
             x.Notes == _updatedUserItemInfo.Notes &&
             x.Repeat == _updatedUserItemInfo.Repeat), _updatedUserItemInfo.UserList,
@@ -96,8 +96,8 @@ public class EditItemRequestHandlerTests
         _userItem.PostponedUntilDate = null;
         var result = await _handler.Handle(new EditItemRequest(_user, _userItem.UserItemId, new AddOrUpdateItemRequest
         {
-            Description = _updatedUserItemInfo.Description,
-            Due = _updatedUserItemInfo.NextDueDate.Value.ToString("yyyy-MM-dd"),
+            Description = _updatedUserItemInfo.Description ?? "",
+            Due = _updatedUserItemInfo.NextDueDate.GetValueOrDefault().ToString("yyyy-MM-dd"),
             List = _updatedUserItemInfo.UserListId.ToString(),
             Notes = _updatedUserItemInfo.Notes,
             Repeat = _updatedUserItemInfo.Repeat,
@@ -107,8 +107,8 @@ public class EditItemRequestHandlerTests
         result.Should().BeTrue();
         _userItemRepository.Verify(x => x.SaveAsync(It.Is<UserItem>(x =>
             x.Description == _updatedUserItemInfo.Description &&
-            x.NextDueDate == _userItem.NextDueDate.Value.Date &&
-            x.PostponedUntilDate == _userItem.NextDueDate.Value.Date.AddDays(1) &&
+            x.NextDueDate == _userItem.NextDueDate.GetValueOrDefault().Date &&
+            x.PostponedUntilDate == _userItem.NextDueDate.GetValueOrDefault().Date.AddDays(1) &&
             x.Notes == _updatedUserItemInfo.Notes &&
             x.Repeat == _updatedUserItemInfo.Repeat), _updatedUserItemInfo.UserList,
             It.IsAny<IUserActionsService>()), Times.Once);
@@ -117,11 +117,11 @@ public class EditItemRequestHandlerTests
     [Fact]
     public async Task When_snoozing_item_Should_add_a_day_from_the_current_postponed_date()
     {
-        var expectedSnoozeDate = _userItem.PostponedUntilDate.Value.Date.AddDays(1);
+        var expectedSnoozeDate = _userItem.PostponedUntilDate.GetValueOrDefault().Date.AddDays(1);
         var result = await _handler.Handle(new EditItemRequest(_user, _userItem.UserItemId, new AddOrUpdateItemRequest
         {
-            Description = _updatedUserItemInfo.Description,
-            Due = _updatedUserItemInfo.NextDueDate.Value.ToString("yyyy-MM-dd"),
+            Description = _updatedUserItemInfo.Description ?? "",
+            Due = _updatedUserItemInfo.NextDueDate.GetValueOrDefault().ToString("yyyy-MM-dd"),
             List = _updatedUserItemInfo.UserListId.ToString(),
             Notes = _updatedUserItemInfo.Notes,
             Repeat = _updatedUserItemInfo.Repeat,
@@ -131,7 +131,7 @@ public class EditItemRequestHandlerTests
         result.Should().BeTrue();
         _userItemRepository.Verify(x => x.SaveAsync(It.Is<UserItem>(x =>
             x.Description == _updatedUserItemInfo.Description &&
-            x.NextDueDate == _userItem.NextDueDate.Value.Date &&
+            x.NextDueDate == _userItem.NextDueDate.GetValueOrDefault().Date &&
             x.PostponedUntilDate == expectedSnoozeDate &&
             x.Notes == _updatedUserItemInfo.Notes &&
             x.Repeat == _updatedUserItemInfo.Repeat), _updatedUserItemInfo.UserList,
@@ -143,8 +143,8 @@ public class EditItemRequestHandlerTests
     {
         var result = await _handler.Handle(new EditItemRequest(_user, _userItem.UserItemId, new AddOrUpdateItemRequest
         {
-            Description = _updatedUserItemInfo.Description,
-            Due = _userItem.NextDueDate.Value.ToString("yyyy-MM-dd"),
+            Description = _updatedUserItemInfo.Description ?? "",
+            Due = _userItem.NextDueDate.GetValueOrDefault().ToString("yyyy-MM-dd"),
             List = _updatedUserItemInfo.UserListId.ToString(),
             Notes = _updatedUserItemInfo.Notes,
             Repeat = _updatedUserItemInfo.Repeat
@@ -153,7 +153,7 @@ public class EditItemRequestHandlerTests
         result.Should().BeTrue();
         _userItemRepository.Verify(x => x.SaveAsync(It.Is<UserItem>(x =>
             x.Description == _updatedUserItemInfo.Description &&
-            x.NextDueDate == _userItem.NextDueDate.Value.Date &&
+            x.NextDueDate == _userItem.NextDueDate.GetValueOrDefault().Date &&
             x.PostponedUntilDate == _userItem.PostponedUntilDate &&
             x.Notes == _updatedUserItemInfo.Notes &&
             x.Repeat == _updatedUserItemInfo.Repeat), _updatedUserItemInfo.UserList,
@@ -165,7 +165,7 @@ public class EditItemRequestHandlerTests
     {
         var result = await _handler.Handle(new EditItemRequest(_user, _userItem.UserItemId, new AddOrUpdateItemRequest
         {
-            Description = _updatedUserItemInfo.Description,
+            Description = _updatedUserItemInfo.Description ?? "",
             Due = "22-Jan-2021",
             List = _updatedUserItemInfo.UserListId.ToString(),
             Notes = _updatedUserItemInfo.Notes,
@@ -181,8 +181,8 @@ public class EditItemRequestHandlerTests
     {
         var result = await _handler.Handle(new EditItemRequest(_user, _userItem.UserItemId, new AddOrUpdateItemRequest
         {
-            Description = _updatedUserItemInfo.Description,
-            Due = _updatedUserItemInfo.NextDueDate.Value.ToString("yyyy-MM-dd"),
+            Description = _updatedUserItemInfo.Description ?? "",
+            Due = _updatedUserItemInfo.NextDueDate.GetValueOrDefault().ToString("yyyy-MM-dd"),
             List = _updatedUserItemInfo.UserListId.ToString(),
             Notes = _updatedUserItemInfo.Notes,
             Repeat = _updatedUserItemInfo.Repeat,

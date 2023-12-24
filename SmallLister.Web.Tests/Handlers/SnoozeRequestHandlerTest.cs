@@ -52,13 +52,13 @@ public class SnoozeRequestHandlerTest
         _userItem.PostponedUntilDate = null;
         var result = await _handler.Handle(new SnoozeRequest(_user, _userItem.UserItemId), CancellationToken.None);
         result.Should().BeTrue();
-        _userItem.PostponedUntilDate.Should().Be(_userItem.NextDueDate.Value.AddDays(1));
+        _userItem.PostponedUntilDate.Should().Be(_userItem.NextDueDate.GetValueOrDefault().AddDays(1));
     }
 
     [Fact]
     public async Task Given_a_postponed_item_Should_postpone_item_by_another_day()
     {
-        var currentPostponedDate = _userItem.PostponedUntilDate.Value;
+        var currentPostponedDate = _userItem.PostponedUntilDate.GetValueOrDefault();
         var result = await _handler.Handle(new SnoozeRequest(_user, _userItem.UserItemId), CancellationToken.None);
         result.Should().BeTrue();
         _userItem.PostponedUntilDate.Should().Be(currentPostponedDate.AddDays(1));

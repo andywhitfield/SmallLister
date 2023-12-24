@@ -16,7 +16,7 @@ namespace SmallLister.Web.Tests;
 public class WebhooksIntegrationTest : IAsyncLifetime
 {
     private readonly IntegrationTestWebApplicationFactory _factory = new();
-    private UserList _userList;
+    private UserList? _userList;
 
     public async Task InitializeAsync()
     {
@@ -91,7 +91,7 @@ public class WebhooksIntegrationTest : IAsyncLifetime
 
         using var response = await client.PostAsync(addAction, new FormUrlEncodedContent(new[] {
             KeyValuePair.Create("__RequestVerificationToken", validationToken),
-            KeyValuePair.Create("list", _userList.UserListId.ToString()),
+            KeyValuePair.Create("list", _userList?.UserListId.ToString() ?? ""),
             KeyValuePair.Create("description", description)
         }));
         response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -110,7 +110,7 @@ public class WebhooksIntegrationTest : IAsyncLifetime
         await context.SaveChangesAsync();
         _userList = userList.Entity;
 
-        var doneAction = $"/items/done/{userItem.UserItemId}";
+        var doneAction = $"/items/done/{userItem?.UserItemId}";
         var validationToken = IntegrationTestWebApplicationFactory.GetFormValidationToken(page, doneAction);
 
         using var response = await client.PostAsync(doneAction, new FormUrlEncodedContent(new[] {
