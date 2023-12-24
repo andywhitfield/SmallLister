@@ -25,7 +25,7 @@ public sealed class WebhookCheckerUserItemTests : IDisposable
         Mock<HttpMessageHandler> mockMessageHandler = new();
         mockMessageHandler.Protected()
             .Setup<Task<HttpResponseMessage>>("SendAsync", ItExpr.IsAny<HttpRequestMessage>(), ItExpr.IsAny<CancellationToken>())
-            .Callback<HttpRequestMessage, CancellationToken>(async (requestMessage, token) => _sentWebhooks.Add(await requestMessage.Content.ReadAsStringAsync(CancellationToken.None)))
+            .Callback<HttpRequestMessage, CancellationToken>(async (requestMessage, token) => _sentWebhooks.Add(await (requestMessage.Content?.ReadAsStringAsync(CancellationToken.None) ?? Task.FromResult(""))))
             .ReturnsAsync(new HttpResponseMessage { StatusCode = HttpStatusCode.OK });
         Mock<IHttpClientFactory> mockHttpClientFactory = new();
         mockHttpClientFactory.Setup(x => x.CreateClient(It.IsAny<string>())).Returns(new HttpClient(mockMessageHandler.Object));
