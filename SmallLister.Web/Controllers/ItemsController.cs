@@ -44,7 +44,7 @@ namespace SmallLister.Web.Controllers
         public async Task<IActionResult> Edit([FromRoute] int userItemId)
         {
             var response = await _mediator.Send(new GetItemForEditRequest(User, userItemId));
-            if (!response.IsValid)
+            if (!response.IsValid || response.UserItem == null || response.SelectedList == null)
             {
                 _logger.LogInformation($"Could not find item {userItemId}, returning not found");
                 return NotFound();

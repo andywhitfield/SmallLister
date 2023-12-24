@@ -3,7 +3,7 @@ using SmallLister.Web.Model.Response;
 
 namespace SmallLister.Web.Handlers.RequestResponse
 {
-    public class ValidateCredentialsAndCreateAccessTokenRequest : IRequest<GetAccessTokenResponse>
+    public class ValidateCredentialsAndCreateAccessTokenRequest : IRequest<GetAccessTokenResponse?>
     {
         public ValidateCredentialsAndCreateAccessTokenRequest(string credentials, string refreshToken)
         {

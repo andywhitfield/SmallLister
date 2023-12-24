@@ -1,16 +1,9 @@
 using Microsoft.AspNetCore.Http;
 
-namespace SmallLister.Web.Model
-{
-    public abstract class BaseViewModel
-    {
-        protected BaseViewModel(HttpContext context, string pageTitle = null)
-        {
-            IsLoggedIn = context.User?.Identity?.IsAuthenticated ?? false;
-            PageTitle = pageTitle ?? "";
-        }
+namespace SmallLister.Web.Model;
 
-        public bool IsLoggedIn { get; }
-        public string PageTitle { get; }
-    }
+public abstract class BaseViewModel(HttpContext context, string? pageTitle = null)
+{
+    public bool IsLoggedIn { get; } = context.User?.Identity?.IsAuthenticated ?? false;
+    public string PageTitle { get; } = pageTitle ?? "";
 }

@@ -10,45 +10,29 @@ using SmallLister.Web.Handlers.RequestResponse;
 
 namespace SmallLister.Web.Handlers;
 
-public class EditItemRequestHandler : IRequestHandler<EditItemRequest, bool>
+public class EditItemRequestHandler(ILogger<EditItemRequestHandler> logger, IUserAccountRepository userAccountRepository,
+    IUserItemRepository userItemRepository, IUserListRepository userListRepository, IUserActionsService userActionsService,
+    IWebhookQueueRepository webhookQueueRepository)
+    : IRequestHandler<EditItemRequest, bool>
 {
-    private readonly ILogger<EditItemRequestHandler> _logger;
-    private readonly IUserAccountRepository _userAccountRepository;
-    private readonly IUserItemRepository _userItemRepository;
-    private readonly IUserListRepository _userListRepository;
-    private readonly IUserActionsService _userActionsService;
-    private readonly IWebhookQueueRepository _webhookQueueRepository;
-
-    public EditItemRequestHandler(ILogger<EditItemRequestHandler> logger, IUserAccountRepository userAccountRepository,
-        IUserItemRepository userItemRepository, IUserListRepository userListRepository, IUserActionsService userActionsService,
-        IWebhookQueueRepository webhookQueueRepository)
-    {
-        _logger = logger;
-        _userAccountRepository = userAccountRepository;
-        _userItemRepository = userItemRepository;
-        _userListRepository = userListRepository;
-        _userActionsService = userActionsService;
-        _webhookQueueRepository = webhookQueueRepository;
-    }
-
     public async Task<bool> Handle(EditItemRequest request, CancellationToken cancellationToken)
     {
-        var user = await _userAccountRepository.GetUserAccountAsync(request.User);
-        var item = await _userItemRepository.GetItemAsync(user, request.UserItemId);
+        var user = await userAccountRepository.GetUserAccountAsync(request.User);
+        var item = await userItemRepository.GetItemAsync(user, request.UserItemId);
         if (item == null)
         {
-            _logger.LogInformation($"Could not find item {request.UserItemId}");
+            logger.LogInformation($"Could not find item {request.UserItemId}");
             return false;
         }
 
-        _logger.LogInformation($"Updating item {item.UserItemId}:" +
+        logger.LogInformation($"Updating item {item.UserItemId}:" +
             $" Description[{item.Description}=>{request.Model.Description}]" +
             $" List[{item.UserListId}=>{request.Model.List}]" +
             $" Repeat[{item.Repeat}=>{request.Model.Repeat}]" +
             $" Notes[{item.Notes}=>{request.Model.Notes}]" +
             $" NextDueDate[{item.NextDueDate}=>{request.Model.Due}]");
 
-        UserList list = null;
+        UserList? list = null;
         if (request.Model.Delete ?? false)
         {
             item.DeletedDateTime = DateTime.UtcNow;
@@ -62,17 +46,17 @@ public class EditItemRequestHandler : IRequestHandler<EditItemRequest, bool>
 
             if (!string.IsNullOrEmpty(request.Model.List) && int.TryParse(request.Model.List, out var listId))
             {
-                list = await _userListRepository.GetListAsync(user, listId);
+                list = await userListRepository.GetListAsync(user, listId);
                 if (list == null)
                 {
-                    _logger.LogInformation($"Could not find list {request.Model.List}");
+                    logger.LogInformation($"Could not find list {request.Model.List}");
                     return false;
                 }
             }
 
             if (!AddItemRequestHandler.TryGetDueDate(request.Model.Due, out var dueDate))
             {
-                _logger.LogInformation($"Could not parse due date {request.Model.Due}");
+                logger.LogInformation($"Could not parse due date {request.Model.Due}");
                 return false;
             }
 
@@ -90,8 +74,8 @@ public class EditItemRequestHandler : IRequestHandler<EditItemRequest, bool>
             }
         }
 
-        await _userItemRepository.SaveAsync(item, list, _userActionsService);
-        await _webhookQueueRepository.OnListItemChangeAsync(user, item, item.DeletedDateTime.HasValue ? WebhookEventType.Delete : WebhookEventType.Modify);
+        await userItemRepository.SaveAsync(item, list, userActionsService);
+        await webhookQueueRepository.OnListItemChangeAsync(user, item, item.DeletedDateTime.HasValue ? WebhookEventType.Delete : WebhookEventType.Modify);
         return true;
     }
 }

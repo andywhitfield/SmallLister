@@ -15,19 +15,8 @@ namespace SmallLister.Web.Controllers.Api.V1;
 [ApiVersion("1.0")]
 [ApiController]
 [Authorize("ApiJwt")]
-public class WebhookApiController : ControllerBase
+public class WebhookApiController(ILogger<WebhookApiController> logger, IJwtService jwtService, IMediator mediator) : ControllerBase
 {
-    private readonly ILogger<WebhookApiController> _logger;
-    private readonly IJwtService _jwtService;
-    private readonly IMediator _mediator;
-
-    public WebhookApiController(ILogger<WebhookApiController> logger, IJwtService jwtService, IMediator mediator)
-    {
-        _logger = logger;
-        _jwtService = jwtService;
-        _mediator = mediator;
-    }
-
     [HttpPost("~/api/v{version:apiVersion}/webhook")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status409Conflict)]
@@ -36,18 +25,18 @@ public class WebhookApiController : ControllerBase
     {
         if (!ModelState.IsValid)
         {
-            _logger.LogInformation("Model state is invalid, returning bad request");
+            logger.LogInformation("Model state is invalid, returning bad request");
             return BadRequest();
         }
         
-        var user = await _jwtService.GetUserAccountAsync(User);
+        var user = await jwtService.GetUserAccountAsync(User);
         if (user == null)
         {
-            _logger.LogInformation($"Could not get user account from token {User.Identity.Name}, returning unauthorized");
+            logger.LogInformation($"Could not get user account from token {User.Identity?.Name}, returning unauthorized");
             return Unauthorized();
         }
 
-        if (!await _mediator.Send(new AddWebhookRequest(user, model)))
+        if (!await mediator.Send(new AddWebhookRequest(user, model)))
             return Conflict();
 
         return Ok();
@@ -58,18 +47,18 @@ public class WebhookApiController : ControllerBase
     {
         if (!ModelState.IsValid)
         {
-            _logger.LogInformation("Model state is invalid, returning bad request");
+            logger.LogInformation("Model state is invalid, returning bad request");
             return BadRequest();
         }
 
-        var user = await _jwtService.GetUserAccountAsync(User);
+        var user = await jwtService.GetUserAccountAsync(User);
         if (user == null)
         {
-            _logger.LogInformation($"Could not get user account from token {User.Identity.Name}, returning unauthorized");
+            logger.LogInformation($"Could not get user account from token {User.Identity?.Name}, returning unauthorized");
             return Unauthorized();
         }
 
-        await _mediator.Send(new DeleteWebhookRequest(user, webhookType));
+        await mediator.Send(new DeleteWebhookRequest(user, webhookType));
         return Ok();
     }
 }

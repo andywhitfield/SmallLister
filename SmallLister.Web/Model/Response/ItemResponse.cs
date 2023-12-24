@@ -1,19 +1,11 @@
 using System;
 
-namespace SmallLister.Web.Model.Response
+namespace SmallLister.Web.Model.Response;
+
+public class ItemResponse(string itemId, string description, DateTime? dueDate, string? notes)
 {
-    public class ItemResponse
-    {
-        public ItemResponse(string itemId, string description, DateTime? dueDate, string notes)
-        {
-            ItemId = itemId;
-            Description = description;
-            DueDate = dueDate;
-            Notes = notes;
-        }
-        public string ItemId { get; }
-        public string Description { get; }
-        public DateTime? DueDate { get; }
-        public string Notes { get; }
-    }
+    public string ItemId { get; } = itemId;
+    public string Description { get; } = description;
+    public DateTime? DueDate { get; } = dueDate;
+    public string? Notes { get; } = notes;
 }

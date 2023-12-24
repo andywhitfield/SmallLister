@@ -7,47 +7,34 @@ using SmallLister.Data;
 using SmallLister.Model;
 using SmallLister.Web.Handlers.RequestResponse.Api;
 
-namespace SmallLister.Web.Handlers.Api
+namespace SmallLister.Web.Handlers.Api;
+
+public class AddItemApiRequestHandler(ILogger<AddItemApiRequestHandler> logger, IUserListRepository userListRepository,
+    IUserItemRepository userItemRepository, IUserActionsService userActionsService)
+    : IRequestHandler<AddItemApiRequest, bool>
 {
-    public class AddItemApiRequestHandler : IRequestHandler<AddItemApiRequest, bool>
+    public async Task<bool> Handle(AddItemApiRequest request, CancellationToken cancellationToken)
     {
-        private readonly ILogger<AddItemApiRequestHandler> _logger;
-        private readonly IUserListRepository _userListRepository;
-        private readonly IUserItemRepository _userItemRepository;
-        private readonly IUserActionsService _userActionsService;
-
-        public AddItemApiRequestHandler(ILogger<AddItemApiRequestHandler> logger, IUserListRepository userListRepository,
-            IUserItemRepository userItemRepository, IUserActionsService userActionsService)
+        UserList? list = null;
+        if (request.Model.ListId != "none")
         {
-            _logger = logger;
-            _userListRepository = userListRepository;
-            _userItemRepository = userItemRepository;
-            _userActionsService = userActionsService;
-        }
-
-        public async Task<bool> Handle(AddItemApiRequest request, CancellationToken cancellationToken)
-        {
-            UserList list = null;
-            if (request.Model.ListId != "none")
+            if (!int.TryParse(request.Model.ListId, out var listId))
             {
-                if (!int.TryParse(request.Model.ListId, out var listId))
-                {
-                    _logger.LogInformation($"Invalid list id {request.Model.ListId}");
-                    return false;
-                }
-
-                list = await _userListRepository.GetListAsync(request.User, listId);
-                if (list == null)
-                {
-                    _logger.LogInformation($"Could not find list {request.Model.ListId}");
-                    return false;
-                }
+                logger.LogInformation($"Invalid list id {request.Model.ListId}");
+                return false;
             }
 
-            _logger.LogInformation($"Adding item to list {list?.UserListId} [{list?.Name}]: {request.Model.Description}; due={request.Model.DueDate}; notes={request.Model.Notes}");
-            await _userItemRepository.AddItemAsync(request.User, list, request.Model.Description?.Trim(), request.Model.Notes?.Trim(), request.Model.DueDate?.Date, null, _userActionsService);
-
-            return true;
+            list = await userListRepository.GetListAsync(request.User, listId);
+            if (list == null)
+            {
+                logger.LogInformation($"Could not find list {request.Model.ListId}");
+                return false;
+            }
         }
+
+        logger.LogInformation($"Adding item to list {list?.UserListId} [{list?.Name}]: {request.Model.Description}; due={request.Model.DueDate}; notes={request.Model.Notes}");
+        await userItemRepository.AddItemAsync(request.User, list, request.Model.Description?.Trim() ?? "", request.Model.Notes?.Trim(), request.Model.DueDate?.Date, null, userActionsService);
+
+        return true;
     }
 }

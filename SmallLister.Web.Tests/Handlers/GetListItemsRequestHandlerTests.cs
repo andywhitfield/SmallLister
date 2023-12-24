@@ -43,7 +43,7 @@ namespace SmallLister.Web.Tests.Handlers
             _userItemRepository = new Mock<IUserItemRepository>();
             _userItemRepository.Setup(x => x.GetItemsAsync(_userAccount, null, null, null, null)).ReturnsAsync((_userItems, 1, 1));
 
-            _handler = new GetListItemsRequestHandler(Mock.Of<ILogger<GetListItemsRequestHandler>>(),
+            _handler = new GetListItemsRequestHandler(
                 userAccountRepository.Object, userListRepository.Object, _userItemRepository.Object, Mock.Of<IUserActionsService>(),
                 Mock.Of<IUserActionRepository>());
         }

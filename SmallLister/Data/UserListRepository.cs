@@ -49,7 +49,7 @@ public class UserListRepository(SqliteDataContext context) : IUserListRepository
         return context.SaveChangesAsync();
     }
 
-    public async Task UpdateOrderAsync(UserList list, UserList precedingList)
+    public async Task UpdateOrderAsync(UserList list, UserList? precedingList)
     {
         var lists = context.UserLists
             .Where(l => l.UserListId != list.UserListId && l.UserAccountId == list.UserAccountId && l.DeletedDateTime == null)

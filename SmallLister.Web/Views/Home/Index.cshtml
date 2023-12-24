@@ -35,20 +35,20 @@
     }
     @if (isUserList) {
         <text>Sort by: </text>
-        @if (Model.SelectedList.ItemSortOrder == SmallLister.Model.ItemSortOrder.DueDate) {
+        @if (Model.SelectedList?.ItemSortOrder == SmallLister.Model.ItemSortOrder.DueDate) {
         <text>due date</text>
         } else {
         <a href="/?sort=@SmallLister.Model.ItemSortOrder.DueDate">due date</a>
         }
         <text> / </text>
-        @if (Model.SelectedList.ItemSortOrder == SmallLister.Model.ItemSortOrder.Description) {
+        @if (Model.SelectedList?.ItemSortOrder == SmallLister.Model.ItemSortOrder.Description) {
         <text>description</text>
         } else {
         <a href="/?sort=@SmallLister.Model.ItemSortOrder.Description">description</a>
         }
     }
     </span>
-    <h2>@Model.SelectedList.Name</h2>
+    <h2>@Model.SelectedList?.Name</h2>
 
     <ul class="sml-list" data-baseuri="/api/v1/items">
         <li class="sml-list">
@@ -117,7 +117,7 @@
         <label for="sml-list-add-list">List:</label>
         <select id="sml-list-add-list" name="list" class="sml-list-add-list">
             @foreach (var list in Model.Lists.Where(l => l.CanAddItems)) {
-                @if (list.UserListId == Model.SelectedList.UserListId) {
+                @if (list.UserListId == Model.SelectedList?.UserListId) {
             <option value="@list.UserListId" selected="selected">@list.Name</option>
                 } else {
             <option value="@list.UserListId">@list.Name</option>

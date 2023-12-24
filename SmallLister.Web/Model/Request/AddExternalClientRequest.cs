@@ -1,12 +1,11 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace SmallLister.Web.Model.Request
+namespace SmallLister.Web.Model.Request;
+
+public class AddExternalClientRequest
 {
-    public class AddExternalClientRequest
-    {
-        [Required]
-        public string Name { get; set; }
-        [Required]
-        public string Uri { get; set; }
-    }
+    [Required]
+    public required string Name { get; set; }
+    [Required]
+    public required string Uri { get; set; }
 }

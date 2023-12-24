@@ -11,5 +11,5 @@ public interface IUserListRepository
     Task<(int OverdueCount, int DueCount, int TotalCount, int TotalWithDueDateCount, IDictionary<int, int> ListCounts)> GetListCountsAsync(UserAccount user);
     Task<UserList> AddListAsync(UserAccount user, string name);
     Task SaveAsync(UserList list);
-    Task UpdateOrderAsync(UserList list, UserList precedingList);
+    Task UpdateOrderAsync(UserList list, UserList? precedingList);
 }

@@ -1,10 +1,9 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace SmallLister.Web.Model.Request
+namespace SmallLister.Web.Model.Request;
+
+public class CreateAccessTokenRequest
 {
-    public class CreateAccessTokenRequest
-    {
-        [Required]
-        public string RefreshToken { get; set; }
-    }
+    [Required]
+    public required string RefreshToken { get; set; }
 }

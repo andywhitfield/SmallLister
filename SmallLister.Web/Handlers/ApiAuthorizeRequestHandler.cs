@@ -7,57 +7,44 @@ using SmallLister.Data;
 using SmallLister.Security;
 using SmallLister.Web.Handlers.RequestResponse;
 
-namespace SmallLister.Web.Handlers
+namespace SmallLister.Web.Handlers;
+
+public class ApiAuthorizeRequestHandler(ILogger<ApiAuthorizeRequestHandler> logger, IApiClientRepository apiClientRepository,
+    IUserAccountRepository userAccountRepository, IUserAccountApiAccessRepository userAccountApiAccessRepository)
+    : IRequestHandler<ApiAuthorizeRequest, string?>
 {
-    public class ApiAuthorizeRequestHandler : IRequestHandler<ApiAuthorizeRequest, string>
+    public async Task<string?> Handle(ApiAuthorizeRequest request, CancellationToken cancellationToken)
     {
-        private readonly ILogger<ApiAuthorizeRequestHandler> _logger;
-        private readonly IApiClientRepository _apiClientRepository;
-        private readonly IUserAccountRepository _userAccountRepository;
-        private readonly IUserAccountApiAccessRepository _userAccountApiAccessRepository;
+        if (!Uri.TryCreate(request.Model.RedirectUri, UriKind.Absolute, out var redirectUri))
+            return null;
 
-        public ApiAuthorizeRequestHandler(ILogger<ApiAuthorizeRequestHandler> logger, IApiClientRepository apiClientRepository,
-            IUserAccountRepository userAccountRepository, IUserAccountApiAccessRepository userAccountApiAccessRepository)
+        if (!request.Model.AllowApiAuth)
+            return GetRedirectUri("errorCode=user_declined");
+
+        var apiClient = await apiClientRepository.GetAsync(request.Model.AppKey);
+        if (apiClient == null)
         {
-            _logger = logger;
-            _apiClientRepository = apiClientRepository;
-            _userAccountRepository = userAccountRepository;
-            _userAccountApiAccessRepository = userAccountApiAccessRepository;
+            logger.LogInformation($"Cannot find api client {request.Model.AppKey} with redirect uri {request.Model.RedirectUri}");
+            return null;
         }
 
-        public async Task<string> Handle(ApiAuthorizeRequest request, CancellationToken cancellationToken)
+        if (apiClient.RedirectUri != request.Model.RedirectUri)
         {
-            if (!Uri.TryCreate(request.Model.RedirectUri, UriKind.Absolute, out var redirectUri))
-                return null;
-
-            if (!request.Model.AllowApiAuth)
-                return GetRedirectUri("errorCode=user_declined");
-
-            var apiClient = await _apiClientRepository.GetAsync(request.Model.AppKey);
-            if (apiClient == null)
-            {
-                _logger.LogInformation($"Cannot find api client {request.Model.AppKey} with redirect uri {request.Model.RedirectUri}");
-                return null;
-            }
-
-            if (apiClient.RedirectUri != request.Model.RedirectUri)
-            {
-                _logger.LogInformation($"Api client {apiClient.AppKey} redirect uri {apiClient.RedirectUri} does not match request {request.Model.RedirectUri}");
-                return null;
-            }
-
-            if (!apiClient.IsEnabled)
-            {
-                _logger.LogInformation($"Api client {apiClient.AppKey} is not enabled");
-                return null;
-            }
-
-            var refreshToken = GuidString.NewGuidString();
-            await _userAccountApiAccessRepository.Create(apiClient, await _userAccountRepository.GetUserAccountAsync(request.User), refreshToken);
-
-            return GetRedirectUri($"refreshToken={refreshToken}");
-
-            string GetRedirectUri(string returnInfo) => $"{redirectUri}{(string.IsNullOrEmpty(redirectUri.Query) ? "?" : "&")}{returnInfo}";
+            logger.LogInformation($"Api client {apiClient.AppKey} redirect uri {apiClient.RedirectUri} does not match request {request.Model.RedirectUri}");
+            return null;
         }
+
+        if (!apiClient.IsEnabled)
+        {
+            logger.LogInformation($"Api client {apiClient.AppKey} is not enabled");
+            return null;
+        }
+
+        var refreshToken = GuidString.NewGuidString();
+        await userAccountApiAccessRepository.Create(apiClient, await userAccountRepository.GetUserAccountAsync(request.User), refreshToken);
+
+        return GetRedirectUri($"refreshToken={refreshToken}");
+
+        string GetRedirectUri(string returnInfo) => $"{redirectUri}{(string.IsNullOrEmpty(redirectUri.Query) ? "?" : "&")}{returnInfo}";
     }
 }

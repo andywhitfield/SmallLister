@@ -81,7 +81,7 @@ public class UserItemRepository : IUserItemRepository
         .Where(i => i.UserAccount == user && i.UserList == null && i.CompletedDateTime == null && i.DeletedDateTime == null)
         .OrderBy(i => i.SortOrder).ToListAsync();
 
-    public async Task<UserItem> AddItemAsync(UserAccount user, UserList list, string description, string notes, DateTime? dueDate, ItemRepeat? repeat, IUserActionsService userActions)
+    public async Task<UserItem> AddItemAsync(UserAccount user, UserList? list, string description, string? notes, DateTime? dueDate, ItemRepeat? repeat, IUserActionsService userActions)
     {
         var maxSortOrder = await GetMaxSortOrderAsync(user, list?.UserListId);
         var newUserItem = new UserItem
@@ -105,7 +105,7 @@ public class UserItemRepository : IUserItemRepository
         return newEntity.Entity;
     }
 
-    public async Task UpdateOrderAsync(UserAccount user, UserItem item, UserItem precedingItem, IUserActionsService userActions)
+    public async Task UpdateOrderAsync(UserAccount user, UserItem item, UserItem? precedingItem, IUserActionsService userActions)
     {
         var savedItemSortOrders = new List<(int, int, int)>();
         var items = _context.UserItems
@@ -181,7 +181,7 @@ public class UserItemRepository : IUserItemRepository
         await _context.SaveChangesAsync();
     }
 
-    public async Task SaveAsync(UserItem item, UserList newList, IUserActionsService userActions)
+    public async Task SaveAsync(UserItem item, UserList? newList, IUserActionsService userActions)
     {
         if (item.DeletedDateTime == null && item.UserListId != newList?.UserListId)
         {

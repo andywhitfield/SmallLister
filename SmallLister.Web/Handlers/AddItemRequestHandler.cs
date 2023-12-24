@@ -11,56 +11,40 @@ using SmallLister.Web.Handlers.RequestResponse;
 
 namespace SmallLister.Web.Handlers;
 
-public class AddItemRequestHandler : IRequestHandler<AddItemRequest, bool>
+public class AddItemRequestHandler(ILogger<AddItemRequestHandler> logger,
+    IUserAccountRepository userAccountRepository, IUserListRepository userListRepository,
+    IUserItemRepository userItemRepository, IUserActionsService userActionsService,
+    IWebhookQueueRepository webhookQueueRepository)
+    : IRequestHandler<AddItemRequest, bool>
 {
-    private readonly ILogger<AddItemRequestHandler> _logger;
-    private readonly IUserAccountRepository _userAccountRepository;
-    private readonly IUserListRepository _userListRepository;
-    private readonly IUserItemRepository _userItemRepository;
-    private readonly IUserActionsService _userActionsService;
-    private readonly IWebhookQueueRepository _webhookQueueRepository;
-
-    public AddItemRequestHandler(ILogger<AddItemRequestHandler> logger,
-        IUserAccountRepository userAccountRepository, IUserListRepository userListRepository,
-        IUserItemRepository userItemRepository, IUserActionsService userActionsService,
-        IWebhookQueueRepository webhookQueueRepository)
-    {
-        _logger = logger;
-        _userAccountRepository = userAccountRepository;
-        _userListRepository = userListRepository;
-        _userItemRepository = userItemRepository;
-        _userActionsService = userActionsService;
-        _webhookQueueRepository = webhookQueueRepository;
-    }
-
     public async Task<bool> Handle(AddItemRequest request, CancellationToken cancellationToken)
     {
-        var user = await _userAccountRepository.GetUserAccountAsync(request.User);
-        UserList list = null;
+        var user = await userAccountRepository.GetUserAccountAsync(request.User);
+        UserList? list = null;
         if (!string.IsNullOrEmpty(request.Model.List) && int.TryParse(request.Model.List, out var listId))
         {
-            list = await _userListRepository.GetListAsync(user, listId);
+            list = await userListRepository.GetListAsync(user, listId);
             if (list == null)
             {
-                _logger.LogInformation($"Could not find list {request.Model.List}");
+                logger.LogInformation($"Could not find list {request.Model.List}");
                 return false;
             }
         }
 
         if (!TryGetDueDate(request.Model.Due, out var dueDate))
         {
-            _logger.LogInformation($"Could not parse due date {request.Model.Due}");
+            logger.LogInformation($"Could not parse due date {request.Model.Due}");
             return false;
         }
 
-        _logger.LogInformation($"Adding item to list {list?.UserListId} [{list?.Name}]: {request.Model.Description}; due={dueDate}; repeat={request.Model.Repeat}; notes={request.Model.Notes}");
-        var listItem = await _userItemRepository.AddItemAsync(user, list, request.Model.Description?.Trim(), request.Model.Notes?.Trim(), dueDate, request.Model.Repeat, _userActionsService);
-        await _webhookQueueRepository.OnListItemChangeAsync(user, listItem, WebhookEventType.New);
+        logger.LogInformation($"Adding item to list {list?.UserListId} [{list?.Name}]: {request.Model.Description}; due={dueDate}; repeat={request.Model.Repeat}; notes={request.Model.Notes}");
+        var listItem = await userItemRepository.AddItemAsync(user, list, request.Model.Description?.Trim() ?? "", request.Model.Notes?.Trim(), dueDate, request.Model.Repeat, userActionsService);
+        await webhookQueueRepository.OnListItemChangeAsync(user, listItem, WebhookEventType.New);
 
         return true;
     }
 
-    public static bool TryGetDueDate(string due, out DateTime? dueDate)
+    public static bool TryGetDueDate(string? due, out DateTime? dueDate)
     {
         dueDate = null;
         if (!string.IsNullOrWhiteSpace(due))

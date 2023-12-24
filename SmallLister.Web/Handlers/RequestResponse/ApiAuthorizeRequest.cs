@@ -4,7 +4,7 @@ using SmallLister.Web.Model.Request;
 
 namespace SmallLister.Web.Handlers.RequestResponse
 {
-    public class ApiAuthorizeRequest : IRequest<string>
+    public class ApiAuthorizeRequest : IRequest<string?>
     {
         public ClaimsPrincipal User { get; }
         public AuthorizeRequest Model { get; }
