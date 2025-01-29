@@ -7,17 +7,19 @@ using AutoFixture;
 using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using SmallLister.Data;
 using SmallLister.Model;
-using Xunit;
 
 namespace SmallLister.Web.Tests;
 
-public class WebhooksIntegrationTest : IAsyncLifetime
+[TestClass]
+public class WebhooksIntegrationTest
 {
     private readonly IntegrationTestWebApplicationFactory _factory = new();
     private UserList? _userList;
 
+    [TestInitialize]
     public async Task InitializeAsync()
     {
         using var serviceScope = _factory.Services.CreateScope();
@@ -30,7 +32,7 @@ public class WebhooksIntegrationTest : IAsyncLifetime
         _userList = userList.Entity;
     }
 
-    [Fact]
+    [TestMethod]
     public async Task Adding_item_to_list_should_add_to_webhook_queue()
     {
         Fixture fixture = new();
@@ -127,6 +129,7 @@ public class WebhooksIntegrationTest : IAsyncLifetime
         return await context.UserItemWebhookQueue.Include(x => x.UserItem).ToListAsync();
     }
 
+    [TestCleanup]
     public Task DisposeAsync()
     {
         _factory.Dispose();

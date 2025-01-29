@@ -5,18 +5,19 @@ using System.Threading;
 using System.Threading.Tasks;
 using AutoFixture;
 using FluentAssertions;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using SmallLister.Data;
 using SmallLister.Model;
 using SmallLister.Web.Handlers;
 using SmallLister.Web.Handlers.RequestResponse;
-using Xunit;
 
 namespace SmallLister.Web.Tests.Handlers;
 
+[TestClass]
 public class FindItemRequestHandlerTests
 {
-    [Fact]
+    [TestMethod]
     public async Task Should_find_items_by_search_string()
     {
         var fixture = new Fixture();
@@ -44,7 +45,7 @@ public class FindItemRequestHandlerTests
         response.Items.Select(i => i.Description).Should().BeEquivalentTo(userItems.Select(i => i.Description));
     }
 
-    [Fact]
+    [TestMethod]
     public async Task Should_trim_search_string()
     {
         var fixture = new Fixture();

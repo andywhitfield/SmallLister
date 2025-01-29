@@ -6,24 +6,26 @@ using System.Threading.Tasks;
 using AutoFixture;
 using FluentAssertions;
 using Microsoft.Extensions.Logging;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using SmallLister.Data;
 using SmallLister.Model;
 using SmallLister.Web.Handlers;
 using SmallLister.Web.Handlers.RequestResponse;
 using SmallLister.Web.Model.Home;
-using Xunit;
 
 namespace SmallLister.Web.Tests.Handlers;
 
+[TestClass]
 public class GetItemForEditRequestHandlerTests
 {
-    private readonly GetItemForEditRequestHandler _handler;
-    private readonly ClaimsPrincipal _user;
-    private readonly UserItem _userItem;
-    private readonly List<UserList> _userLists;
+    private GetItemForEditRequestHandler _handler;
+    private ClaimsPrincipal _user;
+    private UserItem _userItem;
+    private List<UserList> _userLists;
 
-    public GetItemForEditRequestHandlerTests()
+    [TestInitialize]
+    public void Setup()
     {
         var userAccountRepository = new Mock<IUserAccountRepository>();
         var userListRepository = new Mock<IUserListRepository>();
@@ -43,7 +45,7 @@ public class GetItemForEditRequestHandlerTests
             userAccountRepository.Object, userListRepository.Object, userItemRepository.Object);
     }
 
-    [Fact]
+    [TestMethod]
     public async Task Selected_list_should_default_to_all()
     {
         var response = await _handler.Handle(new GetItemForEditRequest(_user, _userItem.UserItemId), CancellationToken.None);
@@ -61,7 +63,7 @@ public class GetItemForEditRequestHandlerTests
         response.Lists.Skip(1).Select(l => l.Name).Should().BeEquivalentTo(_userLists.Select(l => l.Name));
     }
 
-    [Fact]
+    [TestMethod]
     public async Task Selected_list_should_be_list_of_requested_item()
     {
         _userItem.UserList = _userLists.First();

@@ -6,16 +6,18 @@ using System.Threading.Tasks;
 using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using SmallLister.Data;
 using SmallLister.Model;
-using Xunit;
 
 namespace SmallLister.Web.Tests;
 
-public class ItemsIntegrationTest : IAsyncLifetime
+[TestClass]
+public class ItemsIntegrationTest
 {
     private readonly IntegrationTestWebApplicationFactory _factory = new IntegrationTestWebApplicationFactory();
 
+    [TestInitialize]
     public async Task InitializeAsync()
     {
         using var serviceScope = _factory.Services.CreateScope();
@@ -31,7 +33,7 @@ public class ItemsIntegrationTest : IAsyncLifetime
         await context.SaveChangesAsync();
     }
 
-    [Fact]
+    [TestMethod]
     public async Task Marking_daily_overdue_item_as_done_moves_it_to_due_today()
     {
         using var client = _factory.CreateAuthenticatedClient();
@@ -65,7 +67,7 @@ public class ItemsIntegrationTest : IAsyncLifetime
         item?.LastUpdateDateTime.Should().BeAfter(beforeEdit);
     }
 
-    [Fact]
+    [TestMethod]
     public async Task Marking_due_item_as_done()
     {
         using var client = _factory.CreateAuthenticatedClient();
@@ -107,6 +109,7 @@ public class ItemsIntegrationTest : IAsyncLifetime
         return context.UserItems.FirstOrDefaultAsync(i => i.Description == description);
     }
 
+    [TestCleanup]
     public Task DisposeAsync()
     {
         _factory.Dispose();

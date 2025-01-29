@@ -7,20 +7,22 @@ using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using Moq.Protected;
 using SmallLister.Data;
 using SmallLister.Webhook;
-using Xunit;
 
 namespace SmallLister.Tests.Webhook;
 
-public sealed class WebhookCheckerUserItemTests : IDisposable
+[TestClass]
+public sealed class WebhookCheckerUserItemTests
 {
-    private readonly ServiceProvider _services;
+    private ServiceProvider _services;
     private readonly List<string> _sentWebhooks = new();
 
-    public WebhookCheckerUserItemTests()
+    [TestInitialize]
+    public void Setup()
     {
         Mock<HttpMessageHandler> mockMessageHandler = new();
         mockMessageHandler.Protected()
@@ -45,9 +47,10 @@ public sealed class WebhookCheckerUserItemTests : IDisposable
         dbContext.Migrate();
     }
 
-    public void Dispose() => _services.Dispose();
+    [TestCleanup]
+    public void Cleanup() => _services.Dispose();
 
-    [Fact]
+    [TestMethod]
     public async Task New_user_item_should_send_webhook()
     {
         await using (_services.CreateAsyncScope())
@@ -72,17 +75,17 @@ public sealed class WebhookCheckerUserItemTests : IDisposable
             var dbContext = _services.GetRequiredService<SqliteDataContext>();
             await dbContext.UserItemWebhookQueue.ForEachAsync(x =>
             {
-                Assert.NotNull(x.SentDateTime);
-                Assert.InRange(x.SentDateTime.Value, DateTime.UtcNow.AddSeconds(-1), DateTime.UtcNow);
-                Assert.NotNull(x.SentPayload);
-                Assert.Equal("""[{"ListId":"1","ListItemId":"1","Event":"New"}]""", x.SentPayload);
-                Assert.Single(_sentWebhooks);
-                Assert.Equal("""[{"ListId":"1","ListItemId":"1","Event":"New"}]""", _sentWebhooks[0]);
+                Assert.IsNotNull(x.SentDateTime);
+                Assert.IsTrue(x.SentDateTime.Value >= DateTime.UtcNow.AddSeconds(-1) && x.SentDateTime.Value <= DateTime.UtcNow);
+                Assert.IsNotNull(x.SentPayload);
+                Assert.AreEqual("""[{"ListId":"1","ListItemId":"1","Event":"New"}]""", x.SentPayload);
+                Assert.AreEqual(1, _sentWebhooks.Count);
+                Assert.AreEqual("""[{"ListId":"1","ListItemId":"1","Event":"New"}]""", _sentWebhooks[0]);
             });
         }
     }
 
-    [Fact]
+    [TestMethod]
     public async Task Deleted_user_item_should_send_webhook()
     {
         await using (_services.CreateAsyncScope())
@@ -106,17 +109,17 @@ public sealed class WebhookCheckerUserItemTests : IDisposable
             var dbContext = _services.GetRequiredService<SqliteDataContext>();
             await dbContext.UserItemWebhookQueue.ForEachAsync(x =>
             {
-                Assert.NotNull(x.SentDateTime);
-                Assert.InRange(x.SentDateTime.Value, DateTime.UtcNow.AddSeconds(-1), DateTime.UtcNow);
-                Assert.NotNull(x.SentPayload);
-                Assert.Equal("""[{"ListId":"1","ListItemId":"1","Event":"Delete"}]""", x.SentPayload);
-                Assert.Single(_sentWebhooks);
-                Assert.Equal("""[{"ListId":"1","ListItemId":"1","Event":"Delete"}]""", _sentWebhooks[0]);
+                Assert.IsNotNull(x.SentDateTime);
+                Assert.IsTrue(x.SentDateTime.Value >= DateTime.UtcNow.AddSeconds(-1) && x.SentDateTime.Value <= DateTime.UtcNow);
+                Assert.IsNotNull(x.SentPayload);
+                Assert.AreEqual("""[{"ListId":"1","ListItemId":"1","Event":"Delete"}]""", x.SentPayload);
+                Assert.AreEqual(1, _sentWebhooks.Count);
+                Assert.AreEqual("""[{"ListId":"1","ListItemId":"1","Event":"Delete"}]""", _sentWebhooks[0]);
             });
         }
     }
 
-    [Fact]
+    [TestMethod]
     public async Task Modified_user_item_should_send_webhook()
     {
         await using (_services.CreateAsyncScope())
@@ -140,17 +143,17 @@ public sealed class WebhookCheckerUserItemTests : IDisposable
             var dbContext = _services.GetRequiredService<SqliteDataContext>();
             await dbContext.UserItemWebhookQueue.ForEachAsync(x =>
             {
-                Assert.NotNull(x.SentDateTime);
-                Assert.InRange(x.SentDateTime.Value, DateTime.UtcNow.AddSeconds(-1), DateTime.UtcNow);
-                Assert.NotNull(x.SentPayload);
-                Assert.Equal("""[{"ListId":"1","ListItemId":"1","Event":"Modify"}]""", x.SentPayload);
-                Assert.Single(_sentWebhooks);
-                Assert.Equal("""[{"ListId":"1","ListItemId":"1","Event":"Modify"}]""", _sentWebhooks[0]);
+                Assert.IsNotNull(x.SentDateTime);
+                Assert.IsTrue(x.SentDateTime.Value >= DateTime.UtcNow.AddSeconds(-1) && x.SentDateTime.Value <= DateTime.UtcNow);
+                Assert.IsNotNull(x.SentPayload);
+                Assert.AreEqual("""[{"ListId":"1","ListItemId":"1","Event":"Modify"}]""", x.SentPayload);
+                Assert.AreEqual(1, _sentWebhooks.Count);
+                Assert.AreEqual("""[{"ListId":"1","ListItemId":"1","Event":"Modify"}]""", _sentWebhooks[0]);
             });
         }
     }
 
-    [Fact]
+    [TestMethod]
     public async Task New_then_deleted_user_item_should_not_send_webhook()
     {
         await using (_services.CreateAsyncScope())
@@ -175,10 +178,10 @@ public sealed class WebhookCheckerUserItemTests : IDisposable
             await dbContext.UserItemWebhookQueue.ForEachAsync(x =>
             {
                 // the sent date time should be set, but the payload will be null indicating nothing sent
-                Assert.NotNull(x.SentDateTime);
-                Assert.InRange(x.SentDateTime.Value, DateTime.UtcNow.AddSeconds(-1), DateTime.UtcNow);
-                Assert.Null(x.SentPayload);
-                Assert.Empty(_sentWebhooks);
+                Assert.IsNotNull(x.SentDateTime);
+                Assert.IsTrue(x.SentDateTime.Value >= DateTime.UtcNow.AddSeconds(-1) && x.SentDateTime.Value <= DateTime.UtcNow);
+                Assert.IsNull(x.SentPayload);
+                Assert.AreEqual(0, _sentWebhooks.Count);
             });
         }
     }

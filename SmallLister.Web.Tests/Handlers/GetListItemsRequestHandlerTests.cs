@@ -5,26 +5,28 @@ using System.Threading;
 using System.Threading.Tasks;
 using AutoFixture;
 using FluentAssertions;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using SmallLister.Actions;
 using SmallLister.Data;
 using SmallLister.Model;
 using SmallLister.Web.Handlers;
 using SmallLister.Web.Handlers.RequestResponse;
-using Xunit;
 
 namespace SmallLister.Web.Tests.Handlers;
 
+[TestClass]
 public class GetListItemsRequestHandlerTests
 {
-    private readonly GetListItemsRequestHandler _handler;
-    private readonly UserAccount _userAccount;
-    private readonly List<UserList> _userLists;
-    private readonly List<UserItem> _userItems;
-    private readonly ClaimsPrincipal _user;
-    private readonly Mock<IUserItemRepository> _userItemRepository;
+    private GetListItemsRequestHandler _handler;
+    private UserAccount _userAccount;
+    private List<UserList> _userLists;
+    private List<UserItem> _userItems;
+    private ClaimsPrincipal _user;
+    private Mock<IUserItemRepository> _userItemRepository;
 
-    public GetListItemsRequestHandlerTests()
+    [TestInitialize]
+    public void Setup()
     {
         var fixture = new Fixture();
 
@@ -47,7 +49,7 @@ public class GetListItemsRequestHandlerTests
             Mock.Of<IUserActionRepository>());
     }
 
-    [Fact]
+    [TestMethod]
     public async Task Should_get_all_items()
     {
         var response = await _handler.Handle(new GetListItemsRequest(_user, null, null, null), CancellationToken.None);
@@ -60,7 +62,7 @@ public class GetListItemsRequestHandlerTests
         response.SelectedList?.UserListId.Should().Be("all");
     }
 
-    [Fact]
+    [TestMethod]
     public async Task Should_get_items_from_last_selected_list()
     {
         var lastSelectedList = _userLists.First();
@@ -77,7 +79,7 @@ public class GetListItemsRequestHandlerTests
         response.SelectedList?.UserListId.Should().Be(lastSelectedList.UserListId.ToString());
     }
 
-    [Fact]
+    [TestMethod]
     public async Task Should_get_items_on_requested_list()
     {
         var requestedList = _userLists.First();

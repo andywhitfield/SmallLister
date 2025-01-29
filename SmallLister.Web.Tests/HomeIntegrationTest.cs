@@ -3,16 +3,18 @@ using System.Net;
 using System.Threading.Tasks;
 using FluentAssertions;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using SmallLister.Data;
 using SmallLister.Model;
-using Xunit;
 
 namespace SmallLister.Web.Tests
 {
-    public class HomeIntegrationTest : IAsyncLifetime
+    [TestClass]
+    public class HomeIntegrationTest
     {
         private readonly IntegrationTestWebApplicationFactory _factory = new IntegrationTestWebApplicationFactory();
 
+        [TestInitialize]
         public async Task InitializeAsync()
         {
             using var serviceScope = _factory.Services.CreateScope();
@@ -28,7 +30,7 @@ namespace SmallLister.Web.Tests
             await context.SaveChangesAsync();
         }
 
-        [Fact]
+        [TestMethod]
         public async Task Should_display_expected_items()
         {
             using var client = _factory.CreateAuthenticatedClient();
@@ -48,6 +50,7 @@ namespace SmallLister.Web.Tests
                 .And.Contain("Due today");
         }
 
+        [TestCleanup]
         public Task DisposeAsync()
         {
             _factory.Dispose();

@@ -2,18 +2,19 @@ using System;
 using System.Collections.Generic;
 using AutoFixture;
 using FluentAssertions;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using SmallLister.Feed;
 using SmallLister.Model;
-using Xunit;
 
 namespace SmallLister.Tests.Feed
 {
+    [TestClass]
     public class AtomFeedGeneratorTests
     {
-        [Theory]
-        [InlineData(UserFeedType.Daily)]
-        [InlineData(UserFeedType.Due)]
-        [InlineData(UserFeedType.Overdue)]
+        [TestMethod]
+        [DataRow(UserFeedType.Daily)]
+        [DataRow(UserFeedType.Due)]
+        [DataRow(UserFeedType.Overdue)]
         public void Generate_empty_feed(UserFeedType userFeedType)
         {
             var generator = new AtomFeedGenerator();
@@ -31,9 +32,9 @@ namespace SmallLister.Tests.Feed
             atomXmlString.Should().NotContain("<entry>");
         }
 
-        [Theory]
-        [InlineData(UserFeedType.Due)]
-        [InlineData(UserFeedType.Overdue)]
+        [TestMethod]
+        [DataRow(UserFeedType.Due)]
+        [DataRow(UserFeedType.Overdue)]
         public void Generate_feed_entries(UserFeedType userFeedType)
         {
             var generator = new AtomFeedGenerator();
@@ -51,9 +52,9 @@ namespace SmallLister.Tests.Feed
             atomXmlString.Should().Contain("<entry>");
         }
 
-        [Theory]
-        [InlineData(UserFeedType.Due)]
-        [InlineData(UserFeedType.Overdue)]
+        [TestMethod]
+        [DataRow(UserFeedType.Due)]
+        [DataRow(UserFeedType.Overdue)]
         public void Create_description_for_due_item(UserFeedType userFeedType)
         {
             var generator = new AtomFeedGenerator();
@@ -72,9 +73,9 @@ namespace SmallLister.Tests.Feed
             atomXmlString.Should().Contain("You have an item that is due today");
         }
 
-        [Theory]
-        [InlineData(UserFeedType.Due)]
-        [InlineData(UserFeedType.Overdue)]
+        [TestMethod]
+        [DataRow(UserFeedType.Due)]
+        [DataRow(UserFeedType.Overdue)]
         public void Create_description_for_item_due_yesterday(UserFeedType userFeedType)
         {
             var generator = new AtomFeedGenerator();
@@ -93,9 +94,9 @@ namespace SmallLister.Tests.Feed
             atomXmlString.Should().Contain("You have an overdue item! It was due yesterday");
         }
 
-        [Theory]
-        [InlineData(UserFeedType.Due)]
-        [InlineData(UserFeedType.Overdue)]
+        [TestMethod]
+        [DataRow(UserFeedType.Due)]
+        [DataRow(UserFeedType.Overdue)]
         public void Create_description_for_item_postponed_until_yesterday(UserFeedType userFeedType)
         {
             var generator = new AtomFeedGenerator();
@@ -114,9 +115,9 @@ namespace SmallLister.Tests.Feed
             atomXmlString.Should().Contain("You have an overdue item! It was due yesterday");
         }
 
-        [Theory]
-        [InlineData(UserFeedType.Due)]
-        [InlineData(UserFeedType.Overdue)]
+        [TestMethod]
+        [DataRow(UserFeedType.Due)]
+        [DataRow(UserFeedType.Overdue)]
         public void Create_description_for_item_due_in_the_last_week(UserFeedType userFeedType)
         {
             var generator = new AtomFeedGenerator();
@@ -146,9 +147,9 @@ namespace SmallLister.Tests.Feed
             }
         }
 
-        [Theory]
-        [InlineData(UserFeedType.Due)]
-        [InlineData(UserFeedType.Overdue)]
+        [TestMethod]
+        [DataRow(UserFeedType.Due)]
+        [DataRow(UserFeedType.Overdue)]
         public void Create_description_for_item_due_over_a_week_ago(UserFeedType userFeedType)
         {
             var generator = new AtomFeedGenerator();

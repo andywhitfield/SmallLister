@@ -5,24 +5,26 @@ using System.Threading.Tasks;
 using AutoFixture;
 using FluentAssertions;
 using Microsoft.Extensions.Logging;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using SmallLister.Actions;
 using SmallLister.Data;
 using SmallLister.Model;
 using SmallLister.Web.Handlers;
 using SmallLister.Web.Handlers.RequestResponse;
-using Xunit;
 
 namespace SmallLister.Web.Tests.Handlers;
 
+[TestClass]
 public class MarkItemAsDoneRequestHandlerTests
 {
-    private readonly UserItem _userItem;
-    private readonly MarkItemAsDoneRequestHandler _handler;
-    private readonly Mock<IUserItemRepository> _userItemRepository;
-    private readonly ClaimsPrincipal _user;
+    private UserItem _userItem;
+    private MarkItemAsDoneRequestHandler _handler;
+    private Mock<IUserItemRepository> _userItemRepository;
+    private ClaimsPrincipal _user;
 
-    public MarkItemAsDoneRequestHandlerTests()
+    [TestInitialize]
+    public void Setup()
     {
         var fixture = new Fixture();
         _user = fixture.Create<ClaimsPrincipal>();
@@ -41,7 +43,7 @@ public class MarkItemAsDoneRequestHandlerTests
         // TODO: tests around the IUserActionsService
     }
 
-    [Fact]
+    [TestMethod]
     public async Task Non_repeating_item_should_be_completed()
     {
         _userItem.CompletedDateTime = null;
@@ -55,29 +57,29 @@ public class MarkItemAsDoneRequestHandlerTests
         _userItemRepository.Verify(x => x.SaveAsync(_userItem, It.IsAny<UserList>(), It.IsAny<IUserActionsService>()), Times.Once);
     }
 
-    [Theory]
-    [InlineData("2021-01-18", ItemRepeat.Daily, "2021-01-19")]
-    [InlineData("2021-01-15", ItemRepeat.DailyExcludingWeekend, "2021-01-18")]
-    [InlineData("2021-01-16", ItemRepeat.DailyExcludingWeekend, "2021-01-18")]
-    [InlineData("2021-01-17", ItemRepeat.DailyExcludingWeekend, "2021-01-18")]
-    [InlineData("2021-01-15", ItemRepeat.Weekends, "2021-01-16")]
-    [InlineData("2021-01-16", ItemRepeat.Weekends, "2021-01-17")]
-    [InlineData("2021-01-17", ItemRepeat.Weekends, "2021-01-23")]
-    [InlineData("2021-01-18", ItemRepeat.Weekly, "2021-01-25")]
-    [InlineData("2021-01-18", ItemRepeat.Biweekly, "2021-02-01")]
-    [InlineData("2021-01-18", ItemRepeat.Triweekly, "2021-02-08")]
-    [InlineData("2021-01-18", ItemRepeat.Monthly, "2021-02-18")]
-    [InlineData("2021-01-31", ItemRepeat.Monthly, "2021-02-28")]
-    [InlineData("2021-01-31", ItemRepeat.LastDayMonthly, "2021-02-28")]
-    [InlineData("2021-02-28", ItemRepeat.LastDayMonthly, "2021-03-31")]
-    [InlineData("2021-01-18", ItemRepeat.BiMonthly, "2021-03-18")]
-    [InlineData("2021-11-18", ItemRepeat.BiMonthly, "2022-01-18")]
-    [InlineData("2021-01-18", ItemRepeat.Quarterly, "2021-04-18")]
-    [InlineData("2021-10-18", ItemRepeat.Quarterly, "2022-01-18")]
-    [InlineData("2021-01-18", ItemRepeat.HalfYearly, "2021-07-18")]
-    [InlineData("2021-07-18", ItemRepeat.HalfYearly, "2022-01-18")]
-    [InlineData("2021-02-28", ItemRepeat.Yearly, "2022-02-28")]
-    [InlineData("2020-02-29", ItemRepeat.Yearly, "2021-02-28")]
+    [TestMethod]
+    [DataRow("2021-01-18", ItemRepeat.Daily, "2021-01-19")]
+    [DataRow("2021-01-15", ItemRepeat.DailyExcludingWeekend, "2021-01-18")]
+    [DataRow("2021-01-16", ItemRepeat.DailyExcludingWeekend, "2021-01-18")]
+    [DataRow("2021-01-17", ItemRepeat.DailyExcludingWeekend, "2021-01-18")]
+    [DataRow("2021-01-15", ItemRepeat.Weekends, "2021-01-16")]
+    [DataRow("2021-01-16", ItemRepeat.Weekends, "2021-01-17")]
+    [DataRow("2021-01-17", ItemRepeat.Weekends, "2021-01-23")]
+    [DataRow("2021-01-18", ItemRepeat.Weekly, "2021-01-25")]
+    [DataRow("2021-01-18", ItemRepeat.Biweekly, "2021-02-01")]
+    [DataRow("2021-01-18", ItemRepeat.Triweekly, "2021-02-08")]
+    [DataRow("2021-01-18", ItemRepeat.Monthly, "2021-02-18")]
+    [DataRow("2021-01-31", ItemRepeat.Monthly, "2021-02-28")]
+    [DataRow("2021-01-31", ItemRepeat.LastDayMonthly, "2021-02-28")]
+    [DataRow("2021-02-28", ItemRepeat.LastDayMonthly, "2021-03-31")]
+    [DataRow("2021-01-18", ItemRepeat.BiMonthly, "2021-03-18")]
+    [DataRow("2021-11-18", ItemRepeat.BiMonthly, "2022-01-18")]
+    [DataRow("2021-01-18", ItemRepeat.Quarterly, "2021-04-18")]
+    [DataRow("2021-10-18", ItemRepeat.Quarterly, "2022-01-18")]
+    [DataRow("2021-01-18", ItemRepeat.HalfYearly, "2021-07-18")]
+    [DataRow("2021-07-18", ItemRepeat.HalfYearly, "2022-01-18")]
+    [DataRow("2021-02-28", ItemRepeat.Yearly, "2022-02-28")]
+    [DataRow("2020-02-29", ItemRepeat.Yearly, "2021-02-28")]
     public async Task Repeating_item_should_update_next_due_date(string currentDueDate, ItemRepeat repeat, string expectedDueDate)
     {
         _userItem.CompletedDateTime = null;

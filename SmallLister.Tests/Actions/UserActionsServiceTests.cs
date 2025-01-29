@@ -4,25 +4,27 @@ using System.Threading.Tasks;
 using AutoFixture;
 using FluentAssertions;
 using Microsoft.Extensions.Logging;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using SmallLister.Actions;
 using SmallLister.Data;
 using SmallLister.Model;
-using Xunit;
 
 namespace SmallLister.Tests.Actions;
 
+[TestClass]
 public class UserActionsServiceTests
 {
-    private readonly UserActionsService _sut;
-    private readonly Mock<IUserActionRepository> _userActionRepository;
-    private readonly Mock<IUserItemRepository> _userItemRepository;
-    private readonly Mock<IUserListRepository> _userListRepository;
-    private readonly IFixture _fixture;
-    private readonly UserAccount _user;
-    private readonly UserItem _userItem;
+    private UserActionsService _sut;
+    private Mock<IUserActionRepository> _userActionRepository;
+    private Mock<IUserItemRepository> _userItemRepository;
+    private Mock<IUserListRepository> _userListRepository;
+    private IFixture _fixture;
+    private UserAccount _user;
+    private UserItem _userItem;
 
-    public UserActionsServiceTests()
+    [TestInitialize]
+    public void Setup()
     {
         _fixture = new Fixture();
         _user = _fixture.Create<UserAccount>();
@@ -40,28 +42,28 @@ public class UserActionsServiceTests
         _sut = new UserActionsService(Mock.Of<ILogger<UserActionsService>>(), _userActionRepository.Object, userActionHandlers);
     }
 
-    [Fact]
+    [TestMethod]
     public async Task Should_create_action_for_add_useritem()
     {
         await _sut.AddAsync(_user, new AddItemAction(_userItem, new List<(int, int, int)>()));
         _userActionRepository.Verify(x => x.CreateAsync(_user, It.IsAny<string>(), UserActionType.AddItem, It.IsAny<string>()), Times.Once);
     }
 
-    [Fact]
+    [TestMethod]
     public async Task Should_create_action_for_update_useritem()
     {
         await _sut.AddAsync(_user, new UpdateItemAction(_userItem, _userItem, new List<(int, int, int)>()));
         _userActionRepository.Verify(x => x.CreateAsync(_user, It.IsAny<string>(), UserActionType.UpdateItem, It.IsAny<string>()), Times.Once);
     }
 
-    [Fact]
+    [TestMethod]
     public async Task Should_create_action_for_reorder_useritem()
     {
         await _sut.AddAsync(_user, new ReorderItemsAction(new List<(int, int, int)>(), ((int?)null, (ItemSortOrder?)null, (ItemSortOrder?)null)));
         _userActionRepository.Verify(x => x.CreateAsync(_user, It.IsAny<string>(), UserActionType.ReorderItems, It.IsAny<string>()), Times.Once);
     }
 
-    [Fact]
+    [TestMethod]
     public async Task Can_undo_add_action()
     {
         UserAction? addAction = null;
@@ -90,7 +92,7 @@ public class UserActionsServiceTests
         _userItem.LastUpdateDateTime.Should().BeOnOrAfter(beforeUndo).And.BeOnOrBefore(DateTime.UtcNow);
     }
 
-    [Fact]
+    [TestMethod]
     public async Task Can_redo_add_action()
     {
         UserAction? addAction = null;

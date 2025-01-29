@@ -1,12 +1,13 @@
 using FluentAssertions;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using SmallLister.Security;
-using Xunit;
 
 namespace SmallLister.Tests.Security
 {
+    [TestClass]
     public class SaltHashHelperTests
     {
-        [Fact]
+        [TestMethod]
         public void CreateSaltHash()
         {
             var password = "password to hash";
@@ -16,7 +17,7 @@ namespace SmallLister.Tests.Security
             hash.Should().NotBeNullOrEmpty();
         }
 
-        [Fact]
+        [TestMethod]
         public void VerifyHash()
         {
             var password = "password to hash";

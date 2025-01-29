@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using AutoFixture;
 using FluentAssertions;
 using Microsoft.Extensions.Logging;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using SmallLister.Actions;
 using SmallLister.Data;
@@ -11,20 +12,21 @@ using SmallLister.Model;
 using SmallLister.Web.Handlers;
 using SmallLister.Web.Handlers.RequestResponse;
 using SmallLister.Web.Model.Request;
-using Xunit;
 
 namespace SmallLister.Web.Tests.Handlers;
 
+[TestClass]
 public class EditItemRequestHandlerTests
 {
-    private readonly EditItemRequestHandler _handler;
-    private readonly UserItem _userItem;
-    private readonly UserItem _updatedUserItemInfo;
-    private readonly Fixture _fixture;
-    private readonly ClaimsPrincipal _user;
-    private readonly Mock<IUserItemRepository> _userItemRepository;
+    private EditItemRequestHandler _handler;
+    private UserItem _userItem;
+    private UserItem _updatedUserItemInfo;
+    private Fixture _fixture;
+    private ClaimsPrincipal _user;
+    private Mock<IUserItemRepository> _userItemRepository;
 
-    public EditItemRequestHandlerTests()
+    [TestInitialize]
+    public void Setup()
     {
         _fixture = new Fixture();
         _user = _fixture.Create<ClaimsPrincipal>();
@@ -47,7 +49,7 @@ public class EditItemRequestHandlerTests
         // TODO: tests around the IUserActionsService
     }
 
-    [Fact]
+    [TestMethod]
     public async Task Should_edit_item()
     {
         var result = await _handler.Handle(new EditItemRequest(_user, _userItem.UserItemId, new AddOrUpdateItemRequest
@@ -68,7 +70,7 @@ public class EditItemRequestHandlerTests
             It.IsAny<IUserActionsService>()), Times.Once);
     }
 
-    [Fact]
+    [TestMethod]
     public async Task When_editing_item_Should_reset_postponed_date()
     {
         var result = await _handler.Handle(new EditItemRequest(_user, _userItem.UserItemId, new AddOrUpdateItemRequest
@@ -90,7 +92,7 @@ public class EditItemRequestHandlerTests
             It.IsAny<IUserActionsService>()), Times.Once);
     }
 
-    [Fact]
+    [TestMethod]
     public async Task When_snoozing_item_Should_update_other_properties_Except_due_date()
     {
         _userItem.PostponedUntilDate = null;
@@ -114,7 +116,7 @@ public class EditItemRequestHandlerTests
             It.IsAny<IUserActionsService>()), Times.Once);
     }
 
-    [Fact]
+    [TestMethod]
     public async Task When_snoozing_item_Should_add_a_day_from_the_current_postponed_date()
     {
         var expectedSnoozeDate = _userItem.PostponedUntilDate.GetValueOrDefault().Date.AddDays(1);
@@ -138,7 +140,7 @@ public class EditItemRequestHandlerTests
             It.IsAny<IUserActionsService>()), Times.Once);
     }
 
-    [Fact]
+    [TestMethod]
     public async Task Given_editing_an_item_When_not_changing_due_date_Should_not_reset_postponed_date()
     {
         var result = await _handler.Handle(new EditItemRequest(_user, _userItem.UserItemId, new AddOrUpdateItemRequest
@@ -160,7 +162,7 @@ public class EditItemRequestHandlerTests
             It.IsAny<IUserActionsService>()), Times.Once);
     }
 
-    [Fact]
+    [TestMethod]
     public async Task Given_invalid_due_date_should_not_update_item()
     {
         var result = await _handler.Handle(new EditItemRequest(_user, _userItem.UserItemId, new AddOrUpdateItemRequest
@@ -176,7 +178,7 @@ public class EditItemRequestHandlerTests
         _userItemRepository.Verify(x => x.SaveAsync(It.IsAny<UserItem>(), It.IsAny<UserList>(), It.IsAny<IUserActionsService>()), Times.Never);
     }
 
-    [Fact]
+    [TestMethod]
     public async Task Should_delete_item()
     {
         var result = await _handler.Handle(new EditItemRequest(_user, _userItem.UserItemId, new AddOrUpdateItemRequest

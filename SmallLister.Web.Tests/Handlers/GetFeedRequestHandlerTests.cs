@@ -6,19 +6,20 @@ using System.Xml.Linq;
 using AutoFixture;
 using FluentAssertions;
 using Microsoft.Extensions.Logging;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using SmallLister.Data;
 using SmallLister.Feed;
 using SmallLister.Model;
 using SmallLister.Web.Handlers;
 using SmallLister.Web.Handlers.RequestResponse;
-using Xunit;
 
 namespace SmallLister.Web.Tests.Handlers
 {
+    [TestClass]
     public class GetFeedRequestHandlerTests
     {
-        [Fact]
+        [TestMethod]
         public async Task When_items_are_the_same_should_generate_same_xml()
         {
             var fixture = new Fixture();
@@ -47,7 +48,7 @@ namespace SmallLister.Web.Tests.Handlers
             feedGenerator.Verify(x => x.GenerateFeed(baseUri, userFeed.CreatedDateTime, items, userFeed), Times.Exactly(2));
         }
 
-        [Fact]
+        [TestMethod]
         public async Task When_items_are_different_should_generate_different_xml()
         {
             var fixture = new Fixture();

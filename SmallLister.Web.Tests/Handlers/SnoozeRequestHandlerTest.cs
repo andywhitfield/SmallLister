@@ -4,25 +4,27 @@ using System.Threading.Tasks;
 using AutoFixture;
 using FluentAssertions;
 using Microsoft.Extensions.Logging;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using SmallLister.Actions;
 using SmallLister.Data;
 using SmallLister.Model;
 using SmallLister.Web.Handlers;
 using SmallLister.Web.Handlers.RequestResponse;
-using Xunit;
 
 namespace SmallLister.Web.Tests.Handlers;
 
+[TestClass]
 public class SnoozeRequestHandlerTest
 {
     private readonly IFixture _fixture = new Fixture();
-    private readonly ClaimsPrincipal _user;
-    private readonly UserItem _userItem;
-    private readonly Mock<IUserItemRepository> _userItemRepository;
-    private readonly SnoozeRequestHandler _handler;
+    private ClaimsPrincipal _user;
+    private UserItem _userItem;
+    private Mock<IUserItemRepository> _userItemRepository;
+    private SnoozeRequestHandler _handler;
 
-    public SnoozeRequestHandlerTest()
+    [TestInitialize]
+    public void Setup()
     {
         _user = _fixture.Create<ClaimsPrincipal>();
         _userItem = _fixture.Create<UserItem>();
@@ -38,7 +40,7 @@ public class SnoozeRequestHandlerTest
             _userItemRepository.Object, userListRepository.Object, userActionsService.Object, Mock.Of<IWebhookQueueRepository>());
     }
 
-    [Fact]
+    [TestMethod]
     public async Task Given_item_with_no_due_date_Should_not_set_postponed_date()
     {
         _userItem.NextDueDate = null;
@@ -46,7 +48,7 @@ public class SnoozeRequestHandlerTest
         result.Should().BeFalse();
     }
 
-    [Fact]
+    [TestMethod]
     public async Task Should_postpone_item_by_a_day()
     {
         _userItem.PostponedUntilDate = null;
@@ -55,7 +57,7 @@ public class SnoozeRequestHandlerTest
         _userItem.PostponedUntilDate.Should().Be(_userItem.NextDueDate.GetValueOrDefault().AddDays(1));
     }
 
-    [Fact]
+    [TestMethod]
     public async Task Given_a_postponed_item_Should_postpone_item_by_another_day()
     {
         var currentPostponedDate = _userItem.PostponedUntilDate.GetValueOrDefault();

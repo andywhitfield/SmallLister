@@ -1,57 +1,58 @@
 using System;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using SmallLister.Webhook;
-using Xunit;
 
 namespace SmallLister.Tests.Webhook;
 
+[TestClass]
 public class WebhookNotificationTests
 {
-    [Fact]
+    [TestMethod]
     public void Notify_should_cancel_token()
     {
         WebhookNotification webhookNotification = new();
         var token = webhookNotification.GetNewNotificationToken();
-        Assert.False(token.IsCancellationRequested);
+        Assert.IsFalse(token.IsCancellationRequested);
 
         webhookNotification.Notify();
-        Assert.True(token.IsCancellationRequested);
+        Assert.IsTrue(token.IsCancellationRequested);
     }
 
-    [Fact]
+    [TestMethod]
     public void Notify_should_cancel_all_outstanding_tokens()
     {
         WebhookNotification webhookNotification = new();
         var token1 = webhookNotification.GetNewNotificationToken();
         var token2 = webhookNotification.GetNewNotificationToken();
         var token3 = webhookNotification.GetNewNotificationToken();
-        Assert.False(token1.IsCancellationRequested);
-        Assert.False(token2.IsCancellationRequested);
-        Assert.False(token3.IsCancellationRequested);
+        Assert.IsFalse(token1.IsCancellationRequested);
+        Assert.IsFalse(token2.IsCancellationRequested);
+        Assert.IsFalse(token3.IsCancellationRequested);
 
         webhookNotification.Notify();
-        Assert.True(token1.IsCancellationRequested);
-        Assert.True(token2.IsCancellationRequested);
-        Assert.True(token3.IsCancellationRequested);
+        Assert.IsTrue(token1.IsCancellationRequested);
+        Assert.IsTrue(token2.IsCancellationRequested);
+        Assert.IsTrue(token3.IsCancellationRequested);
 
         var token4 = webhookNotification.GetNewNotificationToken();
         var token5 = webhookNotification.GetNewNotificationToken();
-        Assert.True(token1.IsCancellationRequested);
-        Assert.True(token2.IsCancellationRequested);
-        Assert.True(token3.IsCancellationRequested);
-        Assert.False(token4.IsCancellationRequested);
-        Assert.False(token5.IsCancellationRequested);
+        Assert.IsTrue(token1.IsCancellationRequested);
+        Assert.IsTrue(token2.IsCancellationRequested);
+        Assert.IsTrue(token3.IsCancellationRequested);
+        Assert.IsFalse(token4.IsCancellationRequested);
+        Assert.IsFalse(token5.IsCancellationRequested);
 
         webhookNotification.Notify();
-        Assert.True(token1.IsCancellationRequested);
-        Assert.True(token2.IsCancellationRequested);
-        Assert.True(token3.IsCancellationRequested);
-        Assert.True(token4.IsCancellationRequested);
-        Assert.True(token5.IsCancellationRequested);
+        Assert.IsTrue(token1.IsCancellationRequested);
+        Assert.IsTrue(token2.IsCancellationRequested);
+        Assert.IsTrue(token3.IsCancellationRequested);
+        Assert.IsTrue(token4.IsCancellationRequested);
+        Assert.IsTrue(token5.IsCancellationRequested);
     }
 
-    [Fact]
+    [TestMethod]
     public void Can_wait_on_token()
     {
         WebhookNotification webhookNotification = new();
@@ -76,13 +77,13 @@ public class WebhookNotificationTests
             }
         });
         waitTask.Start();
-        Assert.True(waitTaskStarted.Wait(TimeSpan.FromSeconds(1)));
+        Assert.IsTrue(waitTaskStarted.Wait(TimeSpan.FromSeconds(1)));
         Thread.Sleep(100);
 
         webhookNotification.Notify();
         waitTask.Join(TimeSpan.FromSeconds(1));
 
-        Assert.False(failed, "Expected Task.Delay to be cancelled");
-        Assert.True(token.IsCancellationRequested);
+        Assert.IsFalse(failed, "Expected Task.Delay to be cancelled");
+        Assert.IsTrue(token.IsCancellationRequested);
     }
 }

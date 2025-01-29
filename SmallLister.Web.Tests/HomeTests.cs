@@ -1,17 +1,17 @@
-using System;
 using System.Net;
 using System.Threading.Tasks;
 using FluentAssertions;
 using Microsoft.AspNetCore.Mvc.Testing;
-using Xunit;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace SmallLister.Web.Tests;
 
-public sealed class HomeTests : IDisposable
+[TestClass]
+public sealed class HomeTests
 {
     private readonly TestWebApplicationFactory<Startup> _factory = new();
 
-    [Fact]
+    [TestMethod]
     public async Task Unauthorized_HomePage_Should_Redirect_To_Login()
     {
         var client = _factory.CreateClient(new WebApplicationFactoryClientOptions { AllowAutoRedirect = false });
@@ -20,7 +20,7 @@ public sealed class HomeTests : IDisposable
         response.Headers.Location.Should().Be("http://localhost/signin?ReturnUrl=%2F");
     }
 
-    [Fact]
+    [TestMethod]
     public async Task Get_HomePage()
     {
         var client = _factory.CreateAuthenticatedClient();
@@ -30,5 +30,6 @@ public sealed class HomeTests : IDisposable
         responseContent.Should().Contain("Logout").And.Contain("Nothing on this list");
     }
 
-    public void Dispose() => _factory.Dispose();
+    [TestCleanup]
+    public void Cleanup() => _factory.Dispose();
 }

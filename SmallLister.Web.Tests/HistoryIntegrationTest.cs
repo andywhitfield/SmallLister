@@ -6,17 +6,19 @@ using AutoFixture;
 using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using SmallLister.Data;
 using SmallLister.Model;
-using Xunit;
 
 namespace SmallLister.Web.Tests;
 
-public class HistoryIntegrationTest : IAsyncLifetime
+[TestClass]
+public class HistoryIntegrationTest
 {
     private readonly IntegrationTestWebApplicationFactory _factory = new IntegrationTestWebApplicationFactory();
     private UserList? _userList;
 
+    [TestInitialize]
     public async Task InitializeAsync()
     {
         using var serviceScope = _factory.Services.CreateScope();
@@ -28,7 +30,7 @@ public class HistoryIntegrationTest : IAsyncLifetime
         _userList = userList.Entity;
     }
 
-    [Fact]
+    [TestMethod]
     public async Task Should_add_two_items_then_mark_one_as_done_then_undo_all_then_redo_all()
     {
         var fixture = new Fixture();
@@ -183,6 +185,7 @@ public class HistoryIntegrationTest : IAsyncLifetime
         return await response.Content.ReadAsStringAsync();
     }
 
+    [TestCleanup]
     public Task DisposeAsync()
     {
         _factory.Dispose();

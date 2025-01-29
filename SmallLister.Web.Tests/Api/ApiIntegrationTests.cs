@@ -9,14 +9,15 @@ using System.Threading.Tasks;
 using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using SmallLister.Data;
 using SmallLister.Model;
 using SmallLister.Security;
-using Xunit;
 
 namespace SmallLister.Web.Tests.Api;
 
-public class ApiIntegrationTests : IAsyncLifetime
+[TestClass]
+public class ApiIntegrationTests
 {
     private readonly IntegrationTestWebApplicationFactory _factory = new IntegrationTestWebApplicationFactory();
 
@@ -24,6 +25,7 @@ public class ApiIntegrationTests : IAsyncLifetime
     private const string appSecret = "test-appsecret";
     private const string redirectUri = "http://test/redirect";
 
+    [TestInitialize]
     public async Task InitializeAsync()
     {
         using var serviceScope = _factory.Services.CreateScope();
@@ -43,7 +45,7 @@ public class ApiIntegrationTests : IAsyncLifetime
         await context.SaveChangesAsync();
     }
 
-    [Fact]
+    [TestMethod]
     public async Task Authorise_api_and_get_items()
     {
         using var client = _factory.CreateAuthenticatedClient(false);
@@ -54,7 +56,7 @@ public class ApiIntegrationTests : IAsyncLifetime
         await GetListItemsAsync(client, tokenResponse, listResponse.Lists.Single().ListId ?? "");
     }
 
-    [Fact]
+    [TestMethod]
     public async Task Authorise_api_and_add_item()
     {
         using var client = _factory.CreateAuthenticatedClient(false);
@@ -71,7 +73,7 @@ public class ApiIntegrationTests : IAsyncLifetime
         userItem?.UserListId?.ToString().Should().Be(listResponse.Lists.Single().ListId);
     }
 
-    [Fact]
+    [TestMethod]
     public async Task Missing_listid_on_add_should_be_rejected()
     {
         using var client = _factory.CreateAuthenticatedClient(false);
@@ -86,7 +88,7 @@ public class ApiIntegrationTests : IAsyncLifetime
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
     }
 
-    [Fact]
+    [TestMethod]
     public async Task Missing_description_on_add_should_be_rejected()
     {
         using var client = _factory.CreateAuthenticatedClient(false);
@@ -101,7 +103,7 @@ public class ApiIntegrationTests : IAsyncLifetime
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
     }
 
-    [Fact]
+    [TestMethod]
     public async Task Revoked_api_access_on_add_should_be_rejected()
     {
         using var client = _factory.CreateAuthenticatedClient(false);
@@ -118,7 +120,7 @@ public class ApiIntegrationTests : IAsyncLifetime
         response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
     }
 
-    [Fact]
+    [TestMethod]
     public async Task Cannot_authorise_unknown_appkey()
     {
         using var client = _factory.CreateAuthenticatedClient(false);
@@ -126,7 +128,7 @@ public class ApiIntegrationTests : IAsyncLifetime
         response.StatusCode.Should().Be(HttpStatusCode.NotFound);
     }
 
-    [Fact]
+    [TestMethod]
     public async Task Cannot_authorise_unknown_redirect()
     {
         using var client = _factory.CreateAuthenticatedClient(false);
@@ -134,7 +136,7 @@ public class ApiIntegrationTests : IAsyncLifetime
         response.StatusCode.Should().Be(HttpStatusCode.NotFound);
     }
 
-    [Fact]
+    [TestMethod]
     public async Task Authorise_reject_should_send_error_code_to_redirect_uri()
     {
         using var client = _factory.CreateAuthenticatedClient(false);
@@ -152,7 +154,7 @@ public class ApiIntegrationTests : IAsyncLifetime
         response.Headers.Location?.Query.Should().Be("?errorCode=user_declined");
     }
 
-    [Fact]
+    [TestMethod]
     public async Task No_auth_header_when_creating_token_should_be_rejected()
     {
         using var client = _factory.CreateAuthenticatedClient(false);
@@ -164,7 +166,7 @@ public class ApiIntegrationTests : IAsyncLifetime
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
     }
 
-    [Fact]
+    [TestMethod]
     public async Task Invalid_auth_apikey_when_creating_token_should_be_rejected()
     {
         using var client = _factory.CreateAuthenticatedClient(false);
@@ -177,7 +179,7 @@ public class ApiIntegrationTests : IAsyncLifetime
         response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
     }
 
-    [Fact]
+    [TestMethod]
     public async Task Invalid_auth_appsecret_when_creating_token_should_be_rejected()
     {
         using var client = _factory.CreateAuthenticatedClient(false);
@@ -190,7 +192,7 @@ public class ApiIntegrationTests : IAsyncLifetime
         response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
     }
 
-    [Fact]
+    [TestMethod]
     public async Task Unknown_refresh_token_when_creating_access_token_should_be_rejected()
     {
         using var client = _factory.CreateAuthenticatedClient(false);
@@ -203,7 +205,7 @@ public class ApiIntegrationTests : IAsyncLifetime
         response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
     }
 
-    [Fact]
+    [TestMethod]
     public async Task Revoked_api_access_when_creating_access_token_should_be_rejected()
     {
         using var client = _factory.CreateAuthenticatedClient(false);
@@ -220,7 +222,7 @@ public class ApiIntegrationTests : IAsyncLifetime
         tokenResponse?.ErrorCode.Should().Be("user_revoked");
     }
 
-    [Fact]
+    [TestMethod]
     public async Task Disabled_api_when_creating_access_token_should_be_rejected()
     {
         using var client = _factory.CreateAuthenticatedClient(false);
@@ -235,7 +237,7 @@ public class ApiIntegrationTests : IAsyncLifetime
         response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
     }
 
-    [Fact]
+    [TestMethod]
     public async Task No_auth_header_when_getting_list_should_be_rejected()
     {
         using var client = _factory.CreateAuthenticatedClient(false);
@@ -248,7 +250,7 @@ public class ApiIntegrationTests : IAsyncLifetime
         response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
     }
 
-    [Fact]
+    [TestMethod]
     public async Task Invalid_auth_header_when_getting_list_should_be_rejected()
     {
         using var client = _factory.CreateAuthenticatedClient(false);
@@ -262,7 +264,7 @@ public class ApiIntegrationTests : IAsyncLifetime
         response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
     }
 
-    [Fact]
+    [TestMethod]
     public async Task Revoked_api_access_when_getting_list_should_be_rejected()
     {
         using var client = _factory.CreateAuthenticatedClient(false);
@@ -278,7 +280,7 @@ public class ApiIntegrationTests : IAsyncLifetime
         response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
     }
 
-    [Fact]
+    [TestMethod]
     public async Task No_auth_header_when_getting_list_items_should_be_rejected()
     {
         using var client = _factory.CreateAuthenticatedClient(false);
@@ -292,7 +294,7 @@ public class ApiIntegrationTests : IAsyncLifetime
         response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
     }
 
-    [Fact]
+    [TestMethod]
     public async Task Invalid_auth_header_when_getting_list_items_should_be_rejected()
     {
         using var client = _factory.CreateAuthenticatedClient(false);
@@ -307,7 +309,7 @@ public class ApiIntegrationTests : IAsyncLifetime
         response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
     }
 
-    [Fact]
+    [TestMethod]
     public async Task Revoked_api_access_when_getting_list_items_should_be_rejected()
     {
         using var client = _factory.CreateAuthenticatedClient(false);
@@ -412,6 +414,7 @@ public class ApiIntegrationTests : IAsyncLifetime
         await context.SaveChangesAsync();
     }
 
+    [TestCleanup]
     public Task DisposeAsync()
     {
         _factory.Dispose();

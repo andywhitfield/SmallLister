@@ -2,15 +2,16 @@ using System;
 using System.Linq;
 using AutoFixture;
 using FluentAssertions;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using SmallLister.Feed;
 using SmallLister.Model;
-using Xunit;
 
 namespace SmallLister.Tests.Feed
 {
+    [TestClass]
     public class AtomFeedGeneratorDailyDigestTests
     {
-        [Fact]
+        [TestMethod]
         public void Generate_feed_entries()
         {
             var generator = new AtomFeedGenerator();
@@ -28,7 +29,7 @@ namespace SmallLister.Tests.Feed
             atomXmlString.Should().Contain("<entry>");
         }
 
-        [Fact]
+        [TestMethod]
         public void Create_daily_summary_for_due_item()
         {
             var generator = new AtomFeedGenerator();
@@ -48,7 +49,7 @@ namespace SmallLister.Tests.Feed
             atomXmlString.Should().Contain("You have 1 task due today!");
         }
 
-        [Fact]
+        [TestMethod]
         public void Create_daily_summary_for_item_due_yesterday()
         {
             var generator = new AtomFeedGenerator();
@@ -68,7 +69,7 @@ namespace SmallLister.Tests.Feed
             atomXmlString.Should().Contain("You have 1 task overdue!");
         }
 
-        [Fact]
+        [TestMethod]
         public void Create_daily_summary_for_items_due_today_and_yesterday()
         {
             var generator = new AtomFeedGenerator();
@@ -100,7 +101,7 @@ namespace SmallLister.Tests.Feed
                 atomXmlString.Should().Contain($"<a href=\"https://smalllister.nosuchblogger.com/items/{item.UserItemId}\">Task due yesterday");
         }
 
-        [Fact]
+        [TestMethod]
         public void Create_daily_summary_for_item_postponed_until_yesterday()
         {
             var generator = new AtomFeedGenerator();
@@ -120,7 +121,7 @@ namespace SmallLister.Tests.Feed
             atomXmlString.Should().Contain("You have 1 task overdue!");
         }
 
-        [Fact]
+        [TestMethod]
         public void Create_daily_summary_for_item_due_in_the_last_week()
         {
             var generator = new AtomFeedGenerator();
@@ -152,7 +153,7 @@ namespace SmallLister.Tests.Feed
             }
         }
 
-        [Fact]
+        [TestMethod]
         public void Create_daily_summary_for_item_due_over_a_week_ago()
         {
             var generator = new AtomFeedGenerator();
