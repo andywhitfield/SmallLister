@@ -18,12 +18,16 @@ namespace SmallLister.Web.Tests.Handlers;
 [TestClass]
 public class GetListItemsRequestHandlerTests
 {
+    #pragma warning disable CS8618
+
     private GetListItemsRequestHandler _handler;
     private UserAccount _userAccount;
     private List<UserList> _userLists;
     private List<UserItem> _userItems;
     private ClaimsPrincipal _user;
     private Mock<IUserItemRepository> _userItemRepository;
+
+    #pragma warning restore CS8618
 
     [TestInitialize]
     public void Setup()

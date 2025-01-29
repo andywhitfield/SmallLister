@@ -18,7 +18,12 @@ namespace SmallLister.Tests.Webhook;
 [TestClass]
 public sealed class WebhookCheckerUserItemTests
 {
+    #pragma warning disable CS8618
+
     private ServiceProvider _services;
+
+    #pragma warning restore CS8618
+
     private readonly List<string> _sentWebhooks = new();
 
     [TestInitialize]

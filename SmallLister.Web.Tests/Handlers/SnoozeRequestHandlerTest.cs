@@ -18,10 +18,15 @@ namespace SmallLister.Web.Tests.Handlers;
 public class SnoozeRequestHandlerTest
 {
     private readonly IFixture _fixture = new Fixture();
+
+    #pragma warning disable CS8618
+
     private ClaimsPrincipal _user;
     private UserItem _userItem;
     private Mock<IUserItemRepository> _userItemRepository;
     private SnoozeRequestHandler _handler;
+
+    #pragma warning restore CS8618
 
     [TestInitialize]
     public void Setup()

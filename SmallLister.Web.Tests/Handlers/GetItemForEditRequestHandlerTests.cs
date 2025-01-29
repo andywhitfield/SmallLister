@@ -19,10 +19,14 @@ namespace SmallLister.Web.Tests.Handlers;
 [TestClass]
 public class GetItemForEditRequestHandlerTests
 {
+    #pragma warning disable CS8618
+
     private GetItemForEditRequestHandler _handler;
     private ClaimsPrincipal _user;
     private UserItem _userItem;
     private List<UserList> _userLists;
+
+    #pragma warning restore CS8618
 
     [TestInitialize]
     public void Setup()

@@ -15,6 +15,8 @@ namespace SmallLister.Tests.Actions;
 [TestClass]
 public class UserActionsServiceTests
 {
+    #pragma warning disable CS8618
+
     private UserActionsService _sut;
     private Mock<IUserActionRepository> _userActionRepository;
     private Mock<IUserItemRepository> _userItemRepository;
@@ -22,6 +24,8 @@ public class UserActionsServiceTests
     private IFixture _fixture;
     private UserAccount _user;
     private UserItem _userItem;
+
+    #pragma warning restore CS8618
 
     [TestInitialize]
     public void Setup()
