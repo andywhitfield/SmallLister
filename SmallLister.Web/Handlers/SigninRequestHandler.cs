@@ -1,12 +1,7 @@
-using System.Linq;
 using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
 using Fido2NetLib;
 using Fido2NetLib.Objects;
 using MediatR;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Logging;
 using SmallLister.Data;
 using SmallLister.Model;
 using SmallLister.Web.Handlers.RequestResponse;
@@ -14,8 +9,7 @@ using SmallLister.Web.Handlers.RequestResponse;
 namespace SmallLister.Web.Handlers;
 
 public class SigninRequestHandler(ILogger<SigninRequestHandler> logger,
-    IUserAccountRepository userAccountRepository, IFido2 fido2,
-    IConfiguration configuration)
+    IUserAccountRepository userAccountRepository, IFido2 fido2)
     : IRequestHandler<SigninRequest, SigninResponse>
 {
     public async Task<SigninResponse> Handle(SigninRequest request, CancellationToken cancellationToken)
@@ -24,39 +18,27 @@ public class SigninRequestHandler(ILogger<SigninRequestHandler> logger,
         string options;
         if ((user = await userAccountRepository.GetUserAccountByEmailAsync(request.Email)) != null)
         {
-            logger.LogTrace($"Found existing user account with email [{request.Email}], creating assertion options");
+            logger.LogTrace("Found existing user account with email [{RequestEmail}], creating assertion options", request.Email);
             options = fido2.GetAssertionOptions(
                 await userAccountRepository
                     .GetUserAccountCredentialsAsync(user)
                     .Select(uac => new PublicKeyCredentialDescriptor(uac.CredentialId))
                     .ToArrayAsync(cancellationToken: cancellationToken),
-                UserVerificationRequirement.Discouraged,
-                new AuthenticationExtensionsClientInputs()
-                {
-                    Extensions = true,
-                    UserVerificationMethod = true,
-                    AppID = configuration.GetValue<string>("FidoOrigins")
-                }
+                UserVerificationRequirement.Discouraged
             ).ToJson();
         }
         else
         {
-            logger.LogTrace($"Found no user account with email [{request.Email}], creating request new creds options");
+            logger.LogTrace("Found no user account with email [{RequestEmail}], creating request new creds options", request.Email);
             options = fido2.RequestNewCredential(
                 new Fido2User() { Id = Encoding.UTF8.GetBytes(request.Email), Name = request.Email, DisplayName = request.Email },
                 [],
                 AuthenticatorSelection.Default,
-                AttestationConveyancePreference.None,
-                new()
-                {
-                    Extensions = true,
-                    UserVerificationMethod = true,
-                    AppID = configuration.GetValue<string>("FidoOrigins")
-                }
+                AttestationConveyancePreference.None
             ).ToJson();
         }
 
-        logger.LogTrace($"Created sign in options: {options}");
+        logger.LogTrace("Created sign in options: {Options}", options);
 
         return new(user != null, options);
     }
