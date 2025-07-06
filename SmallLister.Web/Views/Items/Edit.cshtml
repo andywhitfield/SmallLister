@@ -65,6 +65,11 @@
             } else {
             <option value="triweekly">Every 3 weeks</option>
             }
+            @if (Model.ItemToEdit.Repeat == SmallLister.Model.ItemRepeat.FourWeekly) {
+            <option value="fourWeekly" selected>Every 4 weeks</option>
+            } else {
+            <option value="fourWeekly">Every 4 weeks</option>
+            }
             @if (Model.ItemToEdit.Repeat == SmallLister.Model.ItemRepeat.Monthly) {
             <option value="monthly" selected>Every month</option>
             } else {
@@ -74,6 +79,11 @@
             <option value="lastDayMonthly" selected>On the last day of every month</option>
             } else {
             <option value="lastDayMonthly">On the last day of every month</option>
+            }
+            @if (Model.ItemToEdit.Repeat == SmallLister.Model.ItemRepeat.SixWeekly) {
+            <option value="sixWeekly" selected>Every 6 weeks</option>
+            } else {
+            <option value="sixWeekly">Every 6 weeks</option>
             }
             @if (Model.ItemToEdit.Repeat == SmallLister.Model.ItemRepeat.BiMonthly) {
             <option value="biMonthly" selected>Every 2 months</option>
