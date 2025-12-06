@@ -1,16 +1,10 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Security.Claims;
 using System.Text.Json;
-using System.Threading;
-using System.Threading.Tasks;
 using Fido2NetLib;
 using Fido2NetLib.Objects;
 using MediatR;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
-using Microsoft.Extensions.Logging;
 using SmallLister.Data;
 using SmallLister.Model;
 using SmallLister.Web.Handlers.RequestResponse;
@@ -41,7 +35,7 @@ public class SigninVerifyRequestHandler(ILogger<SigninVerifyRequestHandler> logg
         AuthenticationProperties authProperties = new() { IsPersistent = true };
         await request.HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(claimsIdentity), authProperties);
 
-        logger.LogTrace($"Signed in: {request.Email}");
+        logger.LogTrace("Signed in: {Email}", request.Email);
 
         return true;
     }
@@ -54,60 +48,72 @@ public class SigninVerifyRequestHandler(ILogger<SigninVerifyRequestHandler> logg
         AuthenticatorAttestationRawResponse? authenticatorAttestationRawResponse = JsonSerializer.Deserialize<AuthenticatorAttestationRawResponse>(request.VerifyResponse);
         if (authenticatorAttestationRawResponse == null)
         {
-            logger.LogWarning($"Cannot parse signin verify response: {request.VerifyResponse}");
+            logger.LogWarning("Cannot parse signin verify response: {VerifyResponse}", request.VerifyResponse);
             return null;
         }
 
-        logger.LogTrace($"Successfully parsed response: {request.VerifyResponse}");
+        logger.LogTrace("Successfully parsed response: {VerifyResponse}", request.VerifyResponse);
 
-        var success = await fido2.MakeNewCredentialAsync(authenticatorAttestationRawResponse, options, (_, _) => Task.FromResult(true), cancellationToken: cancellationToken);
-        logger.LogInformation($"got success status: {success.Status} error: {success.ErrorMessage}");
-        if (success.Result == null)
+        var success = await fido2.MakeNewCredentialAsync(new()
         {
-            logger.LogWarning($"Could not create new credential: {success.Status} - {success.ErrorMessage}");
+            AttestationResponse = authenticatorAttestationRawResponse,
+            OriginalOptions = options,
+            IsCredentialIdUniqueToUserCallback = (_, _) => Task.FromResult(true)
+        }, cancellationToken: cancellationToken);
+        logger.LogInformation("got success status: {Success}", success);
+        if (success == null)
+        {
+            logger.LogWarning("Could not create new credential");
             return null;
         }
 
-        logger.LogTrace($"Got new credential: {JsonSerializer.Serialize(success.Result)}");
+        logger.LogTrace("Got new credential: {Success}", JsonSerializer.Serialize(success));
 
-        return await userAccountRepository.CreateNewUserAsync(request.Email, success.Result.CredentialId,
-            success.Result.PublicKey, success.Result.User.Id);
+        return await userAccountRepository.CreateNewUserAsync(request.Email, success.Id,
+            success.PublicKey, success.User.Id);
     }
 
     private async Task<bool> SigninUserAsync(UserAccount user, SigninVerifyRequest request, CancellationToken cancellationToken)
     {
-        logger.LogTrace($"Checking credientials: {request.VerifyResponse}");
+        logger.LogTrace("Checking credientials: {VerifyResponse}", request.VerifyResponse);
         AuthenticatorAssertionRawResponse? authenticatorAssertionRawResponse = JsonSerializer.Deserialize<AuthenticatorAssertionRawResponse>(request.VerifyResponse);
         if (authenticatorAssertionRawResponse == null)
         {
-            logger.LogWarning($"Cannot parse signin assertion verify response: {request.VerifyResponse}");
+            logger.LogWarning("Cannot parse signin assertion verify response: {VerifyResponse}", request.VerifyResponse);
             return false;
         }
         var options = AssertionOptions.FromJson(request.VerifyOptions);
-        var userAccountCredential = await userAccountRepository.GetUserAccountCredentialsAsync(user).FirstOrDefaultAsync(uac => uac.CredentialId.SequenceEqual(authenticatorAssertionRawResponse.Id), cancellationToken);
+        var userAccountCredential = await userAccountRepository.GetUserAccountCredentialsAsync(user).FirstOrDefaultAsync(uac => uac.CredentialId.SequenceEqual(authenticatorAssertionRawResponse.RawId), cancellationToken);
         if (userAccountCredential == null)
         {
-            logger.LogWarning($"No credential id [{Convert.ToBase64String(authenticatorAssertionRawResponse.Id)}] for user [{user.Email}]");
+            logger.LogWarning("No credential id [{AuthenticatorAssertionRawResponseRawId}] for user [{UserEmail}]", Convert.ToBase64String(authenticatorAssertionRawResponse.RawId), user.Email);
             return false;
         }
         
-        logger.LogTrace($"Making assertion for user [{user.Email}]");
-        var res = await fido2.MakeAssertionAsync(authenticatorAssertionRawResponse, options, userAccountCredential.PublicKey, userAccountCredential.SignatureCount, VerifyExistingUserCredentialAsync, cancellationToken: cancellationToken);
-        if (!string.IsNullOrEmpty(res.ErrorMessage))
+        logger.LogTrace("Making assertion for user [{UserEmail}]", user.Email);
+        var res = await fido2.MakeAssertionAsync(new()
         {
-            logger.LogWarning($"Signin assertion failed: {res.Status} - {res.ErrorMessage}");
+            AssertionResponse = authenticatorAssertionRawResponse,
+            OriginalOptions = options,
+            StoredPublicKey = userAccountCredential.PublicKey,
+            StoredSignatureCounter = userAccountCredential.SignatureCount,
+            IsUserHandleOwnerOfCredentialIdCallback = VerifyExistingUserCredentialAsync
+        }, cancellationToken: cancellationToken);
+        if (res == null)
+        {
+            logger.LogWarning("Signin assertion failed");
             return false;
         }
 
-        logger.LogTrace($"Signin success, got response: {JsonSerializer.Serialize(res)}");
-        await userAccountRepository.SetSignatureCountAsync(userAccountCredential, res.Counter);
+        logger.LogTrace("Signin success, got response: {Res}", JsonSerializer.Serialize(res));
+        await userAccountRepository.SetSignatureCountAsync(userAccountCredential, res.SignCount);
 
         return true;
     }
 
     private async Task<bool> VerifyExistingUserCredentialAsync(IsUserHandleOwnerOfCredentialIdParams credentialIdUserHandleParams, CancellationToken cancellationToken)
     {
-        logger.LogInformation($"Checking credential {credentialIdUserHandleParams.CredentialId} - {credentialIdUserHandleParams.UserHandle}");
+        logger.LogInformation("Checking credential {CredentialId} - {UserHandle}", credentialIdUserHandleParams.CredentialId, credentialIdUserHandleParams.UserHandle);
         var userAccountCredentials = await userAccountRepository.GetUserAccountCredentialsByUserHandleAsync(credentialIdUserHandleParams.UserHandle);
         return userAccountCredentials?.CredentialId.SequenceEqual(credentialIdUserHandleParams.CredentialId) ?? false;
     }

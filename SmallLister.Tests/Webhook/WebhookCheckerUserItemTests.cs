@@ -1,13 +1,7 @@
-using System;
-using System.Collections.Generic;
 using System.Net;
-using System.Net.Http;
-using System.Threading;
-using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using Moq.Protected;
 using SmallLister.Data;
@@ -84,7 +78,7 @@ public sealed class WebhookCheckerUserItemTests
                 Assert.IsTrue(x.SentDateTime.Value >= DateTime.UtcNow.AddSeconds(-1) && x.SentDateTime.Value <= DateTime.UtcNow);
                 Assert.IsNotNull(x.SentPayload);
                 Assert.AreEqual("""[{"ListId":"1","ListItemId":"1","Event":"New"}]""", x.SentPayload);
-                Assert.AreEqual(1, _sentWebhooks.Count);
+                Assert.HasCount(1, _sentWebhooks);
                 Assert.AreEqual("""[{"ListId":"1","ListItemId":"1","Event":"New"}]""", _sentWebhooks[0]);
             });
         }
@@ -118,7 +112,7 @@ public sealed class WebhookCheckerUserItemTests
                 Assert.IsTrue(x.SentDateTime.Value >= DateTime.UtcNow.AddSeconds(-1) && x.SentDateTime.Value <= DateTime.UtcNow);
                 Assert.IsNotNull(x.SentPayload);
                 Assert.AreEqual("""[{"ListId":"1","ListItemId":"1","Event":"Delete"}]""", x.SentPayload);
-                Assert.AreEqual(1, _sentWebhooks.Count);
+                Assert.HasCount(1, _sentWebhooks);
                 Assert.AreEqual("""[{"ListId":"1","ListItemId":"1","Event":"Delete"}]""", _sentWebhooks[0]);
             });
         }
@@ -152,7 +146,7 @@ public sealed class WebhookCheckerUserItemTests
                 Assert.IsTrue(x.SentDateTime.Value >= DateTime.UtcNow.AddSeconds(-1) && x.SentDateTime.Value <= DateTime.UtcNow);
                 Assert.IsNotNull(x.SentPayload);
                 Assert.AreEqual("""[{"ListId":"1","ListItemId":"1","Event":"Modify"}]""", x.SentPayload);
-                Assert.AreEqual(1, _sentWebhooks.Count);
+                Assert.HasCount(1, _sentWebhooks);
                 Assert.AreEqual("""[{"ListId":"1","ListItemId":"1","Event":"Modify"}]""", _sentWebhooks[0]);
             });
         }
@@ -186,7 +180,7 @@ public sealed class WebhookCheckerUserItemTests
                 Assert.IsNotNull(x.SentDateTime);
                 Assert.IsTrue(x.SentDateTime.Value >= DateTime.UtcNow.AddSeconds(-1) && x.SentDateTime.Value <= DateTime.UtcNow);
                 Assert.IsNull(x.SentPayload);
-                Assert.AreEqual(0, _sentWebhooks.Count);
+                Assert.IsEmpty(_sentWebhooks);
             });
         }
     }

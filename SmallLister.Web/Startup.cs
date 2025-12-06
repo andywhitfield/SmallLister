@@ -152,7 +152,7 @@ public class Startup
             {
                 options.ServerName = "Small:Lister";
                 options.ServerDomain = Configuration.GetValue<string>("FidoDomain");
-                options.Origins = [Configuration.GetValue<string>("FidoOrigins")];
+                options.Origins = new HashSet<string> { Configuration.GetValue("FidoOrigins", "") };
             });
     }
 

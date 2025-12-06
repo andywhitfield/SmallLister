@@ -1,28 +1,26 @@
 using Microsoft.AspNetCore.Mvc.ApiExplorer;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
-using Microsoft.OpenApi.Models;
+using Microsoft.OpenApi;
 using Swashbuckle.AspNetCore.SwaggerGen;
 
-namespace SmallLister.Web
+namespace SmallLister.Web;
+
+public class ConfigureSwaggerOptions : IConfigureOptions<SwaggerGenOptions>
 {
-    public class ConfigureSwaggerOptions : IConfigureOptions<SwaggerGenOptions>
+    private readonly IApiVersionDescriptionProvider _provider;
+
+    public ConfigureSwaggerOptions(IApiVersionDescriptionProvider provider) => _provider = provider;
+
+    public void Configure(SwaggerGenOptions options)
     {
-        private readonly IApiVersionDescriptionProvider _provider;
-
-        public ConfigureSwaggerOptions(IApiVersionDescriptionProvider provider) => _provider = provider;
-
-        public void Configure(SwaggerGenOptions options)
+        foreach (var description in _provider.ApiVersionDescriptions)
         {
-            foreach (var description in _provider.ApiVersionDescriptions)
-            {
-                options.SwaggerDoc(description.GroupName,
-                    new OpenApiInfo()
-                    {
-                        Title = $"Small:Lister API {description.ApiVersion}",
-                        Version = description.ApiVersion.ToString(),
-                    });
-            }
+            options.SwaggerDoc(description.GroupName,
+                new OpenApiInfo()
+                {
+                    Title = $"Small:Lister API {description.ApiVersion}",
+                    Version = description.ApiVersion.ToString(),
+                });
         }
     }
 }
