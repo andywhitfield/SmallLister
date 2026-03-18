@@ -1,11 +1,7 @@
-using System;
 using System.Security.Claims;
-using System.Threading;
-using System.Threading.Tasks;
 using AutoFixture;
 using FluentAssertions;
 using Microsoft.Extensions.Logging;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using SmallLister.Actions;
 using SmallLister.Data;
@@ -63,6 +59,8 @@ public class MarkItemAsDoneRequestHandlerTests
 
     [TestMethod]
     [DataRow("2021-01-18", ItemRepeat.Daily, "2021-01-19")]
+    [DataRow("2021-01-18", ItemRepeat.EveryOtherDay, "2021-01-20")]
+    [DataRow("2021-01-18", ItemRepeat.EveryThreeDays, "2021-01-21")]
     [DataRow("2021-01-15", ItemRepeat.DailyExcludingWeekend, "2021-01-18")]
     [DataRow("2021-01-16", ItemRepeat.DailyExcludingWeekend, "2021-01-18")]
     [DataRow("2021-01-17", ItemRepeat.DailyExcludingWeekend, "2021-01-18")]
@@ -73,6 +71,7 @@ public class MarkItemAsDoneRequestHandlerTests
     [DataRow("2021-01-18", ItemRepeat.Biweekly, "2021-02-01")]
     [DataRow("2021-01-18", ItemRepeat.Triweekly, "2021-02-08")]
     [DataRow("2021-01-18", ItemRepeat.FourWeekly, "2021-02-15")]
+    [DataRow("2021-01-18", ItemRepeat.FiveWeekly, "2021-02-22")]
     [DataRow("2021-01-18", ItemRepeat.Monthly, "2021-02-18")]
     [DataRow("2021-01-31", ItemRepeat.Monthly, "2021-02-28")]
     [DataRow("2021-01-31", ItemRepeat.LastDayMonthly, "2021-02-28")]

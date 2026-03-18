@@ -1,8 +1,4 @@
-using System;
-using System.Threading;
-using System.Threading.Tasks;
 using MediatR;
-using Microsoft.Extensions.Logging;
 using SmallLister.Actions;
 using SmallLister.Data;
 using SmallLister.Model;
@@ -10,46 +6,34 @@ using SmallLister.Web.Handlers.RequestResponse;
 
 namespace SmallLister.Web.Handlers;
 
-public class MarkItemAsDoneRequestHandler : IRequestHandler<MarkItemAsDoneRequest, bool>
+public class MarkItemAsDoneRequestHandler(
+    ILogger<MarkItemAsDoneRequestHandler> logger,
+    IUserAccountRepository userAccountRepository,
+    IUserItemRepository userItemRepository,
+    IUserListRepository userListRepository,
+    IUserActionsService userActionsService,
+    IWebhookQueueRepository webhookQueueRepository)
+    : IRequestHandler<MarkItemAsDoneRequest, bool>
 {
-    private readonly ILogger<MarkItemAsDoneRequestHandler> _logger;
-    private readonly IUserAccountRepository _userAccountRepository;
-    private readonly IUserItemRepository _userItemRepository;
-    private readonly IUserListRepository _userListRepository;
-    private readonly IUserActionsService _userActionsService;
-    private readonly IWebhookQueueRepository _webhookQueueRepository;
-
-    public MarkItemAsDoneRequestHandler(ILogger<MarkItemAsDoneRequestHandler> logger, IUserAccountRepository userAccountRepository,
-        IUserItemRepository userItemRepository, IUserListRepository userListRepository,
-        IUserActionsService userActionsService, IWebhookQueueRepository webhookQueueRepository)
-    {
-        _logger = logger;
-        _userAccountRepository = userAccountRepository;
-        _userItemRepository = userItemRepository;
-        _userListRepository = userListRepository;
-        _userActionsService = userActionsService;
-        _webhookQueueRepository = webhookQueueRepository;
-    }
-
     public async Task<bool> Handle(MarkItemAsDoneRequest request, CancellationToken cancellationToken)
     {
-        var user = await _userAccountRepository.GetUserAccountAsync(request.User);
-        var item = await _userItemRepository.GetItemAsync(user, request.UserItemId);
+        var user = await userAccountRepository.GetUserAccountAsync(request.User);
+        var item = await userItemRepository.GetItemAsync(user, request.UserItemId);
         if (item == null)
         {
-            _logger.LogInformation($"Could not find item {request.UserItemId}");
+            logger.LogInformation("Could not find item {UserItemId}", request.UserItemId);
             return false;
         }
 
-        var list = item.UserListId != null ? await _userListRepository.GetListAsync(user, item.UserListId.Value) : null;
+        var list = item.UserListId != null ? await userListRepository.GetListAsync(user, item.UserListId.Value) : null;
         if (item.NextDueDate == null || item.Repeat == null)
             item.CompletedDateTime = DateTime.UtcNow;
         else
             item.NextDueDate = CalculateNextDueDate(item.NextDueDate.Value, item.Repeat.Value);
         item.PostponedUntilDate = null;
 
-        await _userItemRepository.SaveAsync(item, list, _userActionsService);
-        await _webhookQueueRepository.OnListItemChangeAsync(user, item, WebhookEventType.Modify);
+        await userItemRepository.SaveAsync(item, list, userActionsService);
+        await webhookQueueRepository.OnListItemChangeAsync(user, item, WebhookEventType.Modify);
         return true;
     }
 
@@ -57,6 +41,8 @@ public class MarkItemAsDoneRequestHandler : IRequestHandler<MarkItemAsDoneReques
         repeat switch
         {
             ItemRepeat.Daily => dueDate.AddDays(1),
+            ItemRepeat.EveryOtherDay => dueDate.AddDays(2),
+            ItemRepeat.EveryThreeDays => dueDate.AddDays(3),
             ItemRepeat.Weekly => dueDate.AddDays(7),
             ItemRepeat.Monthly => dueDate.AddMonths(1),
             ItemRepeat.Yearly => dueDate.AddYears(1),
@@ -65,6 +51,7 @@ public class MarkItemAsDoneRequestHandler : IRequestHandler<MarkItemAsDoneReques
             ItemRepeat.Biweekly => dueDate.AddDays(14),
             ItemRepeat.Triweekly => dueDate.AddDays(21),
             ItemRepeat.FourWeekly => dueDate.AddDays(28),
+            ItemRepeat.FiveWeekly => dueDate.AddDays(35),
             ItemRepeat.LastDayMonthly => NextLastDayOfTheMonth(dueDate),
             ItemRepeat.SixWeekly => dueDate.AddDays(42),
             ItemRepeat.BiMonthly => dueDate.AddMonths(2),

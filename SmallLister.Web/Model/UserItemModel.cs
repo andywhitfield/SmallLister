@@ -1,4 +1,3 @@
-using System;
 using SmallLister.Model;
 
 namespace SmallLister.Web.Model;
@@ -44,6 +43,8 @@ public class UserItemModel
     private string GetRepeatSummary(UserItem userItem) => userItem.Repeat switch
     {
         ItemRepeat.Daily => "Repeats every day",
+        ItemRepeat.EveryOtherDay => "Repeats every other day",
+        ItemRepeat.EveryThreeDays => "Repeats every 3 days",
         ItemRepeat.Weekly => "Repeats every week",
         ItemRepeat.Monthly => "Repeats every month",
         ItemRepeat.Yearly => "Repeats every year",
@@ -52,6 +53,7 @@ public class UserItemModel
         ItemRepeat.Biweekly => "Repeats every 2 weeks",
         ItemRepeat.Triweekly => "Repeats every 3 weeks",
         ItemRepeat.FourWeekly => "Repeats every 4 weeks",
+        ItemRepeat.FiveWeekly => "Repeats every 5 weeks",
         ItemRepeat.LastDayMonthly => "Repeats on the last day of every month",
         ItemRepeat.SixWeekly => "Repeats every 6 weeks",
         ItemRepeat.BiMonthly => "Repeats every 2 months",

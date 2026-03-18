@@ -40,6 +40,16 @@
             } else {
             <option value="daily">Every day</option>
             }
+            @if (Model.ItemToEdit.Repeat == SmallLister.Model.ItemRepeat.EveryOtherDay) {
+            <option value="everyOtherDay" selected>Every other day</option>
+            } else {
+            <option value="everyOtherDay">Every other day</option>
+            }
+            @if (Model.ItemToEdit.Repeat == SmallLister.Model.ItemRepeat.EveryThreeDays) {
+            <option value="everyThreeDays" selected>Every 3 days</option>
+            } else {
+            <option value="everyThreeDays">Every 3 days</option>
+            }
             @if (Model.ItemToEdit.Repeat == SmallLister.Model.ItemRepeat.DailyExcludingWeekend) {
             <option value="dailyExcludingWeekend" selected>Every day except Saturday and Sunday</option>
             } else {
@@ -69,6 +79,11 @@
             <option value="fourWeekly" selected>Every 4 weeks</option>
             } else {
             <option value="fourWeekly">Every 4 weeks</option>
+            }
+            @if (Model.ItemToEdit.Repeat == SmallLister.Model.ItemRepeat.FiveWeekly) {
+            <option value="fiveWeekly" selected>Every 5 weeks</option>
+            } else {
+            <option value="fiveWeekly">Every 5 weeks</option>
             }
             @if (Model.ItemToEdit.Repeat == SmallLister.Model.ItemRepeat.Monthly) {
             <option value="monthly" selected>Every month</option>
