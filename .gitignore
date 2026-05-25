@@ -30,6 +30,8 @@ publish/
 .keys/
 .DS_Store
 
+*.lscache
+
 appsettings.Development.json
 appsettings.Production.json
 

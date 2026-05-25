@@ -1,6 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 using SmallLister.Model;
 
 namespace SmallLister.Data;
@@ -13,4 +10,5 @@ public interface IWebhookQueueRepository
     Task OnListItemChangeAsync(UserAccount user, UserItem userItem, WebhookEventType eventType);
     Task SentAsync(UserListWebhookQueue userListWebhookQueue, string payload, DateTime? sentTime = null);
     Task SentAsync(UserItemWebhookQueue userItemWebhookQueue, string payload, DateTime? sentTime = null);
+    Task<UserItemWebhookQueue?> GetLastSentUserItemWebHookAsync(int userItemId);
 }

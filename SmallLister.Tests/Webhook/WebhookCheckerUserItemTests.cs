@@ -77,9 +77,9 @@ public sealed class WebhookCheckerUserItemTests
                 Assert.IsNotNull(x.SentDateTime);
                 Assert.IsTrue(x.SentDateTime.Value >= DateTime.UtcNow.AddSeconds(-1) && x.SentDateTime.Value <= DateTime.UtcNow);
                 Assert.IsNotNull(x.SentPayload);
-                Assert.AreEqual("""[{"ListId":"1","ListItemId":"1","Event":"New"}]""", x.SentPayload);
+                Assert.AreEqual("""[{"ListId":"1","PreviousListId":"","ListItemId":"1","Event":"New"}]""", x.SentPayload);
                 Assert.HasCount(1, _sentWebhooks);
-                Assert.AreEqual("""[{"ListId":"1","ListItemId":"1","Event":"New"}]""", _sentWebhooks[0]);
+                Assert.AreEqual("""[{"ListId":"1","PreviousListId":"","ListItemId":"1","Event":"New"}]""", _sentWebhooks[0]);
             });
         }
     }
@@ -111,9 +111,9 @@ public sealed class WebhookCheckerUserItemTests
                 Assert.IsNotNull(x.SentDateTime);
                 Assert.IsTrue(x.SentDateTime.Value >= DateTime.UtcNow.AddSeconds(-1) && x.SentDateTime.Value <= DateTime.UtcNow);
                 Assert.IsNotNull(x.SentPayload);
-                Assert.AreEqual("""[{"ListId":"1","ListItemId":"1","Event":"Delete"}]""", x.SentPayload);
+                Assert.AreEqual("""[{"ListId":"1","PreviousListId":"","ListItemId":"1","Event":"Delete"}]""", x.SentPayload);
                 Assert.HasCount(1, _sentWebhooks);
-                Assert.AreEqual("""[{"ListId":"1","ListItemId":"1","Event":"Delete"}]""", _sentWebhooks[0]);
+                Assert.AreEqual("""[{"ListId":"1","PreviousListId":"","ListItemId":"1","Event":"Delete"}]""", _sentWebhooks[0]);
             });
         }
     }
@@ -145,9 +145,9 @@ public sealed class WebhookCheckerUserItemTests
                 Assert.IsNotNull(x.SentDateTime);
                 Assert.IsTrue(x.SentDateTime.Value >= DateTime.UtcNow.AddSeconds(-1) && x.SentDateTime.Value <= DateTime.UtcNow);
                 Assert.IsNotNull(x.SentPayload);
-                Assert.AreEqual("""[{"ListId":"1","ListItemId":"1","Event":"Modify"}]""", x.SentPayload);
+                Assert.AreEqual("""[{"ListId":"1","PreviousListId":"","ListItemId":"1","Event":"Modify"}]""", x.SentPayload);
                 Assert.HasCount(1, _sentWebhooks);
-                Assert.AreEqual("""[{"ListId":"1","ListItemId":"1","Event":"Modify"}]""", _sentWebhooks[0]);
+                Assert.AreEqual("""[{"ListId":"1","PreviousListId":"","ListItemId":"1","Event":"Modify"}]""", _sentWebhooks[0]);
             });
         }
     }

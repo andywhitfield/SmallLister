@@ -1,7 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using SmallLister.Model;
@@ -10,7 +6,8 @@ using SmallLister.Webhook;
 namespace SmallLister.Data;
 
 public class WebhookQueueRepository(ILogger<WebhookQueueRepository> logger, SqliteDataContext context,
-    IWebhookNotification webhookNotification) : IWebhookQueueRepository
+    IWebhookNotification webhookNotification)
+    : IWebhookQueueRepository
 {
     public IAsyncEnumerable<UserListWebhookQueue> GetUnsentUserListWebhookQueuesAsync() =>
         context.UserListWebhookQueue
@@ -35,7 +32,7 @@ public class WebhookQueueRepository(ILogger<WebhookQueueRepository> logger, Sqli
             wh.WebhookType == WebhookType.ListChange &&
             wh.DeletedDateTime == null))
         {
-            logger.LogInformation($"ListChange webhook exists for this user {user.UserAccountId}, adding list change {list.UserListId} to queue");
+            logger.LogInformation("ListChange webhook exists for this user {UserAccountId}, adding list change {ListUserListId} to queue", user.UserAccountId, list.UserListId);
             context.UserListWebhookQueue.Add(new()
             {
                 UserListId = list.UserListId,
@@ -55,7 +52,7 @@ public class WebhookQueueRepository(ILogger<WebhookQueueRepository> logger, Sqli
             wh.WebhookType == WebhookType.ListItemChange &&
             wh.DeletedDateTime == null))
         {
-            logger.LogInformation($"ListItemChange webhook exists for this user {user.UserAccountId}, adding user item change {userItem.UserItemId} to queue");
+            logger.LogInformation("ListItemChange webhook exists for this user {UserAccountId}, adding user item change {UserItemId} to queue", user.UserAccountId, userItem.UserItemId);
             context.UserItemWebhookQueue.Add(new()
             {
                 UserItemId = userItem.UserItemId,
@@ -83,4 +80,13 @@ public class WebhookQueueRepository(ILogger<WebhookQueueRepository> logger, Sqli
         userItemWebhookQueue.SentDateTime = sentTime ?? DateTime.UtcNow;
         return context.SaveChangesAsync();
     }
+
+    public Task<UserItemWebhookQueue?> GetLastSentUserItemWebHookAsync(int userItemId)
+        => context.UserItemWebhookQueue
+            .Where(x =>
+                x.SentDateTime != null &&
+                x.DeletedDateTime == null &&
+                x.UserItemId == userItemId)
+            .OrderByDescending(x => x.UserItemWebhookQueueId)
+            .FirstOrDefaultAsync();
 }
