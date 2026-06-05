@@ -184,4 +184,41 @@ public sealed class WebhookCheckerUserItemTests
             });
         }
     }
+
+    [TestMethod]
+    public async Task Useritem_moved_should_send_webhook_with_previous_list()
+    {
+        await using (_services.CreateAsyncScope())
+        {
+            var dbContext = _services.GetRequiredService<SqliteDataContext>();
+            var userAccount = dbContext.UserAccounts.Add(new() { Email = "user1/" });
+            var userList1 = dbContext.UserLists.Add(new() { Name = "Test list 1", UserAccount = userAccount.Entity });
+            var userList2 = dbContext.UserLists.Add(new() { Name = "Test list 2", UserAccount = userAccount.Entity });
+            var userItem = dbContext.UserItems.Add(new() { Description = "Item 1", UserList = userList2.Entity, UserAccount = userAccount.Entity });
+            await dbContext.SaveChangesAsync();
+
+            dbContext.UserItemWebhookQueue.AddRange(
+                new() { EventType = Model.WebhookEventType.New, UserItem = userItem.Entity, SentPayload = """[{"ListId":""" + $"\"{userList1.Entity.UserListId}\"" + ""","PreviousListId":"","ListItemId":"1","Event":"New"}]""", SentDateTime = DateTime.UtcNow },
+                new() { EventType = Model.WebhookEventType.Modify, UserItem = userItem.Entity });
+            dbContext.UserWebhooks.Add(new() { UserAccount = userAccount.Entity, WebhookType = Model.WebhookType.ListItemChange, Webhook = new("http://uri/") });
+            await dbContext.SaveChangesAsync();
+        }
+
+        var webhookChecker = _services.GetRequiredService<WebhookChecker>();
+        await webhookChecker.CheckAsync(CancellationToken.None);
+
+        await using (_services.CreateAsyncScope())
+        {
+            var dbContext = _services.GetRequiredService<SqliteDataContext>();
+            var sentWebhook = await dbContext.UserItemWebhookQueue.FirstOrDefaultAsync(x => x.EventType == Model.WebhookEventType.Modify);
+
+            Assert.IsNotNull(sentWebhook);
+            Assert.IsNotNull(sentWebhook.SentDateTime);
+            Assert.IsTrue(sentWebhook.SentDateTime.Value >= DateTime.UtcNow.AddSeconds(-1) && sentWebhook.SentDateTime.Value <= DateTime.UtcNow);
+            Assert.IsNotNull(sentWebhook.SentPayload);
+            Assert.AreEqual("""[{"ListId":"2","PreviousListId":"1","ListItemId":"1","Event":"Modify"}]""", sentWebhook.SentPayload);
+            Assert.HasCount(1, _sentWebhooks);
+            Assert.AreEqual("""[{"ListId":"2","PreviousListId":"1","ListItemId":"1","Event":"Modify"}]""", _sentWebhooks[0]);
+        }
+    }
 }
