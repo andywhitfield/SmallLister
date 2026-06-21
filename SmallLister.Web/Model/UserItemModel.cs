@@ -40,7 +40,10 @@ public class UserItemModel
         return cssClass;
     }
 
-    private string GetRepeatSummary(UserItem userItem) => userItem.Repeat switch
+    private static string GetRepeatSummary(UserItem userItem)
+        => GetRepeatSummary(userItem.Repeat);
+    
+    public static string GetRepeatSummary(ItemRepeat? itemRepeat) => itemRepeat switch
     {
         ItemRepeat.Daily => "Repeats every day",
         ItemRepeat.EveryOtherDay => "Repeats every other day",

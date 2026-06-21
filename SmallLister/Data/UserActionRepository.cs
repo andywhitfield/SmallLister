@@ -1,6 +1,3 @@
-using System;
-using System.Linq;
-using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using SmallLister.Actions;
@@ -55,6 +52,9 @@ public class UserActionRepository(ILogger<UserActionRepository> logger, SqliteDa
         return (currentAction, redoAction);
     }
 
+    public IAsyncEnumerable<UserAction> GetUndoRedoActionsAsync(UserAccount user)
+        => context.UserActions.Where(ua => ua.UserAccount == user && ua.DeletedDateTime == null).OrderByDescending(ua => ua.CreatedDateTime).Take(100).AsAsyncEnumerable();
+
     public async Task SetActionUndoneAsync(UserAction undoAction)
     {
         var now = DateTime.UtcNow;
@@ -71,7 +71,7 @@ public class UserActionRepository(ILogger<UserActionRepository> logger, SqliteDa
             previousAction.LastUpdateDateTime = now;
         }
 
-        logger.LogInformation($"Marked item {undoAction.UserActionId} as undone; {previousAction?.UserActionId} is now the current action.");
+        logger.LogInformation("Marked item {UndoActionUserActionId} as undone; {PreviousActionUserActionId} is now the current action.", undoAction.UserActionId, previousAction?.UserActionId);
 
         await context.SaveChangesAsync();
     }
@@ -88,7 +88,7 @@ public class UserActionRepository(ILogger<UserActionRepository> logger, SqliteDa
         redoAction.IsCurrent = true;
         redoAction.LastUpdateDateTime = now;
 
-        logger.LogInformation($"Marked item {redoAction.UserActionId} as current action.");
+        logger.LogInformation("Marked item {RedoActionUserActionId} as current action.", redoAction.UserActionId);
 
         await context.SaveChangesAsync();
     }

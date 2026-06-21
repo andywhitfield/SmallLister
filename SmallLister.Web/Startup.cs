@@ -1,19 +1,10 @@
-﻿using System;
-using System.IO;
-using System.Text;
+﻿using System.Text;
 using MediatR;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.DataProtection;
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc.ApiExplorer;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using SmallLister.Actions;
@@ -106,7 +97,7 @@ public class Startup
         services.AddDbContext<SqliteDataContext>((serviceProvider, options) =>
         {
             var sqliteConnectionString = Configuration.GetConnectionString("SmallLister");
-            serviceProvider.GetRequiredService<ILogger<Startup>>().LogInformation($"Using connection string: {sqliteConnectionString}");
+            serviceProvider.GetRequiredService<ILogger<Startup>>().LogInformation("Using connection string: {SqliteConnectionString}", sqliteConnectionString);
             options.UseSqlite(sqliteConnectionString);
         });
         services
@@ -139,11 +130,7 @@ public class Startup
         services.AddVersionedApiExplorer(options => options.GroupNameFormat = "'v'VVV");
         services.AddTransient<IConfigureOptions<SwaggerGenOptions>, ConfigureSwaggerOptions>();
         services.AddSwaggerGen();
-        var builder = services.AddRazorPages();
-#if DEBUG
-        if (Environment.IsDevelopment())
-            builder.AddRazorRuntimeCompilation();
-#endif
+        services.AddRazorPages();
         services.AddCors();
         services.AddDistributedMemoryCache();
         services
