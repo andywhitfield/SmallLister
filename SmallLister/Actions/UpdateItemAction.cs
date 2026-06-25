@@ -1,7 +1,4 @@
-using System;
-using System.Collections.Generic;
 using System.Text.Json;
-using System.Threading.Tasks;
 using SmallLister.Actions.Serialization;
 using SmallLister.Model;
 
@@ -9,6 +6,7 @@ namespace SmallLister.Actions;
 
 public class UpdateItemAction : IUserAction
 {
+    public const int DescriptionMaxLength = 24;
     public static UpdateItemAction Create(string data) => new(DataModel.Deserialize(data));
 
     private readonly DataModel _model;
@@ -28,10 +26,10 @@ public class UpdateItemAction : IUserAction
 
     public UserItemDataModel GetOriginalUserItem() => DataModel.Copy(_model).OriginalUserItem;
     public UserItemDataModel GetUpdatedUserItem() => DataModel.Copy(_model).UpdatedUserItem;
-    public IEnumerable<SortOrders> GetSortOrders() => (IEnumerable<SortOrders>?)DataModel.Copy(_model).SortOrders ?? Array.Empty<SortOrders>();
+    public IEnumerable<SortOrders> GetSortOrders() => (IEnumerable<SortOrders>?)DataModel.Copy(_model).SortOrders ?? [];
 
     private static string? DescriptionText(string? value) =>
-        (string.IsNullOrEmpty(value) || value.Length < 24) ? value : $"{value.Substring(0, 21)}...";
+        (string.IsNullOrEmpty(value) || value.Length < DescriptionMaxLength) ? value : $"{value[..(DescriptionMaxLength - 3)]}...";
 
     private class DataModel
     {

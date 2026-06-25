@@ -22,6 +22,8 @@ public class GetActionLogResponse(IUserListRepository userListRepository, IUserA
     {
         var action = userActionsService.GetAction(userAction) as AddItemAction ?? throw new NotSupportedException($"Unknown / unsupported add action: {userAction.UserActionId}");
         var userItem = action.GetUserItemAdded();
+        if (userItem.Description?.Length >= AddItemAction.DescriptionMaxLength)
+            yield return ("", userItem.Description);
         yield return ("", $"List: {(await userListRepository.GetListAsync(userAccount, userItem.UserListId ?? 0))?.Name}");
         if (userItem.Notes != null)
             yield return ("sml-list-item-notes", userItem.Notes ?? "");
@@ -36,6 +38,8 @@ public class GetActionLogResponse(IUserListRepository userListRepository, IUserA
         var action = userActionsService.GetAction(userAction) as UpdateItemAction ?? throw new NotSupportedException($"Unknown / unsupported update action: {userAction.UserActionId}");
         var originalItem = action.GetOriginalUserItem();
         var updatedItem = action.GetUpdatedUserItem();
+        if (updatedItem.Description?.Length >= UpdateItemAction.DescriptionMaxLength && updatedItem.Description == originalItem.Description)
+            yield return ("", updatedItem.Description);
         if (originalItem.UserListId == updatedItem.UserListId)
         {
             yield return ("", $"List: {(await userListRepository.GetListAsync(userAccount, originalItem.UserListId ?? 0))?.Name}");
