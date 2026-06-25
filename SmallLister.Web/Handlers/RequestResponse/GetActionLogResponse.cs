@@ -5,7 +5,18 @@ using SmallLister.Web.Model;
 
 namespace SmallLister.Web.Handlers.RequestResponse;
 
-public class GetActionLogResponse(IUserListRepository userListRepository, IUserActionsService userActionsService, UserAccount userAccount, UserAction userAction)
+public class GetActionLogResponse(IUserListRepository userListRepository, IUserActionsService userActionsService, UserAccount userAccount, UserAction? currentUndoAction, UserAction? currentRedoAction, IAsyncEnumerable<UserAction> allUndoRedoActions)
+{
+    public UserAction? CurrentUndoAction => currentUndoAction;
+    public UserAction? CurrentRedoAction => currentRedoAction;
+    public async IAsyncEnumerable<ActionLogResponse> AllUndoRedoActions()
+    {
+        await foreach (var undoRedoAction in allUndoRedoActions)
+            yield return new ActionLogResponse(userListRepository, userActionsService, userAccount, undoRedoAction);
+    }
+}
+
+public class ActionLogResponse(IUserListRepository userListRepository, IUserActionsService userActionsService, UserAccount userAccount, UserAction userAction)
 {
     public string Description => userAction.Description;
     public DateTime CreatedDateTime => userAction.CreatedDateTime;

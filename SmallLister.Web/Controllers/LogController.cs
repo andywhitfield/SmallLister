@@ -10,5 +10,12 @@ namespace SmallLister.Web.Controllers;
 public class LogController(IMediator mediator) : Controller
 {
     [HttpGet("~/log")]
-    public async Task<IActionResult> Index() => View(new IndexViewModel(HttpContext, mediator.CreateStream(new GetActionLogRequest(User))));
+    public async Task<IActionResult> Index()
+    {
+        var response = await mediator.Send(new GetActionLogRequest(User));
+        return View(new IndexViewModel(HttpContext,
+            response.CurrentUndoAction != null, response.CurrentUndoAction?.Description,
+            response.CurrentRedoAction != null, response.CurrentRedoAction?.Description,
+            response.AllUndoRedoActions()));
+    }
 }

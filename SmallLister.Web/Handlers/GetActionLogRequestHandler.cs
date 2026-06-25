@@ -1,4 +1,3 @@
-using System.Runtime.CompilerServices;
 using MediatR;
 using SmallLister.Actions;
 using SmallLister.Data;
@@ -11,12 +10,13 @@ public class GetActionLogRequestHandler(
     IUserListRepository userListRepository,
     IUserActionRepository userActionRepository,
     IUserActionsService userActionsService)
-    : IStreamRequestHandler<GetActionLogRequest, GetActionLogResponse>
+    : IRequestHandler<GetActionLogRequest, GetActionLogResponse>
 {
-    public async IAsyncEnumerable<GetActionLogResponse> Handle(GetActionLogRequest request, [EnumeratorCancellation] CancellationToken cancellationToken)
+    public async Task<GetActionLogResponse> Handle(GetActionLogRequest request, CancellationToken cancellationToken)
     {
         var user = await userAccountRepository.GetUserAccountAsync(request.User);
-        await foreach (var userAction in userActionRepository.GetUndoRedoActionsAsync(user).WithCancellation(cancellationToken))
-            yield return new GetActionLogResponse(userListRepository, userActionsService, user, userAction);
+        var (currentUndoAction, currentRedoAction) = await userActionRepository.GetUndoRedoActionAsync(user);
+        var allUndoRedoActions = userActionRepository.GetUndoRedoActionsAsync(user);
+        return new GetActionLogResponse(userListRepository, userActionsService, user, currentUndoAction, currentRedoAction, allUndoRedoActions);
     }
 }
