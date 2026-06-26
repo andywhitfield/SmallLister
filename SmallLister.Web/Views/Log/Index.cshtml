@@ -1,0 +1,56 @@
+﻿@model SmallLister.Web.Model.Log.IndexViewModel
+
+<article>
+    <h2>Log</h2>
+
+    <ul class="sml-list">
+        <li class="sml-list">
+            <ul class="sml-list-item">
+                @{bool hasRedoAction = false; }
+                @await foreach (var logAction in Model.Actions) {
+                if (logAction.IsCurrentAction) {
+                <li class="sml-list-item">
+                    <div></div>
+                    <div><div>
+                        <form method="post" action="/history/undo">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="returnUrl" value="/log" />
+                        <button>Undo &darr;</button>
+                        </form>
+                        </div></div>
+                    <div>
+                        @if (hasRedoAction) {
+                        <form method="post" action="/history/redo">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="returnUrl" value="/log" />
+                        <button>Redo &uarr;</button>
+                        </form>                        
+                        }
+                    </div>
+                </li>
+                } else {
+                    hasRedoAction = true;
+                }
+                <li class="sml-list-item">
+                    <div></div>
+                    <div>
+                        <div>@logAction.Description</div>
+                        <div>
+                            @await foreach (var changeInfo in logAction.ChangeDetails)
+                            {
+                            <div class="@changeInfo.CssClass">@changeInfo.ChangeDescription</div>
+                            }
+                            <!-- introduce expand/collapse, as in smallmealplan -->
+                        </div>
+                    </div>
+                    <div>
+                        @logAction.CreatedDateTime.ToString("dd MMM yyyy")
+                        <br/>
+                        <span>@logAction.CreatedDateTime.ToString("HH:mm:ss")</span>
+                    </div>
+                </li>
+                }
+            </ul>
+        </li>
+    </ul>
+</article>

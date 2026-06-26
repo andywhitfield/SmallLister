@@ -5,10 +5,8 @@ using SmallLister.Web.Model;
 
 namespace SmallLister.Web.Handlers.RequestResponse;
 
-public class GetActionLogResponse(IUserListRepository userListRepository, IUserActionsService userActionsService, UserAccount userAccount, UserAction? currentUndoAction, UserAction? currentRedoAction, IAsyncEnumerable<UserAction> allUndoRedoActions)
+public class GetActionLogResponse(IUserListRepository userListRepository, IUserActionsService userActionsService, UserAccount userAccount, IAsyncEnumerable<UserAction> allUndoRedoActions)
 {
-    public UserAction? CurrentUndoAction => currentUndoAction;
-    public UserAction? CurrentRedoAction => currentRedoAction;
     public async IAsyncEnumerable<ActionLogResponse> AllUndoRedoActions()
     {
         await foreach (var undoRedoAction in allUndoRedoActions)
@@ -18,6 +16,7 @@ public class GetActionLogResponse(IUserListRepository userListRepository, IUserA
 
 public class ActionLogResponse(IUserListRepository userListRepository, IUserActionsService userActionsService, UserAccount userAccount, UserAction userAction)
 {
+    public bool IsCurrentAction => userAction.IsCurrent;
     public string Description => userAction.Description;
     public DateTime CreatedDateTime => userAction.CreatedDateTime;
     public IAsyncEnumerable<(string CssClass, string ChangeDescription)> ChangeDetails

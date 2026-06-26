@@ -15,8 +15,6 @@ public class GetActionLogRequestHandler(
     public async Task<GetActionLogResponse> Handle(GetActionLogRequest request, CancellationToken cancellationToken)
     {
         var user = await userAccountRepository.GetUserAccountAsync(request.User);
-        var (currentUndoAction, currentRedoAction) = await userActionRepository.GetUndoRedoActionAsync(user);
-        var allUndoRedoActions = userActionRepository.GetUndoRedoActionsAsync(user);
-        return new GetActionLogResponse(userListRepository, userActionsService, user, currentUndoAction, currentRedoAction, allUndoRedoActions);
+        return new GetActionLogResponse(userListRepository, userActionsService, user, userActionRepository.GetUndoRedoActionsAsync(user));
     }
 }
