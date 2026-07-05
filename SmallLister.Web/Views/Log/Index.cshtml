@@ -32,15 +32,14 @@
                     hasRedoAction = true;
                 }
                 <li class="sml-list-item">
-                    <div></div>
+                    <div><img src="/images/expand.png" class="sml-log-details-oc" height="18" width="18" title="Show/Hide change details" /></div>
                     <div>
                         <div>@logAction.Description</div>
-                        <div>
+                        <div class="sml-log-details">
                             @await foreach (var changeInfo in logAction.ChangeDetails)
                             {
                             <div class="@changeInfo.CssClass">@changeInfo.ChangeDescription</div>
                             }
-                            <!-- introduce expand/collapse, as in smallmealplan -->
                         </div>
                     </div>
                     <div>

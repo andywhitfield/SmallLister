@@ -207,6 +207,15 @@ ul.sml-list-item>li>div {
     white-space: pre-line;
 }
 
+img.sml-log-details-oc {
+    padding: 3px 3px 3px 0px;
+    background-color: white;
+}
+
+div.sml-log-details {
+    display: none;
+}
+
 form[name="sml-list-add"] label,
 form[name="sml-feed-add"] label {
     width: 105px;
@@ -325,5 +334,8 @@ ul.sml-list li.placeholder:before {
     ul.sml-list-item>li,
     span.selected {
         color: black;
+    }
+    img.sml-log-details-oc {
+        background-color: black;
     }
 }

@@ -32,6 +32,10 @@ function smlInitialise() {
         });
     }
 
+    $('.sml-log-details-oc').click(function() {
+        $(this).parent('div').next().find('.sml-log-details').toggle();
+    });
+
     $('[data-depends]').each(function() {
         let btnWithDependency = $(this);
         let dependentFormObject = $(btnWithDependency.attr('data-depends'));
