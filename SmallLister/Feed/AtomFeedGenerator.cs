@@ -1,6 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Xml.Linq;
@@ -57,7 +54,7 @@ public class AtomFeedGenerator : IFeedGenerator
                     itemDescription.Append("<ul>");
                     foreach (var item in itemDetails)
                     {
-                        itemDescription.Append($"<li><a href=\"{baseUri}/items/{item.i.UserItemId}\">Task due ");
+                        itemDescription.Append($"<li><a href=\"{baseUri}/items/{item.i.UserItemId}\" target=\"_blank\">Task due ");
                         var isOverdue = item.Date < DateTime.Today;
                         itemDescription.Append(GetFriendlyDueDate(isOverdue, item.Date));
                         itemDescription.Append(":</a> ");
@@ -74,7 +71,7 @@ public class AtomFeedGenerator : IFeedGenerator
                     itemDescription.Append("</ul>");
                 }
 
-                content.Add(new XCData($"{itemDescription}<p><a href=\"{baseUri}\">Open Small:Lister</a></p>"));
+                content.Add(new XCData($"{itemDescription}<p><a href=\"{baseUri}\" target=\"_blank\">Open Small:Lister</a></p>"));
                 entry.Add(content);
 
                 docRoot.Add(entry);
@@ -102,7 +99,7 @@ public class AtomFeedGenerator : IFeedGenerator
                     UserFeedItemDisplay.Description => $"<p>{GetDueDateMessage(isOverdue, dueDate)}:</p><p><b>{item.Description}</b></p>",
                     _ => throw new InvalidOperationException("Unknown feed item display option")
                 };
-                content.Add(new XCData($"{itemDescription}<p><a href=\"{itemUri}\">Open item</a></p>"));
+                content.Add(new XCData($"{itemDescription}<p><a href=\"{itemUri}\" target=\"_blank\">Open item</a></p>"));
                 entry.Add(content);
 
                 docRoot.Add(entry);
@@ -113,14 +110,14 @@ public class AtomFeedGenerator : IFeedGenerator
         return atom;
     }
 
-    private string GetDueDateMessage(bool isOverdue, DateTime dueDate)
+    private static string GetDueDateMessage(bool isOverdue, DateTime dueDate)
     {
         return isOverdue
             ? $"You have an overdue item! It was due {GetFriendlyDueDate(isOverdue, dueDate)}"
             : $"You have an item that is due {GetFriendlyDueDate(isOverdue, dueDate)}";
     }
 
-    private string GetFriendlyDueDate(bool isOverdue, DateTime dueDate)
+    private static string GetFriendlyDueDate(bool isOverdue, DateTime dueDate)
     {
         if (isOverdue)
         {
