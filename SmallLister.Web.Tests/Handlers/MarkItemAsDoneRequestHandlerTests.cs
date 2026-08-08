@@ -14,14 +14,14 @@ namespace SmallLister.Web.Tests.Handlers;
 [TestClass]
 public class MarkItemAsDoneRequestHandlerTests
 {
-    #pragma warning disable CS8618
+#pragma warning disable CS8618
 
     private UserItem _userItem;
     private MarkItemAsDoneRequestHandler _handler;
     private Mock<IUserItemRepository> _userItemRepository;
     private ClaimsPrincipal _user;
 
-    #pragma warning restore CS8618
+#pragma warning restore CS8618
 
     [TestInitialize]
     public void Setup()
@@ -49,7 +49,7 @@ public class MarkItemAsDoneRequestHandlerTests
         _userItem.CompletedDateTime = null;
         _userItem.Repeat = null;
 
-        var result = await _handler.Handle(new MarkItemAsDoneRequest(_user, _userItem.UserItemId), CancellationToken.None);
+        var (result, _) = await _handler.Handle(new MarkItemAsDoneRequest(_user, _userItem.UserItemId), CancellationToken.None);
         result.Should().BeTrue();
 
         _userItem.CompletedDateTime.Should().NotBeNull();
@@ -91,7 +91,7 @@ public class MarkItemAsDoneRequestHandlerTests
         _userItem.NextDueDate = DateTime.ParseExact(currentDueDate, "yyyy-MM-dd", null);
         _userItem.Repeat = repeat;
 
-        var result = await _handler.Handle(new MarkItemAsDoneRequest(_user, _userItem.UserItemId), CancellationToken.None);
+        var (result, _) = await _handler.Handle(new MarkItemAsDoneRequest(_user, _userItem.UserItemId), CancellationToken.None);
         result.Should().BeTrue();
 
         _userItem.CompletedDateTime.Should().BeNull();

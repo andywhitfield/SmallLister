@@ -1,10 +1,7 @@
 using System.Security.Claims;
-using System.Threading;
-using System.Threading.Tasks;
 using AutoFixture;
 using FluentAssertions;
 using Microsoft.Extensions.Logging;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using SmallLister.Actions;
 using SmallLister.Data;
@@ -18,8 +15,8 @@ namespace SmallLister.Web.Tests.Handlers;
 [TestClass]
 public class EditItemRequestHandlerTests
 {
-    #pragma warning disable CS8618
-    
+#pragma warning disable CS8618
+
     private EditItemRequestHandler _handler;
     private UserItem _userItem;
     private UserItem _updatedUserItemInfo;
@@ -27,7 +24,7 @@ public class EditItemRequestHandlerTests
     private ClaimsPrincipal _user;
     private Mock<IUserItemRepository> _userItemRepository;
 
-    #pragma warning restore CS8618
+#pragma warning restore CS8618
 
     [TestInitialize]
     public void Setup()
@@ -56,7 +53,7 @@ public class EditItemRequestHandlerTests
     [TestMethod]
     public async Task Should_edit_item()
     {
-        var result = await _handler.Handle(new EditItemRequest(_user, _userItem.UserItemId, new AddOrUpdateItemRequest
+        var (result, _) = await _handler.Handle(new EditItemRequest(_user, _userItem.UserItemId, new AddOrUpdateItemRequest
         {
             Description = _updatedUserItemInfo.Description ?? "",
             Due = _updatedUserItemInfo.NextDueDate.GetValueOrDefault().ToString("yyyy-MM-dd"),
@@ -77,7 +74,7 @@ public class EditItemRequestHandlerTests
     [TestMethod]
     public async Task When_editing_item_Should_reset_postponed_date()
     {
-        var result = await _handler.Handle(new EditItemRequest(_user, _userItem.UserItemId, new AddOrUpdateItemRequest
+        var (result, _) = await _handler.Handle(new EditItemRequest(_user, _userItem.UserItemId, new AddOrUpdateItemRequest
         {
             Description = _updatedUserItemInfo.Description ?? "",
             Due = _updatedUserItemInfo.NextDueDate.GetValueOrDefault().ToString("yyyy-MM-dd"),
@@ -100,7 +97,7 @@ public class EditItemRequestHandlerTests
     public async Task When_snoozing_item_Should_update_other_properties_Except_due_date()
     {
         _userItem.PostponedUntilDate = null;
-        var result = await _handler.Handle(new EditItemRequest(_user, _userItem.UserItemId, new AddOrUpdateItemRequest
+        var (result, _) = await _handler.Handle(new EditItemRequest(_user, _userItem.UserItemId, new AddOrUpdateItemRequest
         {
             Description = _updatedUserItemInfo.Description ?? "",
             Due = _updatedUserItemInfo.NextDueDate.GetValueOrDefault().ToString("yyyy-MM-dd"),
@@ -124,7 +121,7 @@ public class EditItemRequestHandlerTests
     public async Task When_snoozing_item_Should_add_a_day_from_the_current_postponed_date()
     {
         var expectedSnoozeDate = _userItem.PostponedUntilDate.GetValueOrDefault().Date.AddDays(1);
-        var result = await _handler.Handle(new EditItemRequest(_user, _userItem.UserItemId, new AddOrUpdateItemRequest
+        var (result, _) = await _handler.Handle(new EditItemRequest(_user, _userItem.UserItemId, new AddOrUpdateItemRequest
         {
             Description = _updatedUserItemInfo.Description ?? "",
             Due = _updatedUserItemInfo.NextDueDate.GetValueOrDefault().ToString("yyyy-MM-dd"),
@@ -147,7 +144,7 @@ public class EditItemRequestHandlerTests
     [TestMethod]
     public async Task Given_editing_an_item_When_not_changing_due_date_Should_not_reset_postponed_date()
     {
-        var result = await _handler.Handle(new EditItemRequest(_user, _userItem.UserItemId, new AddOrUpdateItemRequest
+        var (result, _) = await _handler.Handle(new EditItemRequest(_user, _userItem.UserItemId, new AddOrUpdateItemRequest
         {
             Description = _updatedUserItemInfo.Description ?? "",
             Due = _userItem.NextDueDate.GetValueOrDefault().ToString("yyyy-MM-dd"),
@@ -169,7 +166,7 @@ public class EditItemRequestHandlerTests
     [TestMethod]
     public async Task Given_invalid_due_date_should_not_update_item()
     {
-        var result = await _handler.Handle(new EditItemRequest(_user, _userItem.UserItemId, new AddOrUpdateItemRequest
+        var (result, _) = await _handler.Handle(new EditItemRequest(_user, _userItem.UserItemId, new AddOrUpdateItemRequest
         {
             Description = _updatedUserItemInfo.Description ?? "",
             Due = "22-Jan-2021",
@@ -185,7 +182,7 @@ public class EditItemRequestHandlerTests
     [TestMethod]
     public async Task Should_delete_item()
     {
-        var result = await _handler.Handle(new EditItemRequest(_user, _userItem.UserItemId, new AddOrUpdateItemRequest
+        var (result, _) = await _handler.Handle(new EditItemRequest(_user, _userItem.UserItemId, new AddOrUpdateItemRequest
         {
             Description = _updatedUserItemInfo.Description ?? "",
             Due = _updatedUserItemInfo.NextDueDate.GetValueOrDefault().ToString("yyyy-MM-dd"),
@@ -194,7 +191,7 @@ public class EditItemRequestHandlerTests
             Repeat = _updatedUserItemInfo.Repeat,
             Delete = true
         }), CancellationToken.None);
-        
+
         result.Should().BeTrue();
         _userItemRepository.Verify(x => x.SaveAsync(It.Is<UserItem>(x =>
             x.Description == _userItem.Description &&

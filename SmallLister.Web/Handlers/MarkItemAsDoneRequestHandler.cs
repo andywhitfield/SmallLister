@@ -13,16 +13,16 @@ public class MarkItemAsDoneRequestHandler(
     IUserListRepository userListRepository,
     IUserActionsService userActionsService,
     IWebhookQueueRepository webhookQueueRepository)
-    : IRequestHandler<MarkItemAsDoneRequest, bool>
+    : IRequestHandler<MarkItemAsDoneRequest, (bool, string)>
 {
-    public async Task<bool> Handle(MarkItemAsDoneRequest request, CancellationToken cancellationToken)
+    public async Task<(bool, string)> Handle(MarkItemAsDoneRequest request, CancellationToken cancellationToken)
     {
         var user = await userAccountRepository.GetUserAccountAsync(request.User);
         var item = await userItemRepository.GetItemAsync(user, request.UserItemId);
         if (item == null)
         {
             logger.LogInformation("Could not find item {UserItemId}", request.UserItemId);
-            return false;
+            return (false, "");
         }
 
         var list = item.UserListId != null ? await userListRepository.GetListAsync(user, item.UserListId.Value) : null;
@@ -34,7 +34,7 @@ public class MarkItemAsDoneRequestHandler(
 
         await userItemRepository.SaveAsync(item, list, userActionsService);
         await webhookQueueRepository.OnListItemChangeAsync(user, item, WebhookEventType.Modify);
-        return true;
+        return (true, EditItemRequestHandler.GetRedirectUrl(user, item));
     }
 
     private static DateTime CalculateNextDueDate(DateTime dueDate, ItemRepeat repeat) =>

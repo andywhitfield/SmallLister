@@ -14,4 +14,5 @@ public class AddOrUpdateItemRequest
     public bool? Delete { get; set; }
     public bool? Done { get; set; }
     public bool? Snooze { get; set; }
+    public bool? Cancel { get; set; }
 }
