@@ -29,7 +29,9 @@ public class MarkItemAsDoneRequestHandlerTests
         var fixture = new Fixture();
         _user = fixture.Create<ClaimsPrincipal>();
         var userAccount = fixture.Create<UserAccount>();
+        userAccount.LastSelectedUserListId = 1;
         _userItem = fixture.Create<UserItem>();
+        _userItem.UserListId = 2;
 
         var userAccountRepository = new Mock<IUserAccountRepository>();
         userAccountRepository.Setup(x => x.GetUserAccountAsync(_user)).ReturnsAsync(userAccount);
@@ -49,8 +51,9 @@ public class MarkItemAsDoneRequestHandlerTests
         _userItem.CompletedDateTime = null;
         _userItem.Repeat = null;
 
-        var (result, _) = await _handler.Handle(new MarkItemAsDoneRequest(_user, _userItem.UserItemId), CancellationToken.None);
+        var (result, redir) = await _handler.Handle(new MarkItemAsDoneRequest(_user, _userItem.UserItemId), CancellationToken.None);
         result.Should().BeTrue();
+        redir.Should().Be("~/?list=2");
 
         _userItem.CompletedDateTime.Should().NotBeNull();
         _userItem.PostponedUntilDate.Should().BeNull();
@@ -91,8 +94,9 @@ public class MarkItemAsDoneRequestHandlerTests
         _userItem.NextDueDate = DateTime.ParseExact(currentDueDate, "yyyy-MM-dd", null);
         _userItem.Repeat = repeat;
 
-        var (result, _) = await _handler.Handle(new MarkItemAsDoneRequest(_user, _userItem.UserItemId), CancellationToken.None);
+        var (result, redir) = await _handler.Handle(new MarkItemAsDoneRequest(_user, _userItem.UserItemId), CancellationToken.None);
         result.Should().BeTrue();
+        redir.Should().Be("~/?list=2");
 
         _userItem.CompletedDateTime.Should().BeNull();
         _userItem.PostponedUntilDate.Should().BeNull();
