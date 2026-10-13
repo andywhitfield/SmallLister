@@ -236,6 +236,11 @@ input.sml-list-add-due {
     width: 110px;
 }
 
+input.sml-list-add-list-new {
+    width: 120px;
+    display: none;
+}
+
 .pagination {
     display: inline-block;
 }

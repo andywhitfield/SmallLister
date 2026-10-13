@@ -119,7 +119,9 @@
             <option value="@list.UserListId">@list.Name</option>
                 }
             }
+            <option value="new">New...</option>
         </select>
+        <input type="text" id="sml-list-add-list-new" name="newlist" class="sml-list-add-list-new" />
     </div>
     <div>
         <label for="sml-list-add-description">Description:</label>
@@ -181,6 +183,18 @@
             pickmeup(dueDateSelector).hide();
             pickmeup(dueDateSelector).set_date(new Date);
             $('form[name="sml-list-add"] select.sml-list-add-repeat').val('none');
+        });
+        let addToListSelect = $('form[name="sml-list-add"] select.sml-list-add-list');
+        let addToListSelectNew = $('form[name="sml-list-add"] input.sml-list-add-list-new');
+        addToListSelect.on('change', function() {
+            console.log('selected list: ' + addToListSelect.val());
+            if (addToListSelect.val() === 'new') {
+                addToListSelectNew.show();
+                addToListSelectNew.select();
+                addToListSelectNew.focus();
+            } else {
+                addToListSelectNew.hide();
+            }
         });
     });
 </script>
