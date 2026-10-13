@@ -8,13 +8,12 @@
     <link rel="apple-touch-icon" href="/images/sml.png" sizes="32x32" />
     <title>Small:Lister@(Model.PageTitle)</title>
 
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/PickMeUp/3.2.1/css/pickmeup.css" integrity="sha512-5R2Om2Kryt5hqiLT76LS9Jkpji26njKU/9xZKfguGDZY575Zg3yqi1spdj6r1RVZYZZdw0/zfW8wZlfSKPAiHw==" crossorigin="anonymous" />
     <environment names="Development">
-        <link rel="stylesheet" href="/lib/pickmeup/css/pickmeup.css" />
-        <link rel="stylesheet" href="/css/smalllister.css" />
+    <link rel="stylesheet" href="/css/smalllister.css" />
     </environment>
     <environment names="Staging,Production">
-        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/PickMeUp/3.2.1/css/pickmeup.css" integrity="sha512-5R2Om2Kryt5hqiLT76LS9Jkpji26njKU/9xZKfguGDZY575Zg3yqi1spdj6r1RVZYZZdw0/zfW8wZlfSKPAiHw==" crossorigin="anonymous" />
-        <link rel="stylesheet" href="/css/smalllister.min.css" asp-append-version="true" />
+    <link rel="stylesheet" href="/css/smalllister.min.css" asp-append-version="true" />
     </environment>
     @RenderSection("HeaderScripts", required: false)
 </head>
@@ -51,26 +50,13 @@
         &#169; @DateTime.Today.Year Small:Lister
     </footer>
 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/4.0.0/jquery.min.js" integrity="sha512-8LENNbXmzI/Gbj+OwXmqR6V4QaUAw0/porPzy1+dQoJqC0JPHedWoe0DDOTL2uHA5XXJyIsPtiMHH86pVlay6A==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.7/Sortable.min.js" integrity="sha512-ri8dokds012Oxz+iFzMs4KNJXVc+h7J1zq6unM1NTtzBLj4jD1R5BWiK6QycK0TdSdkt7zYcIcv6sUPhmYkbdQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PickMeUp/3.2.1/pickmeup.min.js" integrity="sha512-zW9jU25wki/XuPm541IGdt3DY0YICfwpNjtXO9bzi5V/bYRxfvUoqQRSOBWL2BXZiFqu4nhp+0iz+7u64Xpm2Q==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     <environment names="Development">
-        <script src="/lib/jquery/jquery.min.js"></script>
-        <script src="/lib/jquery-sortable/jquery-sortable-min.js"></script>
-        <script src="/lib/pickmeup/pickmeup.min.js"></script>
         <script src="/js/smalllister.js" asp-append-version="true"></script>
     </environment>
     <environment names="Staging,Production">
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"
-                asp-fallback-src="/lib/jquery/jquery.min.js"
-                asp-fallback-test="window.jQuery"
-                crossorigin="anonymous">
-        </script>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-sortable/0.9.13/jquery-sortable-min.js"
-                asp-fallback-src="/lib/jquery-sortable/jquery-sortable-min.js"
-                asp-fallback-test="window.jQuery"
-                crossorigin="anonymous">
-        </script>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/PickMeUp/3.2.1/pickmeup.min.js"
-                integrity="sha512-zW9jU25wki/XuPm541IGdt3DY0YICfwpNjtXO9bzi5V/bYRxfvUoqQRSOBWL2BXZiFqu4nhp+0iz+7u64Xpm2Q=="
-                crossorigin="anonymous"></script>
         <script src="/js/smalllister.min.js" asp-append-version="true"></script>
     </environment>
 

@@ -4,20 +4,17 @@ function smlInitialise() {
     let smlList = $('ul.sml-list');
     let baseUri = smlList.attr('data-baseuri');
     if (typeof baseUri !== 'undefined' && baseUri !== '') {
-        smlList.sortable({
+        Sortable.create(smlList.get(0), {
             handle: '.sml-list-item-drag-handle',
-            isValidTarget: function(item, container) {
-                return container.el[0].className.includes('sml-list-item');
-            },
-            onDrop: function(item, container, _super, event) {
-                _super(item, container, event);
-
+            animation: 150,
+            ghostClass: 'sml-list-drag-ghost',
+            onEnd: function (evt) {
+                let item = $(evt.item);
                 let listItemMoved = item.attr('data-listitem');
                 if (typeof listItemMoved !== 'undefined') {
                     let prevListItem = parseInt(item.prev('li').attr('data-listitem'));
 
                     console.log('moving item ' + listItemMoved + ' to be after ' + prevListItem);
-
                     $.ajax({
                         url: baseUri + '/' + listItemMoved + '/move',
                         type: 'PUT',
@@ -25,8 +22,6 @@ function smlInitialise() {
                         contentType: 'application/json; charset=utf-8',
                         dataType: 'json'
                     });
-
-                    return;
                 }
             }
         });

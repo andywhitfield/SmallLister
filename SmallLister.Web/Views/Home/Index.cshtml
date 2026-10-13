@@ -50,42 +50,38 @@
     </span>
     <h2>@Model.SelectedList?.Name</h2>
 
+    @if (Model.Items.Any()) {
     <ul class="sml-list" data-baseuri="/api/v1/items">
-        <li class="sml-list">
-            @if (Model.Items.Any()) {
-            <ul class="sml-list-item">
-            @foreach (var item in Model.Items) {
-                <li class="@item.AppendDueCssClass("sml-list-item")" data-listitem="@item.UserItemId">
-                    <div>
-                        @if (Model.IsUserListSelected) {
-                        <img class="sml-list-item-drag-handle" src="/images/drag.png" height="26" width="22" title="Move" />
-                        }
-                    </div>
-                    <div>
-                        <div>@item.Description</div>
-                        <div class="sml-list-item-notes">@item.Notes</div>
-                        
-                        <form method="post" action="/items/done/@item.UserItemId">
-                        @Html.AntiForgeryToken()
-                        <button title="Done"><img src="/images/tick.png" height="15" width="15" /> Done</button>
-                        </form>
-                        <button title="Edit" data-href="/items/@item.UserItemId"><img src="/images/notes.png" height="15" width="15" /> Edit</button>
-                        @if (item.DueDate.HasValue) {
-                        <form method="post" action="/items/snooze/@item.UserItemId">
-                        @Html.AntiForgeryToken()
-                        <button title="Snooze for a day"><img src="/images/snooze.png" height="15" width="15" /> Snooze</button>
-                        </form>
-                        }
-                    </div>
-                    <div title="@item.Due">@item.DueSummary<br/><span>@item.RepeatSummary</span></div>
-                </li>
-            }
-            </ul>
-            } else {
-            <text>Nothing on this list, you're all done.</text>
-            }
+    @foreach (var item in Model.Items) {
+        <li class="@item.AppendDueCssClass("sml-list-item")" data-listitem="@item.UserItemId">
+            <div>
+                @if (Model.IsUserListSelected) {
+                <img class="sml-list-item-drag-handle" src="/images/drag.png" height="26" width="22" title="Move" />
+                }
+            </div>
+            <div>
+                <div>@item.Description</div>
+                <div class="sml-list-item-notes">@item.Notes</div>
+                
+                <form method="post" action="/items/done/@item.UserItemId">
+                @Html.AntiForgeryToken()
+                <button title="Done"><img src="/images/tick.png" height="15" width="15" /> Done</button>
+                </form>
+                <button title="Edit" data-href="/items/@item.UserItemId"><img src="/images/notes.png" height="15" width="15" /> Edit</button>
+                @if (item.DueDate.HasValue) {
+                <form method="post" action="/items/snooze/@item.UserItemId">
+                @Html.AntiForgeryToken()
+                <button title="Snooze for a day"><img src="/images/snooze.png" height="15" width="15" /> Snooze</button>
+                </form>
+                }
+            </div>
+            <div title="@item.Due">@item.DueSummary<br/><span>@item.RepeatSummary</span></div>
         </li>
+    }
     </ul>
+    } else {
+    <p>Nothing on this list, you're all done.</p>
+    }
 
     @if (Model.Pagination.PageCount > 1) {
     <div class="pagination">
