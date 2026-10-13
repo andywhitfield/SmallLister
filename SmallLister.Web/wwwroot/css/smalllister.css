@@ -237,8 +237,7 @@ input.sml-list-add-due {
 }
 
 input.sml-list-add-list-new {
-    width: 120px;
-    display: none;
+    width: 300px;
 }
 
 .pagination {

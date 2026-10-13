@@ -109,7 +109,7 @@
     @Html.AntiForgeryToken()
     <fieldset>
     <legend>Add to list</legend>
-        <div>
+    <div>
         <label for="sml-list-add-list">List:</label>
         <select id="sml-list-add-list" name="list" class="sml-list-add-list">
             @foreach (var list in Model.Lists.Where(l => l.CanAddItems)) {
@@ -121,7 +121,10 @@
             }
             <option value="new">New...</option>
         </select>
-        <input type="text" id="sml-list-add-list-new" name="newlist" class="sml-list-add-list-new" />
+    </div>
+    <div>
+        <label for="sml-list-add-list-new"></label>
+        <input type="text" id="sml-list-add-list-new" name="newlist" class="sml-list-add-list-new" placeholder="Enter the name of the new list" />
     </div>
     <div>
         <label for="sml-list-add-description">Description:</label>
@@ -184,18 +187,21 @@
             pickmeup(dueDateSelector).set_date(new Date);
             $('form[name="sml-list-add"] select.sml-list-add-repeat').val('none');
         });
+        $('form[name="sml-list-add"] select.sml-list-add-list').on('change', onAddToListChange);
+        onAddToListChange();
+    });
+
+    function onAddToListChange() {
         let addToListSelect = $('form[name="sml-list-add"] select.sml-list-add-list');
         let addToListSelectNew = $('form[name="sml-list-add"] input.sml-list-add-list-new');
-        addToListSelect.on('change', function() {
-            console.log('selected list: ' + addToListSelect.val());
-            if (addToListSelect.val() === 'new') {
-                addToListSelectNew.show();
-                addToListSelectNew.select();
-                addToListSelectNew.focus();
-            } else {
-                addToListSelectNew.hide();
-            }
-        });
-    });
+        console.log('selected list: ' + addToListSelect.val());
+        if (addToListSelect.val() === 'new') {
+            addToListSelectNew.parent().show();
+            addToListSelectNew.select();
+            addToListSelectNew.focus();
+        } else {
+            addToListSelectNew.parent().hide();
+        }
+    }
 </script>
 }
