@@ -49,6 +49,10 @@ header {
     border-bottom: solid #92dd23 2px;
 }
 
+dialog {
+    position: absolute;
+}
+
 input,
 select,
 button {
@@ -217,6 +221,7 @@ div.sml-log-details {
 }
 
 form[name="sml-list-add"] label,
+form[name="sml-list-add-dialog"] label,
 form[name="sml-feed-add"] label {
     width: 105px;
     display: inline-block;
@@ -299,6 +304,10 @@ ul.sml-list li.placeholder:before {
     cursor: move;
 }
 
+.sml-list-add-dialog-close {
+    float: right;
+}
+
 @media (max-width: 600px) {
     header {
         -webkit-flex-direction: column;
@@ -323,11 +332,13 @@ ul.sml-list li.placeholder:before {
 }
 
 @media (prefers-color-scheme: dark) {
+
     body {
         background-color: black;
     }
 
-    article {
+    article,
+    dialog {
         background-color: black;
         color: white;
     }

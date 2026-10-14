@@ -1,0 +1,64 @@
+﻿@using SmallLister.Web.Model.Home
+@model (string FormName, IndexViewModel ViewModel)
+<form name="@Model.FormName" method="post" action="/items/add">
+@Html.AntiForgeryToken()
+<fieldset>
+<legend>Add to list</legend>
+<div>
+    <label for="@(Model.FormName)-list">List:</label>
+    <select id="@(Model.FormName)-list" name="list" class="sml-list-add-list">
+        @foreach (var list in Model.ViewModel.Lists.Where(l => l.CanAddItems)) {
+            @if (list.UserListId == Model.ViewModel.SelectedList?.UserListId) {
+        <option value="@list.UserListId" selected="selected">@list.Name</option>
+            } else {
+        <option value="@list.UserListId">@list.Name</option>
+            }
+        }
+        <option value="new">New...</option>
+    </select>
+</div>
+<div>
+    <label for="@(Model.FormName)-list-new"></label>
+    <input type="text" id="@(Model.FormName)-list-new" name="newlist" class="sml-list-add-list-new" placeholder="Enter the name of the new list" />
+</div>
+<div>
+    <label for="@(Model.FormName)-description">Description:</label>
+    <input type="text" id="@(Model.FormName)-description" name="description" class="sml-list-add-description" />
+</div>
+<div>
+    <label for="@(Model.FormName)-due">Due:</label>
+    <input type="text" id="@(Model.FormName)-due" name="due" class="sml-list-add-due" />
+</div>
+<div>        
+    <label for="@(Model.FormName)-repeat">Repeat:</label>
+    <select id="@(Model.FormName)-repeat" name="repeat" class="sml-list-add-repeat" data-depends="form[name='@(Model.FormName)'] input.sml-list-add-due">
+        <option value="" selected="selected">None</option>
+        <option value="daily">Every day</option>
+        <option value="everyOtherDay">Every other day</option>
+        <option value="everyThreeDays">Every 3 days</option>
+        <option value="dailyExcludingWeekend">Every day except Saturday and Sunday</option>
+        <option value="weekends">Every Saturday and Sunday</option>
+        <option value="weekly">Every week</option>
+        <option value="biweekly">Every 2 weeks</option>
+        <option value="triweekly">Every 3 weeks</option>
+        <option value="fourWeekly">Every 4 weeks</option>
+        <option value="fiveWeekly">Every 4 weeks</option>
+        <option value="monthly">Every month</option>
+        <option value="lastDayMonthly">On the last day of every month</option>
+        <option value="sixWeekly">Every 6 weeks</option>
+        <option value="biMonthly">Every 2 months</option>
+        <option value="quarterly">Every 3 months</option>
+        <option value="halfYearly">Every 6 months</option>
+        <option value="yearly">Every year</option>
+    </select>
+</div>
+<div>
+    <label for="@(Model.FormName)-notes">Notes:</label>
+    <textarea id="@(Model.FormName)-notes" name="notes" class="sml-list-add-notes" wrap="off"></textarea>
+</div>
+<div>
+    <label></label>
+    <button type="submit" data-depends="form[name='@(Model.FormName)'] input.sml-list-add-description">Add</button>
+</div>
+</fieldset>
+</form>

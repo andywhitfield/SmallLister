@@ -145,22 +145,7 @@
 @section Scripts {
 <script type="text/javascript">
     $(function() { 
-        let dueDateSelector = 'form[name="sml-list-add"] input.sml-list-add-due';
-        pickmeup(dueDateSelector, {
-            default_date: false,
-            hide_on_select: true,
-            format: 'Y-m-d'
-        });
-        $(dueDateSelector).on('change input paste keyup', function() {
-            let dueDate = $(this).val();
-            if (dueDate !== null && dueDate.match(/^\s*$/) === null)
-                return;
-            pickmeup(dueDateSelector).hide();
-            pickmeup(dueDateSelector).set_date(new Date);
-            $('form[name="sml-list-add"] select.sml-list-add-repeat').val('none');
-        });
-        $('form[name="sml-list-add"] select.sml-list-add-list').on('change', smlOnAddToListChange);
-        smlOnAddToListChange();
+        smlInitialiseAddToListForm('sml-list-add');
     });
 </script>
 }

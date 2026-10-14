@@ -48,7 +48,7 @@
         }
     }
     </span>
-    <h2>@Model.SelectedList?.Name</h2>
+    <h2><button id="sml-list-add-dialog-open" title="Add a new item...">+</button> @Model.SelectedList?.Name</h2>
 
     @if (Model.Items.Any()) {
     <ul class="sml-list" data-baseuri="/api/v1/items">
@@ -105,90 +105,33 @@
     }
 
     <div>
-    <form name="sml-list-add" method="post" action="/items/add">
-    @Html.AntiForgeryToken()
-    <fieldset>
-    <legend>Add to list</legend>
-    <div>
-        <label for="sml-list-add-list">List:</label>
-        <select id="sml-list-add-list" name="list" class="sml-list-add-list">
-            @foreach (var list in Model.Lists.Where(l => l.CanAddItems)) {
-                @if (list.UserListId == Model.SelectedList?.UserListId) {
-            <option value="@list.UserListId" selected="selected">@list.Name</option>
-                } else {
-            <option value="@list.UserListId">@list.Name</option>
-                }
-            }
-            <option value="new">New...</option>
-        </select>
-    </div>
-    <div>
-        <label for="sml-list-add-list-new"></label>
-        <input type="text" id="sml-list-add-list-new" name="newlist" class="sml-list-add-list-new" placeholder="Enter the name of the new list" />
-    </div>
-    <div>
-        <label for="sml-list-add-description">Description:</label>
-        <input type="text" id="sml-list-add-description" name="description" class="sml-list-add-description" />
-    </div>
-    <div>
-        <label for="sml-list-add-due">Due:</label>
-        <input type="text" id="sml-list-add-due" name="due" class="sml-list-add-due" />
-    </div>
-    <div>        
-        <label for="sml-list-add-repeat">Repeat:</label>
-        <select id="sml-list-add-repeat" name="repeat" class="sml-list-add-repeat" data-depends="input.sml-list-add-due">
-            <option value="" selected="selected">None</option>
-            <option value="daily">Every day</option>
-            <option value="everyOtherDay">Every other day</option>
-            <option value="everyThreeDays">Every 3 days</option>
-            <option value="dailyExcludingWeekend">Every day except Saturday and Sunday</option>
-            <option value="weekends">Every Saturday and Sunday</option>
-            <option value="weekly">Every week</option>
-            <option value="biweekly">Every 2 weeks</option>
-            <option value="triweekly">Every 3 weeks</option>
-            <option value="fourWeekly">Every 4 weeks</option>
-            <option value="fiveWeekly">Every 4 weeks</option>
-            <option value="monthly">Every month</option>
-            <option value="lastDayMonthly">On the last day of every month</option>
-            <option value="sixWeekly">Every 6 weeks</option>
-            <option value="biMonthly">Every 2 months</option>
-            <option value="quarterly">Every 3 months</option>
-            <option value="halfYearly">Every 6 months</option>
-            <option value="yearly">Every year</option>
-        </select>
-    </div>
-    <div>
-        <label for="sml-list-add-notes">Notes:</label>
-        <textarea id="sml-list-add-notes" name="notes" class="sml-list-add-notes" wrap="off"></textarea>
-    </div>
-    <div>
-        <label></label>
-        <button type="submit" data-depends="input.sml-list-add-description">Add</button>
-    </div>
-    </fieldset>
-    </form>
+    <partial name="_AddTaskForm" model='(FormName: "sml-list-add", ViewModel: Model)' />
     </div>
 </article>
 
+<dialog id="sml-list-add-dialog-box">
+Add a new item...
+<button commandfor="sml-list-add-dialog-box" command="close" class="sml-list-add-dialog-close" title="Close">x</button>
+<div style="clear:both;">
+<partial name="_AddTaskForm" model='(FormName: "sml-list-add-dialog", ViewModel: Model)' />
+</div>
+</dialog>
+
 @section Scripts {
 <script type="text/javascript">
-    $(function() { 
-        let dueDateSelector = 'form[name="sml-list-add"] input.sml-list-add-due';
-        pickmeup(dueDateSelector, {
-            default_date: false,
-            hide_on_select: true,
-            format: 'Y-m-d'
+    $(function() {
+        smlInitialiseAddToListForm('sml-list-add');
+        smlInitialiseAddToListForm('sml-list-add-dialog');
+
+        const dialog = document.querySelector('#sml-list-add-dialog-box');
+        $('#sml-list-add-dialog-open').click(function(evt) {
+            dialog.show();
+            console.log('positioning dialog at ('+evt.pageY+')');
+            dialog.style.top = evt.pageY+'px';
+            const descInput = $('input.sml-list-add-description', $(dialog));
+            descInput.select();
+            descInput.focus();
         });
-        $(dueDateSelector).on('change input paste keyup', function() {
-            let dueDate = $(this).val();
-            if (dueDate !== null && dueDate.match(/^\s*$/) === null)
-                return;
-            pickmeup(dueDateSelector).hide();
-            pickmeup(dueDateSelector).set_date(new Date);
-            $('form[name="sml-list-add"] select.sml-list-add-repeat').val('none');
-        });
-        $('form[name="sml-list-add"] select.sml-list-add-list').on('change', smlOnAddToListChange);
-        smlOnAddToListChange();
     });
 </script>
 }

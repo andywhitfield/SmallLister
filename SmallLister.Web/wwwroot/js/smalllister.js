@@ -82,9 +82,28 @@ function smlInitialiseNav() {
     });
 }
 
-function smlOnAddToListChange() {
-    let addToListSelect = $('form[name="sml-list-add"] select.sml-list-add-list');
-    let addToListSelectNew = $('form[name="sml-list-add"] input.sml-list-add-list-new');
+function smlInitialiseAddToListForm(formName) {
+    let dueDateSelector = 'form[name="'+formName+'"] input.sml-list-add-due';
+    pickmeup(dueDateSelector, {
+        default_date: false,
+        hide_on_select: true,
+        format: 'Y-m-d'
+    });
+    $(dueDateSelector).on('change input paste keyup', function() {
+        let dueDate = $(this).val();
+        if (dueDate !== null && dueDate.match(/^\s*$/) === null)
+            return;
+        pickmeup(dueDateSelector).hide();
+        pickmeup(dueDateSelector).set_date(new Date);
+        $('form[name="'+formName+'"] select.sml-list-add-repeat').val('none');
+    });
+    $('form[name="'+formName+'"] select.sml-list-add-list').on('change', function() { smlOnAddToListChange(formName); });
+    smlOnAddToListChange(formName);
+}
+
+function smlOnAddToListChange(formName) {
+    let addToListSelect = $('form[name="'+formName+'"] select.sml-list-add-list');
+    let addToListSelectNew = $('form[name="'+formName+'"] input.sml-list-add-list-new');
     console.log('selected list: ' + addToListSelect.val());
     if (addToListSelect.val() === 'new') {
         addToListSelectNew.parent().show();
