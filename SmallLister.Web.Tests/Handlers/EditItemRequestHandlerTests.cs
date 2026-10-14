@@ -23,9 +23,9 @@ public class EditItemRequestHandlerTests
     private Fixture _fixture;
     private ClaimsPrincipal _user;
     private UserAccount _userAccount;
-    private Mock<IUserItemRepository> _userItemRepository;
-
 #pragma warning restore CS8618
+    private readonly Mock<IUserItemRepository> _userItemRepository = new();
+    private readonly Mock<IUserListRepository> _userListRepository = new();
 
     [TestInitialize]
     public void Setup()
@@ -39,15 +39,13 @@ public class EditItemRequestHandlerTests
         _updatedUserItemInfo = _fixture.Create<UserItem>();
 
         var userAccountRepository = new Mock<IUserAccountRepository>();
-        _userItemRepository = new Mock<IUserItemRepository>();
-        var userListRepository = new Mock<IUserListRepository>();
 
         userAccountRepository.Setup(x => x.GetUserAccountAsync(_user)).ReturnsAsync(_userAccount);
         _userItemRepository.Setup(x => x.GetItemAsync(_userAccount, _userItem.UserItemId, false)).ReturnsAsync(_userItem);
-        userListRepository.Setup(x => x.GetListAsync(_userAccount, _updatedUserItemInfo.UserListId ?? 0)).ReturnsAsync(_updatedUserItemInfo.UserList);
+        _userListRepository.Setup(x => x.GetListAsync(_userAccount, _updatedUserItemInfo.UserListId ?? 0)).ReturnsAsync(_updatedUserItemInfo.UserList);
 
         _handler = new EditItemRequestHandler(Mock.Of<ILogger<EditItemRequestHandler>>(),
-            userAccountRepository.Object, _userItemRepository.Object, userListRepository.Object,
+            userAccountRepository.Object, _userItemRepository.Object, _userListRepository.Object,
             Mock.Of<IUserActionsService>(), Mock.Of<IWebhookQueueRepository>());
         // TODO: tests around the IUserActionsService
     }
@@ -263,5 +261,56 @@ public class EditItemRequestHandlerTests
             x.Notes == _updatedUserItemInfo.Notes &&
             x.Repeat == _updatedUserItemInfo.Repeat), _updatedUserItemInfo.UserList,
             It.IsAny<IUserActionsService>()), Times.Once);
+    }
+
+    [TestMethod]
+    public async Task Given_a_new_list_when_editing_Should_save_with_new_list()
+    {
+        var testNewList = _fixture.Create<UserList>();
+        _userListRepository.Setup(x => x.AddListAsync(_userAccount, "Test new list")).ReturnsAsync(testNewList).Verifiable(Times.Once);
+
+        var (result, redir) = await _handler.Handle(new EditItemRequest(_user, _userItem.UserItemId, new AddOrUpdateItemRequest
+        {
+            Description = _updatedUserItemInfo.Description ?? "",
+            Due = _updatedUserItemInfo.NextDueDate.GetValueOrDefault().ToString("yyyy-MM-dd"),
+            List = "new",
+            Newlist = "Test new list",
+            Notes = _updatedUserItemInfo.Notes,
+            Repeat = _updatedUserItemInfo.Repeat
+        }), CancellationToken.None);
+
+        result.Should().BeTrue();
+        redir.Should().Be("~/");
+        _userItemRepository.Verify(x => x.SaveAsync(It.Is<UserItem>(x =>
+            x.Description == _updatedUserItemInfo.Description &&
+            x.NextDueDate == _updatedUserItemInfo.NextDueDate.GetValueOrDefault().Date &&
+            x.Notes == _updatedUserItemInfo.Notes &&
+            x.Repeat == _updatedUserItemInfo.Repeat), testNewList,
+            It.IsAny<IUserActionsService>()), Times.Once);
+        _userListRepository.Verify();
+    }
+
+    [TestMethod]
+    public async Task Given_updating_to_a_new_list_When_no_name_is_provided_Should_save_to_all_list()
+    {
+        var (result, redir) = await _handler.Handle(new EditItemRequest(_user, _userItem.UserItemId, new AddOrUpdateItemRequest
+        {
+            Description = _updatedUserItemInfo.Description ?? "",
+            Due = _updatedUserItemInfo.NextDueDate.GetValueOrDefault().ToString("yyyy-MM-dd"),
+            List = "new",
+            Newlist = "      ",
+            Notes = _updatedUserItemInfo.Notes,
+            Repeat = _updatedUserItemInfo.Repeat
+        }), CancellationToken.None);
+
+        result.Should().BeTrue();
+        redir.Should().Be("~/");
+        _userItemRepository.Verify(x => x.SaveAsync(It.Is<UserItem>(x =>
+            x.Description == _updatedUserItemInfo.Description &&
+            x.NextDueDate == _updatedUserItemInfo.NextDueDate.GetValueOrDefault().Date &&
+            x.Notes == _updatedUserItemInfo.Notes &&
+            x.Repeat == _updatedUserItemInfo.Repeat), null,
+            It.IsAny<IUserActionsService>()), Times.Once);
+        _userListRepository.Verify(x => x.AddListAsync(It.IsAny<UserAccount>(), It.IsAny<string>()), Times.Never());
     }
 }

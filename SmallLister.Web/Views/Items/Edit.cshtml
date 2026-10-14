@@ -15,7 +15,12 @@
             <option value="@list.UserListId">@list.Name</option>
                 }
             }
+            <option value="new">New...</option>
         </select>
+    </div>
+    <div>
+        <label for="sml-list-add-list-new"></label>
+        <input type="text" id="sml-list-add-list-new" name="newlist" class="sml-list-add-list-new" placeholder="Enter the name of the new list" />
     </div>
     <div>
         <label for="sml-list-add-description">Description:</label>
@@ -154,6 +159,8 @@
             pickmeup(dueDateSelector).set_date(new Date);
             $('form[name="sml-list-add"] select.sml-list-add-repeat').val('none');
         });
+        $('form[name="sml-list-add"] select.sml-list-add-list').on('change', smlOnAddToListChange);
+        smlOnAddToListChange();
     });
 </script>
 }

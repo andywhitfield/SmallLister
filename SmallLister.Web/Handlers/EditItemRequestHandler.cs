@@ -6,8 +6,12 @@ using SmallLister.Web.Handlers.RequestResponse;
 
 namespace SmallLister.Web.Handlers;
 
-public class EditItemRequestHandler(ILogger<EditItemRequestHandler> logger, IUserAccountRepository userAccountRepository,
-    IUserItemRepository userItemRepository, IUserListRepository userListRepository, IUserActionsService userActionsService,
+public class EditItemRequestHandler(
+    ILogger<EditItemRequestHandler> logger,
+    IUserAccountRepository userAccountRepository,
+    IUserItemRepository userItemRepository,
+    IUserListRepository userListRepository,
+    IUserActionsService userActionsService,
     IWebhookQueueRepository webhookQueueRepository)
     : IRequestHandler<EditItemRequest, (bool, string)>
 {
@@ -23,13 +27,13 @@ public class EditItemRequestHandler(ILogger<EditItemRequestHandler> logger, IUse
 
         logger.LogInformation("Updating item {UserItemId}:" +
             " Description[{Description}=>{RequestDescription}]" +
-            " List[{UserListId}=>{RequestList}]" +
+            " List[{UserListId}=>{RequestList}/{RequestListNew}]" +
             " Repeat[{Repeat}=>{RequestRepeat}]" +
             " Notes[{Notes}=>{RequestNotes}]" +
             " NextDueDate[{NextDueDate}=>{RequestDue}]",
             item.UserItemId,
             item.Description, request.Model.Description,
-            item.UserListId, request.Model.List,
+            item.UserListId, request.Model.List, request.Model.Newlist,
             item.Repeat, request.Model.Repeat,
             item.Notes, request.Model.Notes,
             item.NextDueDate, request.Model.Due);
@@ -52,7 +56,15 @@ public class EditItemRequestHandler(ILogger<EditItemRequestHandler> logger, IUse
             item.Notes = request.Model.Notes;
             item.Repeat = request.Model.Repeat;
 
-            if (!string.IsNullOrEmpty(request.Model.List) && int.TryParse(request.Model.List, out var listId))
+            if (!string.IsNullOrEmpty(request.Model.List) && request.Model.List == "new")
+            {
+                // use 'all', rather than reject the edit request
+                if (string.IsNullOrWhiteSpace(request.Model.Newlist))
+                    logger.LogWarning("New list was selected, but no name for the list provided. The item will be moved to the 'all' list.");
+                else
+                    list = await userListRepository.AddListAsync(user, request.Model.Newlist.Trim());
+            }
+            else if (!string.IsNullOrEmpty(request.Model.List) && int.TryParse(request.Model.List, out var listId))
             {
                 list = await userListRepository.GetListAsync(user, listId);
                 if (list == null)

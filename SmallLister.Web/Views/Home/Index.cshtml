@@ -187,21 +187,8 @@
             pickmeup(dueDateSelector).set_date(new Date);
             $('form[name="sml-list-add"] select.sml-list-add-repeat').val('none');
         });
-        $('form[name="sml-list-add"] select.sml-list-add-list').on('change', onAddToListChange);
-        onAddToListChange();
+        $('form[name="sml-list-add"] select.sml-list-add-list').on('change', smlOnAddToListChange);
+        smlOnAddToListChange();
     });
-
-    function onAddToListChange() {
-        let addToListSelect = $('form[name="sml-list-add"] select.sml-list-add-list');
-        let addToListSelectNew = $('form[name="sml-list-add"] input.sml-list-add-list-new');
-        console.log('selected list: ' + addToListSelect.val());
-        if (addToListSelect.val() === 'new') {
-            addToListSelectNew.parent().show();
-            addToListSelectNew.select();
-            addToListSelectNew.focus();
-        } else {
-            addToListSelectNew.parent().hide();
-        }
-    }
 </script>
 }

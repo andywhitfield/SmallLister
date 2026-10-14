@@ -82,6 +82,19 @@ function smlInitialiseNav() {
     });
 }
 
+function smlOnAddToListChange() {
+    let addToListSelect = $('form[name="sml-list-add"] select.sml-list-add-list');
+    let addToListSelectNew = $('form[name="sml-list-add"] input.sml-list-add-list-new');
+    console.log('selected list: ' + addToListSelect.val());
+    if (addToListSelect.val() === 'new') {
+        addToListSelectNew.parent().show();
+        addToListSelectNew.select();
+        addToListSelectNew.focus();
+    } else {
+        addToListSelectNew.parent().hide();
+    }
+}
+
 coerceToArrayBuffer = function (thing, name) {
     if (typeof thing === "string") {
         // base64url to base64
