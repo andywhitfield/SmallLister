@@ -42,7 +42,7 @@ public class UserItemModel
 
     private static string GetRepeatSummary(UserItem userItem)
         => GetRepeatSummary(userItem.Repeat);
-    
+
     public static string GetRepeatSummary(ItemRepeat? itemRepeat) => itemRepeat switch
     {
         ItemRepeat.Daily => "Repeats every day",
@@ -65,7 +65,7 @@ public class UserItemModel
         _ => ""
     };
 
-    private string GetPostponedSummary(UserItem userItem) =>
+    private static string GetPostponedSummary(UserItem userItem) =>
         $"Postponed from {GetDueDateAndSummary(userItem.NextDueDate).DueSummary}";
 
     private void SetDateInfo(DateTime? dueDate, DateTime? postponedUntilDate)
@@ -77,7 +77,7 @@ public class UserItemModel
         DueSummary = string.IsNullOrEmpty(dueSummary) ? dueSummary : $"Due {dueSummary}";
     }
 
-    private (string Due, string DueSummary) GetDueDateAndSummary(DateTime? dueDate)
+    private static (string Due, string DueSummary) GetDueDateAndSummary(DateTime? dueDate)
     {
         if (dueDate == null)
         {
@@ -116,6 +116,6 @@ public class UserItemModel
                 friendlyDueDate = due.ToString("d MMM yyyy");
         }
 
-        return (due.ToString("dd MMMM yyyy"), friendlyDueDate);
+        return (due.ToString("dddd dd MMMM yyyy"), friendlyDueDate);
     }
 }
