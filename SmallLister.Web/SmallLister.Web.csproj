@@ -4,11 +4,11 @@
     <PackageReference Include="BuildBundlerMinifier" Version="*" />
     <PackageReference Include="Fido2.AspNet" Version="4.3.*" />
     <PackageReference Include="MediatR.Extensions.Microsoft.DependencyInjection" Version="11.1.*" />
-    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="10.0.*" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="11.0.*" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc.Versioning" Version="5.1.*" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc.Versioning.ApiExplorer" Version="5.1.*" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.*" PrivateAssets="All"/>
-    <PackageReference Include="Swashbuckle.AspNetCore" Version="10.3.*" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="11.0.*" PrivateAssets="All"/>
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="11.0.*" />
     <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.23.*" />
   </ItemGroup>
   <ItemGroup>
